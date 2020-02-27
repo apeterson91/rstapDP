@@ -1,0 +1,43 @@
+---
+title: "Introduction"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(rstapDP)
+library(tidyverse)
+```
+
+```{r}
+
+
+data("ClusterScales_one")
+
+fit <- fdp_staplm(ClusterScales_one$BMI,
+                  X = cbind(1,matrix(ClusterScales_one$sex,ncol=1)),
+                  iter_max = 1000,
+                  burn_in = 500,
+                  thin = 1,
+                  seed = 13531)
+
+```
+
+
+```{r}
+par(mfrow=c(1,2))
+hist(fit$beta[,1])
+hist(fit$beta[,2])
+```
+
+
