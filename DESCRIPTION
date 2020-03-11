@@ -1,13 +1,17 @@
 Package: rstapDP
 Type: Package
-Title: What the package does (short line)
-Version: 1.0
+Title: Functional Dirichlet Process Spatial Temporal Aggregated Predicators in R
+Version: 0.1.0
 Date: 2020-02-27
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
+Authors@R: person("Adam", "Peterson", , "atpvyc@umich.edu", c("aut", "cre"))
+Encoding: UTF-8
 Description: More about what it does (maybe more than one line)
 License: What license is it under?
-Imports: Rcpp (>= 1.0.3)
+Imports: 
+    Rcpp (>= 1.0.3),
+    magrittr,
+    dplyr,
+    tidyr
 LinkingTo: Rcpp, RcppEigen
 Suggests: 
     knitr,

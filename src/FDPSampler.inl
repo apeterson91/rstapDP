@@ -1,54 +1,121 @@
 void FDPSampler::iteration_sample(std::mt19937 &rng){
 
-	f = X.array().rowwise() * beta.transpose().array();
-	for(int j = 0; j < q; j ++){
-		calculate_residual(j);
-		calculate_Smat(j);
-		draw_z(rng);
-		f.col(j) =  (S * residual  + sigma * S * z);
-		beta(j) = (f.col(j).array() /X.col(j).array())(0);
-	}
+
+	calculate_b();
+	sample_cluster_labels(rng);
+	update_weights(rng);
+
+	draw_z(rng);
+	X_fit << Z,X_K;
+	V = (X_fit.transpose() * X_fit + tau_matrix ).inverse();
+
+	beta = V * z + V * X_fit.transpose() * y; 
 
 	draw_var(rng);
-}
-
-void FDPSampler::calculate_residual(const int &j){
-
-	residual = y;
-	int p = 0;
-	while( p < q){
-		if(p != j)
-			residual = residual - f.col(p) ;
-		p++ ;
-	}
-}
-
-void FDPSampler::calculate_Smat(const int &j){
-
-	S = X.col(j) * ( X.col(j).transpose() * X.col(j)).inverse() * X.col(j).transpose();
 }
 
 void FDPSampler::draw_z(std::mt19937 &rng){
 
 	std::normal_distribution<double> rnorm(0,1);
-	for(int i = 0; i < n; i ++)
-		z(i) = rnorm(rng);
+	for(int q = 0; q < Q; q ++)
+		z(q) = rnorm(rng);
 }
 
 void FDPSampler::draw_var(std::mt19937 &rng){
 
-	s = (y - X*beta).dot(y-X*beta) / (n - q);
-	std::chi_squared_distribution<double> rchisq(n - q);
-	var = rchisq(rng) ;
-	var = (s * n-q) / var;
+	residual = y - X_fit * beta;
+	s = residual.dot(residual) / (n - Q);
+	std::chi_squared_distribution<double> rchisq(n - Q);
+	var = rchisq(rng);
+	var = (s * (n - Q)) / var;
 	sigma = sqrt(var);
 }
 
 void FDPSampler::store_samples(Eigen::ArrayXXd &beta_samples,
-						   Eigen::ArrayXd &sigma_samples){
+						       Eigen::ArrayXd &sigma_samples,
+							   Eigen::ArrayXXd &pi_samples,
+							   Eigen::ArrayXd &alpha_samples,
+							   Eigen::ArrayXXi &cluster_assignment){
 
 	beta_samples.row(sample_ix) = beta.transpose().array();
 	sigma_samples(sample_ix) = sigma;
+	pi_samples.row(sample_ix) = pi.transpose();
+	alpha_samples(sample_ix) = alpha;
+	cluster_assignment.row(sample_ix) = iter_cluster_assignment;
 	sample_ix ++;
+}
+
+void FDPSampler::stick_break(std::mt19937 &rng){
+
+	if(initializing){
+		sftrabbit::beta_distribution<> rbeta(1,alpha);
+		for(int k = 0; k < (K-1); k++){
+			u(k) = rbeta(rng);
+		}
+		u(K-1) = 1;
+	}else{
+		for(int k =0; k < (K-1); k++){
+			sftrabbit::beta_distribution<> rbeta(u_posterior_beta_alpha(k),u_posterior_beta_beta(k));
+			u(k) = rbeta(rng);
+		}
+		u(K-1) = 1;
+	}
+	for(int k = 0; k < K; k++)
+		pi(k) = k == 0 ?  u(k) : u(k) * (Eigen::ArrayXd::Ones(k) - u.head(k)).prod();
 
 }
+
+void FDPSampler::calculate_b(){
+
+	b.setZero(n,K);
+	residual = y - Z * beta.head(P);
+	for(int k = 0; k < K; k++)
+		b.col(k)  = log(pi(k))  -.5 * log(2 * M_PI * var) - (.5  / var * pow(  (residual -  X  * beta(P+k) ).array(),2)).array();
+
+}
+
+void FDPSampler::sample_cluster_labels(std::mt19937 &rng){
+
+	cluster_matrix.setZero(n,K);
+	double log_factor = log(pow(10,-16)) - log(n);
+	for(int i = 0; i < n ; i ++){
+		probs = b.row(i);
+		probs = probs - probs.maxCoeff();
+		for(int k = 0 ; k< K; k ++)
+			probs(k) = probs(k) > log_factor ? exp(probs(k)) : 0;
+		std::discrete_distribution<int> d(probs.data(),probs.data() + probs.size());
+		iter_cluster_assignment(i) = d(rng);
+		cluster_matrix(i,iter_cluster_assignment(i)) = 1.0;
+	}
+	for(int k = 0; k < K; k++)
+		X_K.col(k) = cluster_matrix.col(k).asDiagonal() * X;
+
+}
+
+void FDPSampler::update_weights(std::mt19937 &rng){
+
+	for(int k = 0; k < K; k++)
+		cluster_count(k) = (iter_cluster_assignment == k).count();
+
+	for(int k = 0; k < K; k++){
+		u_posterior_beta_alpha(k) = 1 + cluster_count(k);
+		u_posterior_beta_beta(k) = alpha + cluster_count.tail(K-k-1).sum();
+	}
+
+	stick_break(rng);
+	posterior_b_alpha = 1.0 / alpha_b - (log(1 - u.array())).head(K-1).sum();
+	std::gamma_distribution<double>  rgamma(posterior_a_alpha,posterior_b_alpha);
+	alpha = rgamma(rng);
+
+}
+
+void FDPSampler::initialize_beta(std::mt19937 &rng){
+
+	std::normal_distribution<double> rnorm(0,1);
+	for(int k = P; k < Q; k ++){
+		beta(k) = rnorm(rng) * tau_0 ;
+		tau_matrix(k,k) = tau_0;
+	}
+
+}
+

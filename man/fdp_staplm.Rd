@@ -4,12 +4,23 @@
 \alias{fdp_staplm}
 \title{Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model}
 \usage{
-fdp_staplm(y, X, iter_max, burn_in, thin, seed)
+fdp_staplm(y, Z, X, tau_0, alpha_a, alpha_b, K, iter_max, burn_in, thin,
+  seed)
 }
 \arguments{
 \item{y}{vector of outcomes}
 
-\item{X}{design matrix}
+\item{Z}{design matrix}
+
+\item{X}{stap design matrix}
+
+\item{tau_0}{normal base measure scale}
+
+\item{alpha_a}{alpha gamma prior hyperparameter}
+
+\item{alpha_b}{alpha gamma prior hyperparameter}
+
+\item{K}{truncation number}
 
 \item{burn_in}{number of burn in iterations}
 

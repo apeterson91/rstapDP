@@ -36,8 +36,12 @@ void print_progress(const int &iter_ix, const int &warm_up, const int &iter_max,
 //
 // [[Rcpp::export]]
 Rcpp::List stapDP_backfit(const Eigen::VectorXd &y,
-						  const Eigen::VectorXd &init_beta,
-						  const Eigen::MatrixXd &X,
+						  const Eigen::MatrixXd &Z,
+						  const Eigen::VectorXd &X,
+						  const double &tau_0,
+						  const double &alpha_a,
+						  const double &alpha_b,
+						  const int &K,
 						  const int &iter_max,
 						  const int &burn_in,
 						  const int &thin,
@@ -50,28 +54,51 @@ Rcpp::List stapDP_backfit(const Eigen::VectorXd &y,
     rng = std::mt19937(seed);
 	
 	// create sample containers
-	Eigen::ArrayXXd beta_samples(num_posterior_samples,X.cols());
-	beta_samples = Eigen::ArrayXXd::Zero(num_posterior_samples,X.cols());
-	Eigen::ArrayXd sigma_samples(num_posterior_samples);
-	sigma_samples = Eigen::ArrayXd::Zero(num_posterior_samples);
+	Eigen::ArrayXXd beta_samples;
+	Eigen::ArrayXd sigma_samples;
+	Eigen::ArrayXd alpha_samples;
+	Eigen::ArrayXXd pi_samples;
+	Eigen::ArrayXXi cluster_assignment;
+	Eigen::MatrixXd P;
+	P.setZero(y.rows(),y.rows());
+	cluster_assignment.setZero(num_posterior_samples,y.rows());
+	alpha_samples.setZero(num_posterior_samples);
+	beta_samples.setZero(num_posterior_samples,Z.cols() + K);
+	sigma_samples.setZero(num_posterior_samples);
+	pi_samples.setZero(num_posterior_samples,K);
+
 	const int chain = 1;
 	int sample_ix = 0;
 
-	FDPSampler sampler(X,y,init_beta);
+	FDPSampler sampler(y,Z,X,alpha_a,
+					   alpha_b,tau_0,K,rng);
 
+
+	sampler.iteration_sample(rng);
 
 	for(int iter_ix = 1; iter_ix <= iter_max; iter_ix ++){
 		print_progress(iter_ix,burn_in,iter_max,chain);
 		sampler.iteration_sample(rng);
 		if(iter_ix > burn_in && (iter_ix % thin == 0)){
-			beta_samples.row(sample_ix) = sampler.get_beta();
-			sigma_samples(sample_ix) = sampler.get_sigma();
-			sample_ix ++ ;
+			sampler.store_samples(beta_samples,sigma_samples,pi_samples,
+							      alpha_samples,cluster_assignment);
 		}
-
 	}
+
+	for(int iter_ix = 0 ; iter_ix < num_posterior_samples; iter_ix ++){
+		for(int i = 0; i < y.rows(); i ++){
+			for(int j = 0; j < i; j ++)
+				P(i,j) += cluster_assignment(iter_ix,i) == cluster_assignment(iter_ix,j) ? 1 : 0 ;
+		}
+	}
+
+	P = P / num_posterior_samples;
 
 
     return Rcpp::List::create(Rcpp::Named("beta") = beta_samples,
-                              Rcpp::Named("sigma") = sigma_samples);
+							  Rcpp::Named("pi") = pi_samples,
+                              Rcpp::Named("sigma") = sigma_samples,
+							  Rcpp::Named("alpha") = alpha_samples,
+							  Rcpp::Named("cluster_assignment") = cluster_assignment,
+							  Rcpp::Named("PairwiseProbabilityMat") = P);
 }

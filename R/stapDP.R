@@ -10,7 +10,22 @@ stapDP <- function(object,chains, J){
 
 
 	out <- list(beta = coda::as.mcmc(object$beta),
-				sigma = coda::as.mcmc(object$sigma))
+				pi = coda::as.mcmc(object$pi),
+				sigma = coda::as.mcmc(object$sigma),
+				alpha = coda::as.mcmc(object$alpha),
+				cluster_assignment = coda::as.mcmc(object$cluster_assignment),
+				pmat = object$PairwiseProbabilityMat
+	)
 
     structure(out, class = c("stapDP"))
 }
+
+
+# get_par_tibble <- function(object) UseMethod("get_par_tibble")
+# 
+# get_par_tibble.stapDP <- function(object){
+#   
+#   tibble(Iteration = 1:nrow(object$beta),
+#          Parameter = )
+#   
+# }

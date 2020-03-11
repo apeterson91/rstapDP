@@ -17,27 +17,40 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(rstapDP)
 library(tidyverse)
+library(coda)
+theme_set(theme_bw())
 ```
 
 ```{r}
-
-
 data("ClusterScales_one")
 
-fit <- fdp_staplm(ClusterScales_one$BMI,
-                  X = cbind(1,matrix(ClusterScales_one$sex,ncol=1)),
-                  iter_max = 1000,
-                  burn_in = 500,
+fit <- fdp_staplm(y = ClusterScales_one$BMI,
+                  Z = cbind(1,matrix(ClusterScales_one$sex,ncol=1)),
+                  X = ClusterScales_one$dists,
+                  tau_0 = 1,
+                  alpha_a = 1, 
+                  alpha_b = 1,
+                  K = 5,
+                  iter_max = 10000,
+                  burn_in = 9000,
                   thin = 1,
-                  seed = 13531)
+                  seed = 43431)
 
+```
+ 
+ 
+```{r}
+plot(fit$beta)
 ```
 
 
 ```{r}
-par(mfrow=c(1,2))
-hist(fit$beta[,1])
-hist(fit$beta[,2])
+plot_pairs(fit)
 ```
 
 
+
+```{r}
+
+
+```
