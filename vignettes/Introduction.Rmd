@@ -26,7 +26,7 @@ data("ClusterScales_one")
 
 fit <- fdp_staplm(y = ClusterScales_one$BMI,
                   Z = cbind(1,matrix(ClusterScales_one$sex,ncol=1)),
-                  X = ClusterScales_one$dists,
+                  X = matrix(ClusterScales_one$dists,ncol=1),
                   tau_0 = 1,
                   alpha_a = 1, 
                   alpha_b = 1,
@@ -52,5 +52,20 @@ plot_pairs(fit)
 
 ```{r}
 
+data("ClusterScales_two")
+
+
+fit <- fdp_staplm(y = ClusterScales_two$BMI,
+                  Z = cbind(1,ClusterScales_two$sex),
+                  X = ClusterScales_two$dists_mat,
+                  tau_0 = c(1,1,1),
+                  alpha_a = 1, 
+                  alpha_b = 1,
+                  K = 5,
+                  iter_max = 5E4,
+                  burn_in = 4E4,
+                  thin = 1,
+                  seed = 43431,
+                  scale_center = F)
 
 ```

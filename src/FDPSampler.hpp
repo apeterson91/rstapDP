@@ -6,7 +6,7 @@
 class FDPSampler
 {
 	private:
-		const Eigen::VectorXd &X;
+		const Eigen::MatrixXd &X;
 		const Eigen::MatrixXd &Z;
 		const Eigen::VectorXd &y;
 		Eigen::MatrixXd X_fit;
@@ -24,7 +24,7 @@ class FDPSampler
 		Eigen::ArrayXXd b;
 		Eigen::MatrixXd tau_matrix;
 		const double alpha_b;
-		const double tau_0;
+		const Eigen::ArrayXd tau_0;
 		Eigen::ArrayXd u_posterior_beta_alpha;
 		Eigen::ArrayXd u_posterior_beta_beta;
 		double sigma;
@@ -34,6 +34,7 @@ class FDPSampler
 		double posterior_a_alpha;
 		double posterior_b_alpha;
 		const int P;
+		const int P_two;
 		const int n;
 		const int K;
 		const int Q;
@@ -41,25 +42,28 @@ class FDPSampler
 		bool initializing = true;
 
 	public:
+		Eigen::MatrixXd P_matrix;
 		FDPSampler(const Eigen::VectorXd &y,
 				   const Eigen::MatrixXd &Z,
-				   const Eigen::VectorXd &X,
+				   const Eigen::MatrixXd &X,
 				   const double &alpha_a,
 				   const double &alpha_b,
-				   const double &tau_0,
+				   const Eigen::ArrayXd &tau_0,
 				   const int &K,
 				   std::mt19937 &rng
 				   ): 
 			X(X), Z(Z), y(y),
 			alpha_b(alpha_b), tau_0(tau_0),
-			n(y.rows()), P(Z.cols()), K(K), Q(Z.cols() + K)
+			n(y.rows()), P(Z.cols()), K(K),
+			Q(Z.cols() + X.cols()*K), P_two(X.cols())
 	{
 
+		P_matrix.setZero(n,n);
 		tau_matrix.setZero(Q,Q);
 		X_fit.setZero(n,Q);
 		z.setZero(Q); 
 		beta.setZero(Q); 
-		X_K.setZero(n,K);
+		X_K.setZero(n,P_two*K);
 		u.setZero(K);
 		pi.setZero(K);
 		u_posterior_beta_alpha.setZero(K);

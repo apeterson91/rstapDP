@@ -6,7 +6,7 @@
 #' @param J number of groups
 #' @return A stapDP object
 #'
-stapDP <- function(object,chains, J){
+stapDP <- function(object,X_ranges){
 
 
 	out <- list(beta = coda::as.mcmc(object$beta),
@@ -14,7 +14,8 @@ stapDP <- function(object,chains, J){
 				sigma = coda::as.mcmc(object$sigma),
 				alpha = coda::as.mcmc(object$alpha),
 				cluster_assignment = coda::as.mcmc(object$cluster_assignment),
-				pmat = object$PairwiseProbabilityMat
+				pmat = object$PairwiseProbabilityMat,
+				X_ranges = X_ranges
 	)
 
     structure(out, class = c("stapDP"))

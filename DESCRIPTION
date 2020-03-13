@@ -11,7 +11,8 @@ Imports:
     Rcpp (>= 1.0.3),
     magrittr,
     dplyr,
-    tidyr
+    tidyr,
+    purrr
 LinkingTo: Rcpp, RcppEigen
 Suggests: 
     knitr,

@@ -37,8 +37,8 @@ void print_progress(const int &iter_ix, const int &warm_up, const int &iter_max,
 // [[Rcpp::export]]
 Rcpp::List stapDP_backfit(const Eigen::VectorXd &y,
 						  const Eigen::MatrixXd &Z,
-						  const Eigen::VectorXd &X,
-						  const double &tau_0,
+						  const Eigen::MatrixXd &X,
+						  const Eigen::ArrayXd &tau_0,
 						  const double &alpha_a,
 						  const double &alpha_b,
 						  const int &K,
@@ -59,11 +59,9 @@ Rcpp::List stapDP_backfit(const Eigen::VectorXd &y,
 	Eigen::ArrayXd alpha_samples;
 	Eigen::ArrayXXd pi_samples;
 	Eigen::ArrayXXi cluster_assignment;
-	Eigen::MatrixXd P;
-	P.setZero(y.rows(),y.rows());
 	cluster_assignment.setZero(num_posterior_samples,y.rows());
 	alpha_samples.setZero(num_posterior_samples);
-	beta_samples.setZero(num_posterior_samples,Z.cols() + K);
+	beta_samples.setZero(num_posterior_samples,Z.cols() + X.cols()*K);
 	sigma_samples.setZero(num_posterior_samples);
 	pi_samples.setZero(num_posterior_samples,K);
 
@@ -74,8 +72,6 @@ Rcpp::List stapDP_backfit(const Eigen::VectorXd &y,
 					   alpha_b,tau_0,K,rng);
 
 
-	sampler.iteration_sample(rng);
-
 	for(int iter_ix = 1; iter_ix <= iter_max; iter_ix ++){
 		print_progress(iter_ix,burn_in,iter_max,chain);
 		sampler.iteration_sample(rng);
@@ -85,14 +81,6 @@ Rcpp::List stapDP_backfit(const Eigen::VectorXd &y,
 		}
 	}
 
-	for(int iter_ix = 0 ; iter_ix < num_posterior_samples; iter_ix ++){
-		for(int i = 0; i < y.rows(); i ++){
-			for(int j = 0; j < i; j ++)
-				P(i,j) += cluster_assignment(iter_ix,i) == cluster_assignment(iter_ix,j) ? 1 : 0 ;
-		}
-	}
-
-	P = P / num_posterior_samples;
 
 
     return Rcpp::List::create(Rcpp::Named("beta") = beta_samples,
@@ -100,5 +88,5 @@ Rcpp::List stapDP_backfit(const Eigen::VectorXd &y,
                               Rcpp::Named("sigma") = sigma_samples,
 							  Rcpp::Named("alpha") = alpha_samples,
 							  Rcpp::Named("cluster_assignment") = cluster_assignment,
-							  Rcpp::Named("PairwiseProbabilityMat") = P);
+							  Rcpp::Named("PairwiseProbabilityMat") = sampler.P_matrix / num_posterior_samples );
 }

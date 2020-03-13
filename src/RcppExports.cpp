@@ -7,15 +7,15 @@
 using namespace Rcpp;
 
 // stapDP_backfit
-Rcpp::List stapDP_backfit(const Eigen::VectorXd& y, const Eigen::MatrixXd& Z, const Eigen::VectorXd& X, const double& tau_0, const double& alpha_a, const double& alpha_b, const int& K, const int& iter_max, const int& burn_in, const int& thin, const int& seed, const int& num_posterior_samples);
+Rcpp::List stapDP_backfit(const Eigen::VectorXd& y, const Eigen::MatrixXd& Z, const Eigen::MatrixXd& X, const Eigen::ArrayXd& tau_0, const double& alpha_a, const double& alpha_b, const int& K, const int& iter_max, const int& burn_in, const int& thin, const int& seed, const int& num_posterior_samples);
 RcppExport SEXP _rstapDP_stapDP_backfit(SEXP ySEXP, SEXP ZSEXP, SEXP XSEXP, SEXP tau_0SEXP, SEXP alpha_aSEXP, SEXP alpha_bSEXP, SEXP KSEXP, SEXP iter_maxSEXP, SEXP burn_inSEXP, SEXP thinSEXP, SEXP seedSEXP, SEXP num_posterior_samplesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type y(ySEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type Z(ZSEXP);
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const double& >::type tau_0(tau_0SEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const Eigen::ArrayXd& >::type tau_0(tau_0SEXP);
     Rcpp::traits::input_parameter< const double& >::type alpha_a(alpha_aSEXP);
     Rcpp::traits::input_parameter< const double& >::type alpha_b(alpha_bSEXP);
     Rcpp::traits::input_parameter< const int& >::type K(KSEXP);

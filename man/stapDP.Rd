@@ -4,7 +4,7 @@
 \alias{stapDP}
 \title{Create a stapDP object}
 \usage{
-stapDP(object, chains, J)
+stapDP(object, X_ranges)
 }
 \arguments{
 \item{object}{A list provided by the nd_nhpp function}
