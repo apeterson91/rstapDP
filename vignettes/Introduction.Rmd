@@ -31,21 +31,21 @@ fit <- fdp_staplm(y = ClusterScales_one$BMI,
                   alpha_a = 1, 
                   alpha_b = 1,
                   K = 5,
-                  iter_max = 10000,
-                  burn_in = 9000,
+                  iter_max = 2E4,
+                  burn_in = 1.9E4,
                   thin = 1,
-                  seed = 43431)
+                  seed = 43431,scale_center = F)
 
 ```
  
  
-```{r}
-plot(fit$beta)
-```
-
-
 ```{r}
 plot_pairs(fit)
+```
+
+
+```{r}
+plot(fit$beta[,4:5])
 ```
 
 
@@ -69,3 +69,18 @@ fit <- fdp_staplm(y = ClusterScales_two$BMI,
                   scale_center = F)
 
 ```
+
+
+
+```{r}
+plot_pairs(fit)
+```
+
+```{r}
+plot(fit$beta)
+```
+
+```{r}
+plot_cluster_effects(fit)
+```
+
