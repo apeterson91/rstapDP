@@ -10,6 +10,7 @@ stapDP <- function(object,X_ranges){
 
 
 	out <- list(beta = coda::as.mcmc(object$beta),
+				tau = coda::as.mcmc(object$tau),
 				pi = coda::as.mcmc(object$pi),
 				sigma = coda::as.mcmc(object$sigma),
 				alpha = coda::as.mcmc(object$alpha),

@@ -9,7 +9,14 @@ void FDPSampler::iteration_sample(std::mt19937 &rng){
 	X_fit << Z,X_K;
 	V = (X_fit.transpose() * X_fit + tau_matrix ).inverse();
 
-	beta = V * z + V * X_fit.transpose() * y; 
+	beta = V * sigma * z + V * X_fit.transpose() * y; 
+	if(isnan(beta(0))){
+		Rcpp::Rcout << "pi: " << pi << std::endl;
+		Rcpp::Rcout << "tau: " << (1/tau_matrix.diagonal().array()) << std::endl;
+		Rcpp::Rcout << "sigma: " << sigma << std::endl;
+		Rcpp::Rcout << "cluster assignment: " << cluster_matrix << std::endl;
+	}
+
 
 	draw_var(rng);
 }
@@ -30,15 +37,30 @@ void FDPSampler::draw_var(std::mt19937 &rng){
 	var = rchisq(rng);
 	var = (s * (n - Q)) / var;
 	sigma = sqrt(var);
+	int k_ = 0;
+	double temp_scale;
+	std::chi_squared_distribution<double> rchisq_tau(nu_0 + 1);
+
+	for(int k = 0; k< (Q-P); k += P_two){
+		k_ ++ ;
+		for(int p_ix =0; p_ix < P_two ; p_ix ++ ){
+			temp_scale = (nu_0  + pow(beta(P + k + p_ix),2) ) / (nu_0 + 1) ;
+			tau_matrix(P + k + p_ix,P + k + p_ix) = 1 ;// 1.0 / (sqrt( (nu_0+1 * temp_scale  )  / rchisq_tau(rng) )); // invert the scaled inverse chi-square variate
+		}
+	}
+
+
 }
 
 void FDPSampler::store_samples(Eigen::ArrayXXd &beta_samples,
+							  Eigen::ArrayXXd &tau_samples,
 						       Eigen::ArrayXd &sigma_samples,
 							   Eigen::ArrayXXd &pi_samples,
 							   Eigen::ArrayXd &alpha_samples,
 							   Eigen::ArrayXXi &cluster_assignment){
 
 	beta_samples.row(sample_ix) = beta.transpose().array();
+	tau_samples.row(sample_ix) = (1 / tau_matrix.diagonal().tail(Q-P).transpose().array());
 	sigma_samples(sample_ix) = sigma;
 	pi_samples.row(sample_ix) = pi.transpose();
 	alpha_samples(sample_ix) = alpha;
@@ -75,10 +97,23 @@ void FDPSampler::calculate_b(){
 	b.setZero(n,K);
 	residual = y - Z * beta.head(P);
 	int start = P;
+	/*
+	Rcpp::Rcout << " sigma: " << sigma << std::endl;
+	Rcpp::Rcout << " pi: " << pi(0) << std::endl;
+	Rcpp::Rcout << " delta: " << beta.segment(0,P) << std::endl;
+	Rcpp::Rcout << " beta: " << beta.segment(P,P_two) << std::endl;
+	Rcpp::Rcout << " tau_matrix \n" << tau_matrix << std::endl;
+	Rcpp::Rcout << " tau_matrix transformed " << tau_matrix.diagonal().segment(start,P_two) << std::endl;
+	*/
 	for(int k = 0; k < K; k++){
-		b.col(k)  = log(pi(k))  -.5 * log(2 * M_PI * var) - (.5  / var * pow(  (residual -  X  * beta.segment(start,P_two) ).array(),2)).array();
+		b.col(k)  = log(pi(k))   - (.5  / var * pow(  (residual -  X  * beta.segment(start,P_two) ).array(),2)).array() - 
+			0.5 * ( pow(beta.segment(start,P_two).array(),2) * pow(tau_matrix.diagonal().segment(start,P_two).array(),2)   ).sum();//  -  
+			//.5 * P_two *  log(2*M_PI) -  P_two * (log( (1.0 / tau_matrix.diagonal().segment(start,P_two).array() ) )).sum() -  
+	//		(nu_0 *  (.5 * tau_matrix.diagonal().segment(start,P_two).array() * 
+	//				  tau_matrix.diagonal().segment(start,P_two).array() )  - (1 + nu_0 /2 ) * log(tau_matrix.diagonal().segment(start,P_two).array() ) ).sum();  
 		start += P_two;
 	}
+	//Rcpp::Rcout << " b(0,0):" <<  b(0,0) << std::endl;
 
 }
 
@@ -123,10 +158,11 @@ void FDPSampler::update_weights(std::mt19937 &rng){
 void FDPSampler::initialize_beta(std::mt19937 &rng){
 
 	std::normal_distribution<double> rnorm(0,1);
+	std::chi_squared_distribution<double> rchisq(nu_0);
 	for(int k = 0; k< (Q-P); k += P_two){
 		for(int p_ix =0; p_ix < P_two ; p_ix ++ ){
-			beta(P + k+p_ix) = rnorm(rng) + tau_0(p_ix);
-			tau_matrix(P + k+p_ix,P + k+p_ix) = tau_0(p_ix);
+			tau_matrix(P + k+p_ix,P + k+p_ix) =  sqrt( rchisq(rng) / nu_0) ; // invert the inverted chi square variate
+			beta(P + k+p_ix) = rnorm(rng)* (1.0 / tau_matrix(P + k + p_ix, P + k + p_ix)); 
 		}
 	}
 
