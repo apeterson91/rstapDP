@@ -24,7 +24,7 @@ class FDPSampler
 		Eigen::ArrayXXd b;
 		Eigen::MatrixXd tau_matrix;
 		const double alpha_b;
-		const int nu_0;
+		const Eigen::ArrayXd tau_0;
 		Eigen::ArrayXd u_posterior_beta_alpha;
 		Eigen::ArrayXd u_posterior_beta_beta;
 		double sigma;
@@ -48,16 +48,14 @@ class FDPSampler
 				   const Eigen::MatrixXd &X,
 				   const double &alpha_a,
 				   const double &alpha_b,
-				   const int &nu_0,
+				   const Eigen::ArrayXd &tau_0,
 				   const int &K,
 				   std::mt19937 &rng
 				   ): 
 			X(X), Z(Z), y(y),
-			alpha_b(alpha_b),
+			alpha_b(alpha_b), tau_0(tau_0),
 			n(y.rows()), P(Z.cols()), K(K),
-			nu_0(nu_0),
-			Q(Z.cols() + X.cols()*K), 
-			P_two(X.cols())
+			Q(Z.cols() + X.cols()*K), P_two(X.cols())
 	{
 
 		P_matrix.setZero(n,n);
@@ -96,7 +94,6 @@ class FDPSampler
 		void draw_var(std::mt19937 &rng);
 
 		void store_samples(Eigen::ArrayXXd &beta_samples,
-						   Eigen::ArrayXXd &tau_samples,
 						   Eigen::ArrayXd &sigma_samples,
 						   Eigen::ArrayXXd &pi_samples,
 						   Eigen::ArrayXd &alpha_samples,
