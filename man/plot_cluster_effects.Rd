@@ -4,7 +4,8 @@
 \alias{plot_cluster_effects}
 \title{plot cluster effects plots}
 \usage{
-plot_cluster_effects(x, p = 0.95)
+plot_cluster_effects(x, p = 0.95, switch = "color",
+  prob_filter = 0.1)
 }
 \arguments{
 \item{x}{stapDP object}

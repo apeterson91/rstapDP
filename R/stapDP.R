@@ -9,7 +9,11 @@
 stapDP <- function(object,X_ranges){
 
 
-	out <- list(beta = coda::as.mcmc(object$beta),
+	beta <- object$beta
+	colnames(beta) <- paste0("beta_",1:ncol(beta))
+	pi <- object$pi
+	colnames(pi) <- paste0("pi_",1:ncol(pi))
+	out <- list(beta = coda::as.mcmc(beta),
 				pi = coda::as.mcmc(object$pi),
 				sigma = coda::as.mcmc(object$sigma),
 				alpha = coda::as.mcmc(object$alpha),
@@ -17,6 +21,11 @@ stapDP <- function(object,X_ranges){
 				pmat = object$PairwiseProbabilityMat,
 				X_ranges = X_ranges
 	)
+	if(!is.null(object$tau)){
+		tau <- object$tau
+		colnames(tau) <- paste0("tau_",1:ncol(tau))
+		out$tau <- coda::as.mcmc(tau)
+	}
 
     structure(out, class = c("stapDP"))
 }

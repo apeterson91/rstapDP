@@ -31,56 +31,78 @@ fit <- fdp_staplm(y = ClusterScales_one$BMI,
                   alpha_a = 1, 
                   alpha_b = 1,
                   K = 5,
-                  iter_max = 2E4,
-                  burn_in = 1.9E4,
-                  thin = 1,
-                  seed = 43431,scale_center = F)
-
-```
- 
- 
-```{r}
-plot_pairs(fit)
-```
-
-
-```{r}
-plot(fit$beta[,4:5])
-```
-
-
-
-```{r}
-
-data("ClusterScales_two")
-
-
-fit <- fdp_staplm(y = ClusterScales_two$BMI,
-                  Z = cbind(1,ClusterScales_two$sex),
-                  X = ClusterScales_two$dists_mat,
-                  tau_0 = c(1,1,1),
-                  alpha_a = 1, 
-                  alpha_b = 1,
-                  K = 5,
                   iter_max = 5E4,
-                  burn_in = 4E4,
+                  burn_in = 4.5E4,
                   thin = 1,
-                  seed = 43431,
-                  scale_center = F)
+                  seed = 43431)
 
 ```
-
-
-
+ 
+ 
 ```{r}
 plot_pairs(fit)
 ```
+
 
 ```{r}
 plot(fit$beta)
 ```
 
+
+
+```{r}
+data("ClusterScales_two")
+
+fit <- fdp_staplm(y = ClusterScales_two$BMI,
+                  Z = cbind(1,ClusterScales_two$sex),
+                  X = ClusterScales_two$dists_mat,
+                  tau_0 = rep(1,ncol(ClusterScales_two$dists_mat)),
+                  alpha_a = 1, 
+                  alpha_b = 1,
+                  K = 5,
+                  iter_max = 1E4,
+                  burn_in = 9E3,
+                  thin = 1,
+                  seed = 43431)
+```
+
+
+
+```{r}
+plot_pairs(fit)
+```
+
+
 ```{r}
 plot_cluster_effects(fit)
 ```
+
+
+```{r}
+fit <- fdp_stapplm(y = ClusterScales_two$BMI,
+                   Z = cbind(1,ClusterScales_two$sex),
+                   X = ClusterScales_two$dists_mat,
+                   nu_0 = 1,
+                   alpha_a = 1, 
+                   alpha_b = 1,
+                   K = 5,
+                   iter_max = 1E4,
+                   burn_in = 9E3,
+                   thin = 3,
+                   seed = 43431)
+```
+
+
+
+
+```{r}
+plot_pairs(fit)
+```
+
+
+
+```{r}
+plot_cluster_effects(fit)
+```
+
 

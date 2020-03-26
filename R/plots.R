@@ -19,7 +19,7 @@ plot_pairs <- function(x,sort = FALSE)
 #' @export
 #' @param x stapDP object
 #' 
-plot_cluster_effects <- function(x, p = 0.95, switch = "color")
+plot_cluster_effects <- function(x, p = 0.95, switch = "color", prob_filter = 0.1)
     UseMethod("plot_cluster_effects")
 
 #' plots pairwise probability clustering plot
