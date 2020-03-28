@@ -35,7 +35,6 @@ fit <- fdp_staplm(y = ClusterScales_one$BMI,
                   burn_in = 4.5E4,
                   thin = 1,
                   seed = 43431)
-
 ```
  
  
@@ -105,4 +104,23 @@ plot_pairs(fit)
 plot_cluster_effects(fit)
 ```
 
+
+
+```{r}
+data("Clusterdata_binomial")
+
+fit <- fdp_stappglm(y = Clusterdata_binomial$y,
+                   n = Clusterdata_binomial$n,
+                   Z = cbind(1,Clusterdata_binomial$sex),
+                   X = Clusterdata_binomial$dists,
+                   nu_0 = 1,
+                   alpha_a = 1, 
+                   alpha_b = 1,
+                   K = 5,
+                   iter_max = 1,
+                   burn_in = 0,
+                   thin = 1,
+                   seed = 43431)
+
+```
 

@@ -14,7 +14,7 @@
 #' 
 #' @export
 #' 
-fdp_stappglm <- function(y,Z,X,
+fdp_stappglm <- function(y,n,Z,X,
 					   alpha_a,
 					   alpha_b, 
 					   K,
@@ -28,10 +28,11 @@ fdp_stappglm <- function(y,Z,X,
   X_ranges <- lapply(1:ncol(X),function(x) range(X[,x,drop=TRUE]))
 
 
-	fit <- stappDP_fit(y,Z,X,
-					   nu_0,alpha_a,alpha_b,
-					   K,iter_max,burn_in,thin,
-					   seed,num_posterior_samples)
+	fit <- stappDP_logistic_fit(y,n,
+								Z,X,
+							   nu_0,alpha_a,alpha_b,
+							   K,iter_max,burn_in,thin,
+							   seed,num_posterior_samples)
 
 
 	return(stapDP(fit,X_ranges))

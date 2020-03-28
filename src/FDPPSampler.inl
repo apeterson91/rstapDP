@@ -7,7 +7,7 @@ void FDPPSampler::iteration_sample(std::mt19937 &rng){
 
 	draw_z(rng);
 	X_fit << Z,X_K;
-	V = (X_fit.transpose() * X_fit + correction_mat + (tau_matrix) ).inverse();
+	V = (X_fit.transpose() * X_fit + correction_mat + (tau_var_matrix) ).inverse();
 
 	beta = V * sigma * z + V * X_fit.transpose() * y; 
 	if(isnan(beta(0)) & flag ){
@@ -29,7 +29,7 @@ void FDPPSampler::draw_z(std::mt19937 &rng){
 void FDPPSampler::draw_var(std::mt19937 &rng){
 
 	residual = y - X_fit * beta;
-	s = (residual.dot(residual) + beta.segment(P,Q-P).transpose() * tau_matrix.block(P,P,Q-P,Q-P) *  beta.segment(P,Q-P) ) / (n + Q - P);
+	s = (residual.dot(residual) + beta.segment(P,Q-P).transpose() * tau_var_matrix.block(P,P,Q-P,Q-P) *  beta.segment(P,Q-P) ) / (n + Q - P);
 	std::chi_squared_distribution<double> rchisq(n + Q-P);
 	std::chi_squared_distribution<double> rchisq_tau(nu_0 + 1);
 	var = rchisq(rng);
@@ -59,9 +59,12 @@ void FDPPSampler::store_samples(Eigen::ArrayXXd &beta_samples,
 	cluster_assignment.row(sample_ix) = iter_cluster_assignment;
 	tau_samples.row(sample_ix) = tau_matrix.inverse().diagonal().segment(P,Q-P).array();
 	sample_ix ++;
+	int j = 0;
 	for(int i = 0; i< n; i ++){
-		for(int j = 0; j < i ; j++)
-			P_matrix(i,j) += iter_cluster_assignment(i) == iter_cluster_assignment(j) ? 1 : 0;
+		for(int k = 0; k < K; k ++){
+			if(cluster_matrix(i,k) == 1)
+				P_matrix.row(i) = P_matrix.row(i) + cluster_matrix.col(k);
+		}
 	}
 }
 

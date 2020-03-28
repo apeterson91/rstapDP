@@ -5,12 +5,21 @@ stapDP_fit <- function(y, Z, X, tau_0, alpha_a, alpha_b, K, iter_max, burn_in, t
     .Call(`_rstapDP_stapDP_fit`, y, Z, X, tau_0, alpha_a, alpha_b, K, iter_max, burn_in, thin, seed, num_posterior_samples)
 }
 
-#' Penalized Functional Dirichlet Process Regression
+#' Penalized Functional Dirichlet Process Logistic Regression
 #'
 #' @param y vector of outcomes 
 #' @param Z matrix of subject covariates 
 #' @param X matrix of distance spline basis 
 stappDP_fit <- function(y, Z, X, nu_0, alpha_a, alpha_b, K, iter_max, burn_in, thin, seed, num_posterior_samples) {
     .Call(`_rstapDP_stappDP_fit`, y, Z, X, nu_0, alpha_a, alpha_b, K, iter_max, burn_in, thin, seed, num_posterior_samples)
+}
+
+#' Penalized Functional Dirichlet Process Linear Regression
+#'
+#' @param y vector of outcomes 
+#' @param Z matrix of subject covariates 
+#' @param X matrix of distance spline basis 
+stappDP_logistic_fit <- function(y, nt, Z, X, nu_0, alpha_a, alpha_b, K, iter_max, burn_in, thin, seed, num_posterior_samples) {
+    .Call(`_rstapDP_stappDP_logistic_fit`, y, nt, Z, X, nu_0, alpha_a, alpha_b, K, iter_max, burn_in, thin, seed, num_posterior_samples)
 }
 

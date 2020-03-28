@@ -31,13 +31,17 @@ plot_cluster_effects <- function(x, p = 0.95, switch = "color", prob_filter = 0.
 #' @importFrom ggplot2 ggplot aes geom_tile scale_fill_gradientn
 #' @importFrom stringr str_replace
 #'
-plot_pairs.stapDP <- function(x,sort = FALSE){
+plot_pairs.stapDP <- function(x,sort = FALSE,sample = 0){
 
 	### To pass R CMD Check
 	Group_2 <- Group_1 <- Probability <- NULL
 	###
 
-	P <- x$pmat
+	if(sample>0){
+		ics <- sample(1:nrow(x$pmat),sample,replace=F)
+		P <- x$pmat[ics,ics]
+	}else
+		P <- x$pmat
 
 	makeSymm <- function(m) {
 	  m[upper.tri(m)] <- t(m)[upper.tri(m)]
