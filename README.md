@@ -5,9 +5,9 @@
 
 ## About
 
-This is an R package that fits a Normal Linear Model to data with a Dirichlet Process Prior placed on a subset of the regression coefficients.
-The primary target audience is researchers interested in the effect of built environment features (BEFs) on human health, 
-though other applications are possible. 
+This is an R package that fits a Linear Model with normally distributed residual error with a Dirichlet Process Prior 
+placed on a subset of the regression coefficients. The primary target audience is researchers interested in the effect
+of built environment features (BEFs) on human health, though other applications are possible. 
 
 ## Installation
 
