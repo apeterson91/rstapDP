@@ -28,13 +28,22 @@ void print_progress(const int &iter_ix, const int &warm_up, const int &iter_max,
 //
 // [[Rcpp::depends(RcppEigen)]]
 
-// simple example of creating two matrices and
-// returning the result of an operatioon on them
 //
 // via the exports attribute we tell Rcpp to make this function
 // available from R
-//
-//
+
+//' Functional Dirichlet Process Linear Regression
+//' @param y a vector of continuous outcomes
+//' @param Z a matrix of population level confounders
+//' @param X a matrix of spatial temporal aggregated predictors
+//' @param tau_0 prior variance for STAP parameters
+//' @param alpha_a alpha gamma prior hyperparameter
+//' @param alpha_b alpha gamma prior hyperparameter
+//' @param K truncation number
+//' @param iter_max maximum number of iterations
+//' @param burn_in number of burn in iterations
+//' @param thin number by which to thin samples
+//' @param seed rng initializer
 // [[Rcpp::export]]
 Rcpp::List stapDP_fit(const Eigen::VectorXd &y,
 						  const Eigen::MatrixXd &Z,
@@ -95,13 +104,24 @@ Rcpp::List stapDP_fit(const Eigen::VectorXd &y,
 
 //' Penalized Functional Dirichlet Process Logistic Regression
 //'
-//' @param y vector of outcomes 
-//' @param Z matrix of subject covariates 
-//' @param X matrix of distance spline basis 
+//' @param y a vector of continuous outcomes
+//' @param Z a matrix of population level confounders
+//' @param X a matrix of spatial temporal aggregated predictors
+//' @param w a vector of weights for weighted regression
+//' @param nu_0 prior degrees of freedom for STAP regression coefficient scales
+//' @param alpha_a alpha gamma prior hyperparameter
+//' @param alpha_b alpha gamma prior hyperparameter
+//' @param K truncation number
+//' @param iter_max maximum number of iterations
+//' @param burn_in number of burn in iterations
+//' @param thin number by which to thin samples
+//' @param seed rng initializer
+//' @param num_posterior_samples total number of posterior samples
 // [[Rcpp::export]]
 Rcpp::List stappDP_fit(const Eigen::VectorXd &y,
 					   const Eigen::MatrixXd &Z,
 					   const Eigen::MatrixXd &X,
+					   const Eigen::VectorXd &w,
 					   const double &nu_0,
 					   const double &alpha_a,
 					   const double &alpha_b,
@@ -134,7 +154,7 @@ Rcpp::List stappDP_fit(const Eigen::VectorXd &y,
 	const int chain = 1;
 	int sample_ix = 0;
 
-	FDPPSampler sampler(y,Z,X,alpha_a,
+	FDPPSampler sampler(y,Z,X,w, alpha_a,
 					   alpha_b,nu_0,K,rng);
 
 
@@ -161,10 +181,6 @@ Rcpp::List stappDP_fit(const Eigen::VectorXd &y,
 
 //' Penalized Functional Dirichlet Process Linear Regression
 //'
-//' @param y vector of outcomes 
-//' @param Z matrix of subject covariates 
-//' @param X matrix of distance spline basis 
-// [[Rcpp::export]]
 Rcpp::List stappDP_logistic_fit(
 								const Eigen::ArrayXd &y,
 								const Eigen::ArrayXd &nt,
@@ -200,7 +216,7 @@ Rcpp::List stappDP_logistic_fit(
 	int sample_ix = 0;
 
 	GFDPPSampler sampler(y,nt,Z,X,alpha_a,
-					   alpha_b,nu_0,K,rng);
+					     alpha_b,nu_0,K,rng);
 
 	for(int iter_ix = 1; iter_ix <= iter_max; iter_ix ++){
 		print_progress(iter_ix,burn_in,iter_max,chain);

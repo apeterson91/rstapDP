@@ -22,13 +22,13 @@ fdp_staplm(y, Z, X, tau_0, alpha_a, alpha_b, K, iter_max, burn_in, thin,
 
 \item{K}{truncation number}
 
+\item{iter_max}{maximum number of iterations}
+
 \item{burn_in}{number of burn in iterations}
 
 \item{thin}{number by which to thin samples}
 
 \item{seed}{rng initializer}
-
-\item{iter_ix}{maximum number of iterations}
 }
 \description{
 Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model

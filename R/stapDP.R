@@ -1,9 +1,8 @@
 
 #' Create a stapDP object
 #'
-#' @param object A list provided by the nd_nhpp function
-#' @param chains number of chains
-#' @param J number of groups
+#' @param object A list provided by the fdp_stap(p)lm function
+#' @param X_ranges the range of the covariate space for the STAP
 #' @return A stapDP object
 #'
 stapDP <- function(object,X_ranges){
@@ -34,12 +33,3 @@ stapDP <- function(object,X_ranges){
     structure(out, class = c("stapDP"))
 }
 
-
-# get_par_tibble <- function(object) UseMethod("get_par_tibble")
-# 
-# get_par_tibble.stapDP <- function(object){
-#   
-#   tibble(Iteration = 1:nrow(object$beta),
-#          Parameter = )
-#   
-# }

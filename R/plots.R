@@ -1,4 +1,4 @@
-#' plots pairwise probability clustering plot
+#' Plots pairwise probability clustering plot
 #' 
 #' @template rodriguez
 #'
@@ -6,28 +6,27 @@
 #' @param x stapDP object
 #' @param sort boolean asking whether sorting algorithm should be used to sort
 #' pairwise probablity
-#' @importFrom ggplot2 ggplot aes geom_tile scale_fill_gradientn
+#' @param sample number of subjects to sample in order to speed computation
 #' @return ggplot plot object
 #' @seealso the supplementary section of the reference for the sorting algorithm.
-#'
-
-plot_pairs <- function(x,sort = FALSE)
+plot_pairs <- function(x,sort = FALSE, sample = 0)
     UseMethod("plot_pairs")
 
 #' plot cluster effects plots
 #' 
 #' @export
 #' @param x stapDP object
+#' @param p probability contained in credible interval
+#' @param switch one of "color" or "facet" for different plotting options
+#' @param  prob_filter all mixture components with median probability < prob_filter are excluded from the plot
+#' @return plot with cluster effect across space
 #' 
 plot_cluster_effects <- function(x, p = 0.95, switch = "color", prob_filter = 0.1)
     UseMethod("plot_cluster_effects")
 
-#' plots pairwise probability clustering plot
 #'
 #' @export
-#' @param x stapDP object
-#' @param sort boolean asking whether sorting algorithm should be used to sort
-#' @return ggplot plot object
+#' @describeIn plot_pairs plot_pairwise probability matrix
 #' @importFrom ggplot2 ggplot aes geom_tile scale_fill_gradientn
 #' @importFrom stringr str_replace
 #'
@@ -87,7 +86,7 @@ plot_pairs.stapDP <- function(x,sort = FALSE,sample = 0){
 #' plot cluster effects plots
 #' 
 #' @export
-#' @param x stapDP object
+#' @describeIn plot_cluster_effects 
 #' 
 plot_cluster_effects.stapDP <- function(x,p = 0.95, switch = "color",prob_filter = 0.1){
 
@@ -103,9 +102,10 @@ plot_cluster_effects.stapDP <- function(x,p = 0.95, switch = "color",prob_filter
 	grids <- cbind(1,grids,grids^2)
 	lo <- (1 - p)/2
 	hi <-  p + lo
-	los <- lapply(1:K, function(k) apply(tcrossprod(grids, x$beta[,start[k]:end[k],drop=F]),1,function(x) quantile(x,lo)))
-	his <- lapply(1:K, function(k) apply(tcrossprod(grids, x$beta[,start[k]:end[k],drop=F]),1,function(x) quantile(x,hi)))
-	meds <- lapply(1:K, function(k) apply(tcrossprod(grids, x$beta[,start[k]:end[k],drop=F]),1,function(x) quantile(x,.5)))
+	los <- lapply(1:K, function(k) apply(tcrossprod(grids, x$beta[,start[k]:end[k],drop=F]),1,function(x) stats::quantile(x,lo)))
+	his <- lapply(1:K, function(k) apply(tcrossprod(grids, x$beta[,start[k]:end[k],drop=F]),1,function(x) stats::quantile(x,hi)))
+	meds <- lapply(1:K, function(k) apply(tcrossprod(grids, x$beta[,start[k]:end[k],drop=F]),1,function(x) stats::quantile(x,.5)))
+	med <- Grid <- lower <- upper <- K <-  NULL
 
 	out <- purrr::map_dfr(1:K,function(k) {
 	  dplyr::tibble(K = k,
@@ -115,7 +115,7 @@ plot_cluster_effects.stapDP <- function(x,p = 0.95, switch = "color",prob_filter
 	                upper = his[[k]])
 	})
 	pi_df <- dplyr::tibble(K = 1:K,
-	                pi = apply(fit$pi,2,median))
+	                pi = apply(x$pi,2,stats::median))
 
 	if(switch=="color")
 		p <- out %>% dplyr::left_join(pi_df) %>% dplyr::filter(pi>prob_filter) %>% 

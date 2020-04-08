@@ -4,15 +4,35 @@
 \alias{stappDP_fit}
 \title{Penalized Functional Dirichlet Process Logistic Regression}
 \usage{
-stappDP_fit(y, Z, X, nu_0, alpha_a, alpha_b, K, iter_max, burn_in, thin,
+stappDP_fit(y, Z, X, w, nu_0, alpha_a, alpha_b, K, iter_max, burn_in, thin,
   seed, num_posterior_samples)
 }
 \arguments{
-\item{y}{vector of outcomes}
+\item{y}{a vector of continuous outcomes}
 
-\item{Z}{matrix of subject covariates}
+\item{Z}{a matrix of population level confounders}
 
-\item{X}{matrix of distance spline basis}
+\item{X}{a matrix of spatial temporal aggregated predictors}
+
+\item{w}{a vector of weights for weighted regression}
+
+\item{nu_0}{prior degrees of freedom for STAP regression coefficient scales}
+
+\item{alpha_a}{alpha gamma prior hyperparameter}
+
+\item{alpha_b}{alpha gamma prior hyperparameter}
+
+\item{K}{truncation number}
+
+\item{iter_max}{maximum number of iterations}
+
+\item{burn_in}{number of burn in iterations}
+
+\item{thin}{number by which to thin samples}
+
+\item{seed}{rng initializer}
+
+\item{num_posterior_samples}{total number of posterior samples}
 }
 \description{
 Penalized Functional Dirichlet Process Logistic Regression

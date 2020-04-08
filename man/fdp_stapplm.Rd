@@ -4,8 +4,8 @@
 \alias{fdp_stapplm}
 \title{Penalized Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model}
 \usage{
-fdp_stapplm(y, Z, X, alpha_a, alpha_b, K, nu_0, iter_max, burn_in, thin,
-  seed)
+fdp_stapplm(y, Z, X, alpha_a, alpha_b, K, nu_0, w = rep(1, nrow(y)),
+  iter_max, burn_in, thin, seed)
 }
 \arguments{
 \item{y}{vector of outcomes}
@@ -18,17 +18,19 @@ fdp_stapplm(y, Z, X, alpha_a, alpha_b, K, nu_0, iter_max, burn_in, thin,
 
 \item{alpha_b}{alpha gamma prior hyperparameter}
 
-\item{K}{truncation number}
+\item{K}{truncation number for DP mixture components}
+
+\item{nu_0}{inverse-chi-square degree of freedom for tau base measure}
+
+\item{w}{weights for weighted regression - default is 1}
+
+\item{iter_max}{maximum number of iterations}
 
 \item{burn_in}{number of burn in iterations}
 
 \item{thin}{number by which to thin samples}
 
 \item{seed}{rng initializer}
-
-\item{tau_0}{normal base measure scale}
-
-\item{iter_ix}{maximum number of iterations}
 }
 \description{
 Penalized Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model

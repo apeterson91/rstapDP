@@ -29,14 +29,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // stappDP_fit
-Rcpp::List stappDP_fit(const Eigen::VectorXd& y, const Eigen::MatrixXd& Z, const Eigen::MatrixXd& X, const double& nu_0, const double& alpha_a, const double& alpha_b, const int& K, const int& iter_max, const int& burn_in, const int& thin, const int& seed, const int& num_posterior_samples);
-RcppExport SEXP _rstapDP_stappDP_fit(SEXP ySEXP, SEXP ZSEXP, SEXP XSEXP, SEXP nu_0SEXP, SEXP alpha_aSEXP, SEXP alpha_bSEXP, SEXP KSEXP, SEXP iter_maxSEXP, SEXP burn_inSEXP, SEXP thinSEXP, SEXP seedSEXP, SEXP num_posterior_samplesSEXP) {
+Rcpp::List stappDP_fit(const Eigen::VectorXd& y, const Eigen::MatrixXd& Z, const Eigen::MatrixXd& X, const Eigen::VectorXd& w, const double& nu_0, const double& alpha_a, const double& alpha_b, const int& K, const int& iter_max, const int& burn_in, const int& thin, const int& seed, const int& num_posterior_samples);
+RcppExport SEXP _rstapDP_stappDP_fit(SEXP ySEXP, SEXP ZSEXP, SEXP XSEXP, SEXP wSEXP, SEXP nu_0SEXP, SEXP alpha_aSEXP, SEXP alpha_bSEXP, SEXP KSEXP, SEXP iter_maxSEXP, SEXP burn_inSEXP, SEXP thinSEXP, SEXP seedSEXP, SEXP num_posterior_samplesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type y(ySEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type Z(ZSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type w(wSEXP);
     Rcpp::traits::input_parameter< const double& >::type nu_0(nu_0SEXP);
     Rcpp::traits::input_parameter< const double& >::type alpha_a(alpha_aSEXP);
     Rcpp::traits::input_parameter< const double& >::type alpha_b(alpha_bSEXP);
@@ -46,38 +47,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const int& >::type thin(thinSEXP);
     Rcpp::traits::input_parameter< const int& >::type seed(seedSEXP);
     Rcpp::traits::input_parameter< const int& >::type num_posterior_samples(num_posterior_samplesSEXP);
-    rcpp_result_gen = Rcpp::wrap(stappDP_fit(y, Z, X, nu_0, alpha_a, alpha_b, K, iter_max, burn_in, thin, seed, num_posterior_samples));
-    return rcpp_result_gen;
-END_RCPP
-}
-// stappDP_logistic_fit
-Rcpp::List stappDP_logistic_fit(const Eigen::ArrayXd& y, const Eigen::ArrayXd& nt, const Eigen::MatrixXd& Z, const Eigen::MatrixXd& X, const double& nu_0, const double& alpha_a, const double& alpha_b, const int& K, const int& iter_max, const int& burn_in, const int& thin, const int& seed, const int& num_posterior_samples);
-RcppExport SEXP _rstapDP_stappDP_logistic_fit(SEXP ySEXP, SEXP ntSEXP, SEXP ZSEXP, SEXP XSEXP, SEXP nu_0SEXP, SEXP alpha_aSEXP, SEXP alpha_bSEXP, SEXP KSEXP, SEXP iter_maxSEXP, SEXP burn_inSEXP, SEXP thinSEXP, SEXP seedSEXP, SEXP num_posterior_samplesSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::ArrayXd& >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const Eigen::ArrayXd& >::type nt(ntSEXP);
-    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type Z(ZSEXP);
-    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const double& >::type nu_0(nu_0SEXP);
-    Rcpp::traits::input_parameter< const double& >::type alpha_a(alpha_aSEXP);
-    Rcpp::traits::input_parameter< const double& >::type alpha_b(alpha_bSEXP);
-    Rcpp::traits::input_parameter< const int& >::type K(KSEXP);
-    Rcpp::traits::input_parameter< const int& >::type iter_max(iter_maxSEXP);
-    Rcpp::traits::input_parameter< const int& >::type burn_in(burn_inSEXP);
-    Rcpp::traits::input_parameter< const int& >::type thin(thinSEXP);
-    Rcpp::traits::input_parameter< const int& >::type seed(seedSEXP);
-    Rcpp::traits::input_parameter< const int& >::type num_posterior_samples(num_posterior_samplesSEXP);
-    rcpp_result_gen = Rcpp::wrap(stappDP_logistic_fit(y, nt, Z, X, nu_0, alpha_a, alpha_b, K, iter_max, burn_in, thin, seed, num_posterior_samples));
+    rcpp_result_gen = Rcpp::wrap(stappDP_fit(y, Z, X, w, nu_0, alpha_a, alpha_b, K, iter_max, burn_in, thin, seed, num_posterior_samples));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_rstapDP_stapDP_fit", (DL_FUNC) &_rstapDP_stapDP_fit, 12},
-    {"_rstapDP_stappDP_fit", (DL_FUNC) &_rstapDP_stappDP_fit, 12},
-    {"_rstapDP_stappDP_logistic_fit", (DL_FUNC) &_rstapDP_stappDP_logistic_fit, 13},
+    {"_rstapDP_stappDP_fit", (DL_FUNC) &_rstapDP_stappDP_fit, 13},
     {NULL, NULL, 0}
 };
 

@@ -10,15 +10,13 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  eval = FALSE
 )
 ```
 
 ```{r setup}
 library(rstapDP)
-library(tidyverse)
-library(coda)
-theme_set(theme_bw())
 ```
 
 ```{r}
@@ -42,10 +40,6 @@ fit <- fdp_staplm(y = ClusterScales_one$BMI,
 plot_pairs(fit)
 ```
 
-
-```{r}
-plot(fit$beta)
-```
 
 
 
@@ -72,9 +66,7 @@ plot_pairs(fit)
 ```
 
 
-```{r}
-plot_cluster_effects(fit)
-```
+
 
 
 ```{r}
@@ -85,8 +77,8 @@ fit <- fdp_stapplm(y = ClusterScales_two$BMI,
                    alpha_a = 1, 
                    alpha_b = 1,
                    K = 5,
-                   iter_max = 1E4,
-                   burn_in = 9E3,
+                   iter_max = 5,
+                   burn_in = 0,
                    thin = 3,
                    seed = 43431)
 ```
@@ -106,21 +98,21 @@ plot_cluster_effects(fit)
 
 
 
-```{r}
-data("Clusterdata_binomial")
-
-fit <- fdp_stappglm(y = Clusterdata_binomial$y,
-                   n = Clusterdata_binomial$n,
-                   Z = cbind(1,Clusterdata_binomial$sex),
-                   X = Clusterdata_binomial$dists,
-                   nu_0 = 1,
-                   alpha_a = 1, 
-                   alpha_b = 1,
-                   K = 5,
-                   iter_max = 1,
-                   burn_in = 0,
-                   thin = 1,
-                   seed = 43431)
+```{r,echo=F}
+# data("Clusterdata_binomial")
+# 
+# fit <- fdp_stappglm(y = Clusterdata_binomial$y,
+#                    n = Clusterdata_binomial$n,
+#                    Z = cbind(1,Clusterdata_binomial$sex),
+#                    X = Clusterdata_binomial$dists,
+#                    nu_0 = 1,
+#                    alpha_a = 1, 
+#                    alpha_b = 1,
+#                    K = 5,
+#                    iter_max = 2,
+#                    burn_in = 0,
+#                    thin = 1,
+#                    seed = 43431)
 
 ```
 

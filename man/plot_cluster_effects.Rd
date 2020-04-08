@@ -2,14 +2,34 @@
 % Please edit documentation in R/plots.R
 \name{plot_cluster_effects}
 \alias{plot_cluster_effects}
+\alias{plot_cluster_effects.stapDP}
 \title{plot cluster effects plots}
 \usage{
 plot_cluster_effects(x, p = 0.95, switch = "color",
   prob_filter = 0.1)
+
+\method{plot_cluster_effects}{stapDP}(x, p = 0.95, switch = "color",
+  prob_filter = 0.1)
 }
 \arguments{
 \item{x}{stapDP object}
+
+\item{p}{probability contained in credible interval}
+
+\item{switch}{one of "color" or "facet" for different plotting options}
+
+\item{prob_filter}{all mixture components with median probability < prob_filter are excluded from the plot}
+}
+\value{
+plot with cluster effect across space
 }
 \description{
 plot cluster effects plots
+
+plot cluster effects plots
 }
+\section{Methods (by class)}{
+\itemize{
+\item \code{stapDP}: 
+}}
+

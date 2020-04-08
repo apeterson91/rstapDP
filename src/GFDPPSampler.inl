@@ -1,28 +1,67 @@
 void GFDPPSampler::iteration_sample(std::mt19937 &rng){
 
-	correction_mat.setZero(Q,Q);
 	calculate_b();
 	sample_cluster_labels(rng);
 	update_weights(rng);
 
-
-
+	std::uniform_real_distribution<double> runif(0,1);
 	draw_z(rng);
-	X_fit << Z,X_K;
-	eta = X_fit * beta;
-	residual = eta + pow((1 + exp(eta)),2) / exp(eta)  * ( y / nt - exp(eta) / (1 + exp(eta))); 
-	W.diagonal() = (nt * exp(eta)) /  pow(1 + exp(eta),2 ) ;
-	V = (X_fit.transpose() * W *  X_fit + correction_mat + tau_var_matrix ).inverse();
+	X_fit << Z, X_K;
+	Eigen::VectorXd temp;
+	diff = 1;
+	int cntr = 0;
+	//find mode
+	Rcpp::Rcout << "cluster count: " << cluster_count << std::endl;
+	Rcpp::Rcout << "initial beta: " << beta.tail(5) << std::endl;
+	while(diff > 1E-6){
+		temp = beta;
+		eta = (X_fit * beta).array();
+		W =  ((nt * exp(eta) ) / ( pow(1 + exp(eta),2) )) ; 
+		mu = exp(eta) / (1 + exp(eta));
+		r = eta + (y / nt - mu ) * pow(1 + exp(eta),2) / exp(eta);
+		beta = ( X_fit.transpose() * W.asDiagonal() * X_fit + correction_mat ).ldlt().solve(X_fit.transpose() * W.asDiagonal() * r);
+		if(cntr < 2){
+			Rcpp::Rcout << " beta.tail: " << beta.tail(3) << std::endl;
+			Rcpp::Rcout << " r " << (r).tail(5) << std::endl;
+			Rcpp::Rcout << " W " << (W).tail(5) << std::endl;
+			Rcpp::Rcout << "X * W * r " << (X_fit.transpose() * W.asDiagonal() * r).tail(5) << std::endl;
+			Rcpp::Rcout << "---------------- "  << std::endl;
+			//Rcpp::Rcout << "XTWX + correction: " << (X_fit.transpose() * W.asDiagonal() * X_fit + correction_mat).inverse().diagonal().tail(5) << std::endl;
+		}
+		diff = (beta - temp).dot(beta-temp);
+		cntr ++;
+		if(cntr >50){
+			Rcpp::Rcout << " Uh-oh, taking a while to find mode" << std::endl;
+			Rcpp::Rcout << " Current beta" << beta << std::endl;
+			Rcpp::Rcout << " Current diff " << diff << std::endl;
+			break;
+		}
+	}
+	Rcpp::Rcout << "cntr: " << cntr << std::endl;
+	L = ((X_fit.transpose() * W.asDiagonal() * X_fit + correction_mat).inverse()).llt().matrixL().toDenseMatrix() ;
+	beta = L * z + beta;
 
-	beta = V * z + V * X_fit.transpose() * W * residual; 
-	if(isnan(beta(0)) & flag ){
+
+	// error check
+	if( (beta.array().isNaN() == true).any() & flag ){
 		Rcpp::Rcout << "things are NaN" << std::endl;
-		Rcpp::Rcout << " residual: " << residual.head(10) << std::endl;
-		Rcpp::Rcout << " W.block " << W.block(0,0,5,5) << std::endl;
-		Rcpp::Rcout << " XTWX.block " << (X_fit.transpose() * W * X_fit).block(0,0,5,5) << std::endl;
-		Rcpp::Rcout << " tau_var.block " << tau_var_matrix.diagonal() << std::endl;
+		/*
+		Rcpp::Rcout << " correction_mat " << correction_mat.diagonal() << std::endl;
+		Rcpp::Rcout << "exp(eta): \n" << exp(eta).isNaN().any() << std::endl;
+		Rcpp::Rcout << "(nt * exp(eta)): \n " << ( (nt * exp(eta)) ).isNaN().any() << std::endl;
+		Rcpp::Rcout << "pow(1 +exp(eta),2): \n " <<  (pow(1 + exp(eta),2) ).isNaN().any() << std::endl;
+		Rcpp::Rcout << "sqrt(nt * exp(eta)/...): \n " << (sqrt( (nt * exp(eta)) / pow(1 + exp(eta),2) )).isNaN().any() << std::endl;
+		Rcpp::Rcout << "exp(eta): \n" << exp(eta).tail(5) << std::endl;
+		Rcpp::Rcout << "(nt * exp(eta)): \n " << ( (nt * exp(eta)) ).tail(5) << std::endl;
+		Rcpp::Rcout << "pow(1 +exp(eta),2): \n " <<  (pow(1 + exp(eta),2) ).tail(5) << std::endl;
+		Rcpp::Rcout << "sqrt(nt * exp(eta)/...): \n " << (sqrt( (nt * exp(eta)) / pow(1 + exp(eta),2) )).tail(5)<< std::endl;
+		Rcpp::Rcout << "X * beta: \n " << (X_fit * beta).tail(5) << std::endl;
+		Rcpp::Rcout << "eta: \n " << (eta).tail(5) << std::endl;
+		*/
 		flag = false;
 	}
+
+
 
 	draw_var(rng);
 }
@@ -37,6 +76,7 @@ void GFDPPSampler::draw_z(std::mt19937 &rng){
 
 void GFDPPSampler::draw_var(std::mt19937 &rng){
 
+	/*
 	std::chi_squared_distribution<double> rchisq_tau(nu_0 + 1);
 	double temp_scale;
 	for(int k = 0; k< (Q-P); k += P_two){
@@ -46,6 +86,7 @@ void GFDPPSampler::draw_var(std::mt19937 &rng){
 		}
 	}
 	tau_var_matrix = tau_matrix * tau_matrix;
+	*/
 
 }
 
@@ -55,11 +96,11 @@ void GFDPPSampler::store_samples(Eigen::ArrayXXd &beta_samples,
 							   Eigen::ArrayXd  &alpha_samples,
 							   Eigen::ArrayXXi &cluster_assignment){
 
-	beta_samples.row(sample_ix) = beta.transpose().array();
+	beta_samples.row(sample_ix) = beta.transpose().array(); 
 	pi_samples.row(sample_ix) = pi.transpose();
 	alpha_samples(sample_ix) = alpha;
 	cluster_assignment.row(sample_ix) = iter_cluster_assignment;
-	tau_samples.row(sample_ix) = tau_matrix.inverse().diagonal().segment(P,Q-P).array();
+//	tau_samples.row(sample_ix) = Eigen::Vectord::Ones(tau_samples.cols());
 	sample_ix ++;
 	for(int i = 0; i< n; i ++){
 		for(int j = 0; j < i ; j++)
@@ -91,15 +132,12 @@ void GFDPPSampler::calculate_b(){
 
 	b.setZero(n,K);
 	int start = P;
+	residual = (Z * beta.head(P)).array();
 	for(int k = 0; k < K; k++){
-		b.col(k)  = log(pi(k))  - y * (Z * beta.head(P) + X * beta.segment(start,P_two)).array() -
-			nt * log( 1 +  exp( (Z * beta.head(P) + X * beta.segment(start,P)).array()  )) -
-			.5 * log((tau_var_matrix.block(start,start,P_two,P_two).inverse()).determinant())  - 
-			 (.5  * (beta.segment(start,P_two) * ( tau_var_matrix.block(start,start,P_two,P_two)) * beta.segment(start,P_two) )).array()  -
-		((.5 * nu_0 * tau_var_matrix.block(start,start,P_two,P_two).diagonal().array()) - (1 +.5 * nu_0) * log(tau_var_matrix.block(start,start,P_two,P_two).diagonal().array()) ).sum() ;
+		eta = residual + (X * beta.segment(start,P_two)).array();
+		b.col(k)  = log(pi(k))  + y * eta - nt * log( 1 +  exp(eta)  );
 		start += P_two;
 	}
-
 }
 
 void GFDPPSampler::sample_cluster_labels(std::mt19937 &rng){
@@ -116,6 +154,7 @@ void GFDPPSampler::sample_cluster_labels(std::mt19937 &rng){
 		cluster_matrix(i,iter_cluster_assignment(i)) = 1.0;
 	}
 	int k_ = 0;
+	correction_mat.setZero(Q,Q);
 	for(int k = 0; k < (Q-P); k+= P_two){
 		cluster_count(k_) = (iter_cluster_assignment == k_).count();
 		if(cluster_count(k_) == 0)
@@ -138,19 +177,3 @@ void GFDPPSampler::update_weights(std::mt19937 &rng){
 	alpha = rgamma(rng);
 
 }
-
-void GFDPPSampler::initialize_beta(std::mt19937 &rng){
-
-	std::normal_distribution<double> rnorm(0,1);
-	std::chi_squared_distribution<double> rchisq(nu_0);
-	for(int k = 0; k< (Q-P); k += P_two){
-		for(int p_ix =0; p_ix < P_two ; p_ix ++ ){
-			tau_matrix(P + k+p_ix,P + k+p_ix) = sqrt(rchisq(rng) / nu_0);
-			beta(P + k+p_ix) = rnorm(rng) + (1 / tau_matrix(P+k+p_ix,P+k+p_ix));
-		}
-	}
-	tau_var_matrix = tau_matrix * tau_matrix;
-
-}
-
-

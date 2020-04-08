@@ -10,32 +10,34 @@ class GFDPPSampler
 		const Eigen::MatrixXd &Z;
 		const Eigen::ArrayXd &y;
 		const Eigen::ArrayXd &nt;
-		Eigen::VectorXd mu;
+		Eigen::VectorXd beta;
+		Eigen::VectorXd temp;
+		Eigen::VectorXd r;
+		Eigen::ArrayXd residual;
 		Eigen::ArrayXd eta;
-		Eigen::MatrixXd W;
+		Eigen::ArrayXd mu;
+		Eigen::VectorXd W;
+		Eigen::MatrixXd L;
 		Eigen::MatrixXd X_fit;
 		Eigen::MatrixXd X_K;
-		Eigen::MatrixXd V;
 		Eigen::ArrayXd pi;
 		Eigen::ArrayXd u;
 		Eigen::ArrayXi iter_cluster_assignment;
 		Eigen::MatrixXd cluster_matrix;
 		Eigen::ArrayXi cluster_count;
 		Eigen::ArrayXd probs;
-		Eigen::VectorXd residual;
-		Eigen::VectorXd beta;
 		Eigen::VectorXd z;
 		Eigen::ArrayXXd b;
-		Eigen::MatrixXd tau_matrix;
-		Eigen::MatrixXd tau_var_matrix;
-		Eigen::MatrixXd correction_mat;
+		Eigen::MatrixXd correction_mat ;
 		Eigen::ArrayXd u_posterior_beta_alpha;
 		Eigen::ArrayXd u_posterior_beta_beta;
+		Eigen::ArrayXd temp_f;
 		double alpha;
 		double posterior_a_alpha;
 		double posterior_b_alpha;
 		const double alpha_b;
 		const double nu_0;
+		double sigma;
 		const int P;
 		const int P_two;
 		const int n;
@@ -44,7 +46,7 @@ class GFDPPSampler
 		int sample_ix = 0;
 		bool initializing = true;
 		bool flag = true;
-
+		double diff;
 	public:
 		Eigen::MatrixXd P_matrix;
 		GFDPPSampler(
@@ -65,21 +67,21 @@ class GFDPPSampler
 	{
 
 		//set a bunch of things to zero
+		eta.setZero(n);
 		P_matrix.setZero(n,n);
-		tau_matrix.setZero(Q,Q);
 		X_fit.setZero(n,Q);
-		W.setZero(n,n);
-		z.setZero(Q); 
-		beta.setZero(Q); 
+		z.setZero(n); 
 		X_K.setZero(n,P_two*K);
 		u.setZero(K);
 		pi.setZero(K);
+		beta.setZero(Q);
 		u_posterior_beta_alpha.setZero(K);
 		u_posterior_beta_beta.setZero(K);
 		cluster_count.setZero(K);
 		iter_cluster_assignment.setZero(n);
 		cluster_matrix.setZero(n,K);
 		probs.setZero(K);
+	correction_mat.setZero(Q,Q);
 		//initialize  vars
 		std::gamma_distribution<double> rgamma(alpha_a,alpha_b);
 		alpha = rgamma(rng);
@@ -87,14 +89,10 @@ class GFDPPSampler
 		stick_break(rng);
 		W.diagonal() = Eigen::VectorXd::Ones(n);
 		initializing = false;
-		initialize_beta(rng);
 	}
 
 		void iteration_sample(std::mt19937 &rng);
 
-		void calculate_residual(const int &j);
-
-		void calculate_Smat(const int &j);
 
 		void draw_z(std::mt19937 &rng);
 
@@ -106,10 +104,6 @@ class GFDPPSampler
 						   Eigen::ArrayXd &alpha_samples,
 						   Eigen::ArrayXXi &cluster_assignment);
 
-		Eigen::ArrayXd get_beta() const{
-			return(beta.array());
-		}
-
 		void stick_break(std::mt19937 &rng);
 
 		void calculate_b();
@@ -118,7 +112,6 @@ class GFDPPSampler
 
 		void update_weights(std::mt19937 &rng);
 
-		void initialize_beta(std::mt19937 &rng);
 
 };
 

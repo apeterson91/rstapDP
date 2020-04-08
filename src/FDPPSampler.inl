@@ -7,11 +7,13 @@ void FDPPSampler::iteration_sample(std::mt19937 &rng){
 
 	draw_z(rng);
 	X_fit << Z,X_K;
-	V = (X_fit.transpose() * X_fit + correction_mat + (tau_var_matrix) ).inverse();
+	V = (X_fit.transpose() * w.asDiagonal() * X_fit + correction_mat + (tau_var_matrix) ).inverse();
 
-	beta = V * sigma * z + V * X_fit.transpose() * y; 
+	beta = V.llt().matrixL().toDenseMatrix() * sigma * z + V * X_fit.transpose() * w.asDiagonal() * y; 
 	if(isnan(beta(0)) & flag ){
 		Rcpp::Rcout << "things are NaN" << std::endl;
+		Rcpp::Rcout << " V block" << V.block(0,0,5,5) << std::endl;
+		Rcpp::Rcout << "w.diagonal" << w.head(5)  << std::endl;
 		flag = false;
 	}
 
@@ -29,7 +31,7 @@ void FDPPSampler::draw_z(std::mt19937 &rng){
 void FDPPSampler::draw_var(std::mt19937 &rng){
 
 	residual = y - X_fit * beta;
-	s = (residual.dot(residual) + beta.segment(P,Q-P).transpose() * tau_var_matrix.block(P,P,Q-P,Q-P) *  beta.segment(P,Q-P) ) / (n + Q - P);
+	s = (residual.dot((w.asDiagonal() * residual)) + beta.segment(P,Q-P).transpose() * tau_var_matrix.block(P,P,Q-P,Q-P) *  beta.segment(P,Q-P) ) / (w.sum() + Q - P);
 	std::chi_squared_distribution<double> rchisq(n + Q-P);
 	std::chi_squared_distribution<double> rchisq_tau(nu_0 + 1);
 	var = rchisq(rng);
@@ -63,9 +65,10 @@ void FDPPSampler::store_samples(Eigen::ArrayXXd &beta_samples,
 	for(int i = 0; i< n; i ++){
 		for(int k = 0; k < K; k ++){
 			if(cluster_matrix(i,k) == 1)
-				P_matrix.row(i) = P_matrix.row(i) + cluster_matrix.col(k);
+				P_matrix.row(i) = P_matrix.row(i) + cluster_matrix.col(k).transpose().array();
 		}
 	}
+
 }
 
 void FDPPSampler::stick_break(std::mt19937 &rng){

@@ -7,11 +7,9 @@
 stapDP(object, X_ranges)
 }
 \arguments{
-\item{object}{A list provided by the nd_nhpp function}
+\item{object}{A list provided by the fdp_stap(p)lm function}
 
-\item{chains}{number of chains}
-
-\item{J}{number of groups}
+\item{X_ranges}{the range of the covariate space for the STAP}
 }
 \value{
 A stapDP object

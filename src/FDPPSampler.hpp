@@ -9,6 +9,7 @@ class FDPPSampler
 		const Eigen::MatrixXd &X;
 		const Eigen::MatrixXd &Z;
 		const Eigen::VectorXd &y;
+		const Eigen::VectorXd &w;
 		Eigen::MatrixXd X_fit;
 		Eigen::MatrixXd X_K;
 		Eigen::MatrixXd V;
@@ -45,17 +46,18 @@ class FDPPSampler
 		bool flag = true;
 
 	public:
-		Eigen::MatrixXd P_matrix;
+		Eigen::ArrayXXd P_matrix;
 		FDPPSampler(const Eigen::VectorXd &y,
 				   const Eigen::MatrixXd &Z,
 				   const Eigen::MatrixXd &X,
+				   const Eigen::VectorXd &w,
 				   const double &alpha_a,
 				   const double &alpha_b,
 				   const double &nu_0,
 				   const int &K,
 				   std::mt19937 &rng
 				   ): 
-			X(X), Z(Z), y(y),
+			X(X), Z(Z), y(y),w(w),
 			alpha_b(alpha_b),nu_0(nu_0),
 			n(y.rows()), P(Z.cols()), K(K),
 			Q(Z.cols() + X.cols()*K), P_two(X.cols())
