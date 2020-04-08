@@ -1,4 +1,4 @@
-## <img src = "docs/figures/bendr_hex.png" align="right" width="400" height = "400"> rstapDP: Spatial Temporal Aggregated Dirichlet Process Predictors in R
+## rstapDP: Spatial Temporal Aggregated Dirichlet Process Predictors in R
 <!-- badges: start -->
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 <!-- badges: end -->
