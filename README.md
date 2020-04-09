@@ -22,7 +22,7 @@ of built environment features (BEFs) on human health, though other applications 
 	library(devtools)
  }
 
-install_github("apeterson91/bendr",dependencies = TRUE)
+install_github("apeterson91/rstapDP",dependencies = TRUE)
  ```
 
 ## Contributing
