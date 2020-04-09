@@ -48,6 +48,7 @@ void print_progress(const int &iter_ix, const int &warm_up, const int &iter_max,
 Rcpp::List stapDP_fit(const Eigen::VectorXd &y,
 						  const Eigen::MatrixXd &Z,
 						  const Eigen::MatrixXd &X,
+						  const Eigen::VectorXd &w,
 						  const Eigen::ArrayXd tau_0,
 						  const double &alpha_a,
 						  const double &alpha_b,
@@ -78,7 +79,7 @@ Rcpp::List stapDP_fit(const Eigen::VectorXd &y,
 	const int chain = 1;
 	int sample_ix = 0;
 
-	FDPSampler sampler(y,Z,X,alpha_a,
+	FDPSampler sampler(y,Z,X,w,alpha_a,
 					   alpha_b,tau_0,K,
 					   rng);
 
@@ -178,6 +179,7 @@ Rcpp::List stappDP_fit(const Eigen::VectorXd &y,
 							  Rcpp::Named("cluster_assignment") = cluster_assignment,
 							  Rcpp::Named("PairwiseProbabilityMat") = sampler.P_matrix / num_posterior_samples );
 }
+
 
 //' Penalized Functional Dirichlet Process Linear Regression
 //'

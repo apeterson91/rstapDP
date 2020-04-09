@@ -7,9 +7,9 @@ void FDPSampler::iteration_sample(std::mt19937 &rng){
 
 	draw_z(rng);
 	X_fit << Z,X_K;
-	V = (X_fit.transpose() * X_fit + tau_matrix ).inverse();
+	V = (X_fit.transpose() * w.asDiagonal() * X_fit + correction_mat +  tau_matrix ).inverse();
 
-	beta = V * z + V * X_fit.transpose() * y; 
+	beta = V.llt().matrixL().toDenseMatrix() * sigma * z + V * X_fit.transpose() * w.asDiagonal() * y; 
 
 	draw_var(rng);
 }
@@ -98,6 +98,9 @@ void FDPSampler::sample_cluster_labels(std::mt19937 &rng){
 	}
 	int k_ = 0;
 	for(int k = 0; k < (Q-P); k+= P_two){
+		cluster_count(k) = (iter_cluster_assignment == k).count();
+		if(cluster_count(k_)==0)
+			correction_mat.diagonal().segment(P+k,P_two) = Eigen::VectorXd::Ones(P_two);
 		X_K.block(0,k,n,P_two) = cluster_matrix.col(k_).asDiagonal() * X;
 		k_ ++;
 	}
@@ -105,9 +108,6 @@ void FDPSampler::sample_cluster_labels(std::mt19937 &rng){
 }
 
 void FDPSampler::update_weights(std::mt19937 &rng){
-
-	for(int k = 0; k < K; k++)
-		cluster_count(k) = (iter_cluster_assignment == k).count();
 
 	for(int k = 0; k < K; k++){
 		u_posterior_beta_alpha(k) = 1 + cluster_count(k);

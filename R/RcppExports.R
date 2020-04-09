@@ -17,8 +17,8 @@ NULL
 #' @param burn_in number of burn in iterations
 #' @param thin number by which to thin samples
 #' @param seed rng initializer
-stapDP_fit <- function(y, Z, X, tau_0, alpha_a, alpha_b, K, iter_max, burn_in, thin, seed, num_posterior_samples) {
-    .Call(`_rstapDP_stapDP_fit`, y, Z, X, tau_0, alpha_a, alpha_b, K, iter_max, burn_in, thin, seed, num_posterior_samples)
+stapDP_fit <- function(y, Z, X, w, tau_0, alpha_a, alpha_b, K, iter_max, burn_in, thin, seed, num_posterior_samples) {
+    .Call(`_rstapDP_stapDP_fit`, y, Z, X, w, tau_0, alpha_a, alpha_b, K, iter_max, burn_in, thin, seed, num_posterior_samples)
 }
 
 #' Penalized Functional Dirichlet Process Logistic Regression

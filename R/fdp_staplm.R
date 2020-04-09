@@ -16,6 +16,7 @@
 #' @export
 #' 
 fdp_staplm <- function(y,Z,X,
+					   w = rep(1,length(y)),
 					   tau_0,
 					   alpha_a,
 					   alpha_b, K,
@@ -28,10 +29,10 @@ fdp_staplm <- function(y,Z,X,
 	X_ranges <- lapply(1:ncol(X),function(x) range(X[,x,drop=TRUE]))
 
 
-	fit <- stapDP_fit(y,Z,X,
-						  tau_0,alpha_a,alpha_b,
-						  K,iter_max,burn_in,thin,
-						  seed,num_posterior_samples)
+	fit <- stapDP_fit(y,Z,X,w,
+					  tau_0,alpha_a,alpha_b,
+					  K,iter_max,burn_in,thin,
+					  seed,num_posterior_samples)
 
 
 	return(stapDP(fit,X_ranges))
