@@ -68,9 +68,11 @@ Rcpp::List stapDP_fit(const Eigen::VectorXd &y,
 	Eigen::ArrayXXd beta_samples;
 	Eigen::ArrayXd sigma_samples;
 	Eigen::ArrayXd alpha_samples;
+	Eigen::ArrayXXd tau_samples;
 	Eigen::ArrayXXd pi_samples;
 	Eigen::ArrayXXi cluster_assignment;
 	cluster_assignment.setZero(num_posterior_samples,y.rows());
+	tau_samples.setZero(num_posterior_samples,1);
 	alpha_samples.setZero(num_posterior_samples);
 	beta_samples.setZero(num_posterior_samples,Z.cols() + X.cols()*K);
 	sigma_samples.setZero(num_posterior_samples);
@@ -88,8 +90,8 @@ Rcpp::List stapDP_fit(const Eigen::VectorXd &y,
 		print_progress(iter_ix,burn_in,iter_max,chain);
 		sampler.iteration_sample(rng);
 		if(iter_ix > burn_in && (iter_ix % thin == 0)){
-			sampler.store_samples(beta_samples,sigma_samples,pi_samples,
-							      alpha_samples,cluster_assignment);
+			sampler.store_samples(beta_samples,sigma_samples,tau_samples,
+								  pi_samples,alpha_samples,cluster_assignment);
 		}
 	}
 
@@ -97,6 +99,7 @@ Rcpp::List stapDP_fit(const Eigen::VectorXd &y,
 
     return Rcpp::List::create(Rcpp::Named("beta") = beta_samples,
 							  Rcpp::Named("pi") = pi_samples,
+							  Rcpp::Named("tau") = tau_samples,
                               Rcpp::Named("sigma") = sigma_samples,
 							  Rcpp::Named("alpha") = alpha_samples,
 							  Rcpp::Named("cluster_assignment") = cluster_assignment,

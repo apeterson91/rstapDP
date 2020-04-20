@@ -27,13 +27,26 @@ void FDPSampler::draw_var(std::mt19937 &rng){
 	residual = y - X_fit * beta;
 	s = residual.dot(residual) / (n - Q);
 	std::chi_squared_distribution<double> rchisq(n - Q);
+	std::chi_squared_distribution<double> rchisq_tau(1 + (Q-P) );
 	var = rchisq(rng);
 	var = (s * (n - Q)) / var;
 	sigma = sqrt(var);
+	double temp_scale;
+	temp_scale = (1 + beta.tail(Q-P).dot(beta.tail(Q-P)) / var ) / ((Q-P) + 1);
+	temp_scale = sqrt(rchisq_tau(rng)) / ((1.0 + (Q-P)) * temp_scale) ;
+
+
+	for(int k = 0; k< (Q-P); k += P_two){
+		for(int p_ix =0; p_ix < P_two ; p_ix ++ ){
+			tau_matrix(P + k+p_ix,P + k+p_ix) = temp_scale;
+		}
+	}
+
 }
 
 void FDPSampler::store_samples(Eigen::ArrayXXd &beta_samples,
 						       Eigen::ArrayXd &sigma_samples,
+							   Eigen::ArrayXXd &tau_samples,
 							   Eigen::ArrayXXd &pi_samples,
 							   Eigen::ArrayXd &alpha_samples,
 							   Eigen::ArrayXXi &cluster_assignment){
@@ -42,6 +55,7 @@ void FDPSampler::store_samples(Eigen::ArrayXXd &beta_samples,
 	sigma_samples(sample_ix) = sigma;
 	pi_samples.row(sample_ix) = pi.transpose();
 	alpha_samples(sample_ix) = alpha;
+	tau_samples(sample_ix,0) = pow(1 / tau_matrix(P,P),2) ;
 	cluster_assignment.row(sample_ix) = iter_cluster_assignment;
 	sample_ix ++;
 	for(int i = 0; i< n; i ++){

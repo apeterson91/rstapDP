@@ -99,6 +99,7 @@ class FDPSampler
 
 		void store_samples(Eigen::ArrayXXd &beta_samples,
 						   Eigen::ArrayXd &sigma_samples,
+						   Eigen::ArrayXXd &tau_samples,
 						   Eigen::ArrayXXd &pi_samples,
 						   Eigen::ArrayXd &alpha_samples,
 						   Eigen::ArrayXXi &cluster_assignment);
