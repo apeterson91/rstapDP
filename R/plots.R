@@ -90,49 +90,73 @@ plot_pairs.stapDP <- function(x,sort = FALSE,sample = 0){
 #' 
 plot_cluster_effects.stapDP <- function(x,p = 0.95, switch = "color",prob_filter = 0.1){
 
-	if(!(switch %in% c("color","facet"))){
-		stop("switch must be one of `color` or `facet` ")
+	stop("To be Implimented")
+
+}
+#' Diagnostic Traceplots
+#' 
+#' @export
+#' 
+traceplots <- function(x,par=c("probs")){
+	UseMethod("traceplots")
+}
+
+
+#' 
+#' @export
+#' 
+traceplots.stapDP <- function(x,par=c("probs")){
+	stopifnot(par %in% c("probs","fixef","ranef","alpha","sigma"))
+
+	if(par %in% c("alpha","sigma"))
+		p <- x$pardf %>% dplyr::filter(Parameter == !!par) %>% ggplot2::ggplot(ggplot2::aes(x=iteration_ix,y=Samples,color=Parameter)) + ggplot2::geom_line() + ggplot2::theme_bw()
+	else{
+		p <- x[[par]] %>% ggplot2::ggplot(ggplot2::aes(x = iteration_ix,y = Samples,color=Parameter)) + ggplot2::geom_line() + 
+			ggplot2::theme_bw() + ggplot2::facet_wrap(~Parameter,scales="free") + ggplot2::theme(strip.background = ggplot2::element_blank())
 	}
-	stopifnot(p>0 & p<1)
-	K <- ncol(x$pi)
-	P_two <- length(x$X_ranges)
-	start <- seq(from = 3, to = (2+(K*P_two)), by = P_two)
-	end <- start+(P_two-1)
-	grids <- seq(from = x$X_ranges[[2]][1],to=x$X_ranges[[2]][2], length.out = 150)
-	grids <- cbind(1,grids,grids^2)
-	lo <- (1 - p)/2
-	hi <-  p + lo
-	los <- lapply(1:K, function(k) apply(tcrossprod(grids, x$beta[,start[k]:end[k],drop=F]),1,function(x) stats::quantile(x,lo)))
-	his <- lapply(1:K, function(k) apply(tcrossprod(grids, x$beta[,start[k]:end[k],drop=F]),1,function(x) stats::quantile(x,hi)))
-	meds <- lapply(1:K, function(k) apply(tcrossprod(grids, x$beta[,start[k]:end[k],drop=F]),1,function(x) stats::quantile(x,.5)))
-	med <- Grid <- lower <- upper <- K <-  NULL
+	return(p)
+}
 
-	out <- purrr::map_dfr(1:K,function(k) {
-	  dplyr::tibble(K = k,
-	                Grid = grids[,2],
-	                med = meds[[k]],
-	                lower = los[[k]],
-	                upper = his[[k]])
-	})
-	pi_df <- dplyr::tibble(K = 1:K,
-	                pi = apply(x$pi,2,stats::median))
+#' Parameter Histograms
+#'
+#' @export
+#' 
+plotpars <- function(x,par=c("probs"))
+	UseMethod("plotpars")
 
-	if(switch=="color")
-		p <- out %>% dplyr::left_join(pi_df) %>% dplyr::filter(pi>prob_filter) %>% 
-	  dplyr::mutate(K= factor(K)) %>% 
-			ggplot2::ggplot(aes(x=Grid,y=med,fill=K)) + 
-			ggplot2::geom_line() + ggplot2::theme_bw() + 
-			ggplot2::geom_ribbon(aes(ymin=lower,ymax=upper),alpha=0.3)
-	else
-		p <- out %>% dplyr::left_join(pi_df) %>% dplyr::filter(pi>prob_filter) %>% 
-	  dplyr::mutate(K= factor(K)) %>% 
-			ggplot2::ggplot(aes(x=Grid,y=med)) + 
-			ggplot2::geom_line() + ggplot2::theme_bw() + 
-			ggplot2::geom_ribbon(aes(ymin=lower,ymax=upper),alpha=0.3) + 
-			ggplot2::facet_wrap(~K)
-
-	p <- p + ggplot2::ggtitle("Cluster Spatial Effects") + ggplot2::geom_hline(aes(yintercept=0),linetype=2,color='red') +
-	  ggplot2::xlab("Grid") + ggplot2::ylab("Change in g(E[Y])")
+#' Parameter Histograms
+#'
+#' @export
+#'
+plotpars.stapDP <- function(x,par=c("probs")){
+	if(par %in% c("alpha","sigma"))
+		p <- x$pardf %>% dplyr::filter(Parameter == !!par) %>% ggplot2::ggplot(ggplot2::aes(x=Samples,fill=Parameter)) + ggplot2::geom_histogram() + ggplot2::theme_bw()
+	else{
+		p <- x[[par]] %>% ggplot2::ggplot(ggplot2::aes(x = Samples,fill=Parameter)) + ggplot2::geom_histogram() + 
+			ggplot2::theme_bw() + ggplot2::facet_wrap(~Parameter,scales="free") + ggplot2::theme(strip.background = ggplot2::element_blank())
+	}
 	return(p)
 
+}
+
+#' Posterior Predictive Checks 
+#'
+#'@export
+#'
+ppc <- function(x,num_reps = 20)
+	UseMethod("ppc")
+
+#' Posterior Predictive Checks
+#'
+#' @export
+#'
+ppc.stapDP <- function(x,num_reps = 20){
+
+	samp <- c(0,sample(1:max(x$yhat$iteration_ix),num_reps))
+	p <- suppressWarnings(x$yhat %>% dplyr::filter(iteration_ix %in% samp) %>% 
+		ggplot2::ggplot(ggplot2::aes(x=Samples,color=Parameter,group=iteration_ix,alpha=Parameter)) + 
+		ggplot2::geom_density() + ggplot2::theme_bw()+ ggplot2::theme(legend.title=ggplot2::element_blank()) +   
+		ggplot2::scale_colour_manual(values=c("black","grey")) + ggplot2::scale_alpha_discrete(range=c(1,.1)))
+
+	return(p)
 }

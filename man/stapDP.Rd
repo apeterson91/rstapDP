@@ -4,12 +4,10 @@
 \alias{stapDP}
 \title{Create a stapDP object}
 \usage{
-stapDP(object, X_ranges)
+stapDP(object)
 }
 \arguments{
-\item{object}{A list provided by the fdp_stap(p)lm function}
-
-\item{X_ranges}{the range of the covariate space for the STAP}
+\item{object}{A list provided by the fdp_staplm.fit function}
 }
 \value{
 A stapDP object

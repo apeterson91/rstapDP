@@ -7,9 +7,11 @@ class FDPPSampler
 {
 	private:
 		const Eigen::MatrixXd &X;
+		const Eigen::MatrixXd &S;
 		const Eigen::MatrixXd &Z;
 		const Eigen::VectorXd &y;
 		const Eigen::VectorXd &w;
+		Eigen::VectorXd yhat;
 		Eigen::MatrixXd X_fit;
 		Eigen::MatrixXd X_K;
 		Eigen::MatrixXd V;
@@ -23,9 +25,8 @@ class FDPPSampler
 		Eigen::VectorXd beta;
 		Eigen::VectorXd z;
 		Eigen::ArrayXXd b;
-		Eigen::MatrixXd tau_matrix;
+		Eigen::ArrayXd unique_taus_sq;
 		Eigen::MatrixXd tau_var_matrix;
-		Eigen::MatrixXd correction_mat;
 		const double alpha_b;
 		const double nu_0;
 		Eigen::ArrayXd u_posterior_beta_alpha;
@@ -44,12 +45,14 @@ class FDPPSampler
 		int sample_ix = 0;
 		bool initializing = true;
 		bool flag = true;
+		const double log_factor;
 
 	public:
 		Eigen::ArrayXXd P_matrix;
 		FDPPSampler(const Eigen::VectorXd &y,
 				   const Eigen::MatrixXd &Z,
 				   const Eigen::MatrixXd &X,
+				   const Eigen::MatrixXd &S,
 				   const Eigen::VectorXd &w,
 				   const double &alpha_a,
 				   const double &alpha_b,
@@ -57,14 +60,16 @@ class FDPPSampler
 				   const int &K,
 				   std::mt19937 &rng
 				   ): 
-			X(X), Z(Z), y(y),w(w),
+			X(X), Z(Z), S(S), y(y),w(w),
 			alpha_b(alpha_b),nu_0(nu_0),
 			n(y.rows()), P(Z.cols()), K(K),
-			Q(Z.cols() + X.cols()*K), P_two(X.cols())
+			Q(Z.cols() + X.cols()*K), P_two(X.cols()),
+			log_factor(log(pow(10,-16)) - log(n))
 	{
 
 		P_matrix.setZero(n,n);
-		tau_matrix.setZero(Q,Q);
+		unique_taus_sq.setZero(K);
+		tau_var_matrix.setZero(Q,Q);
 		X_fit.setZero(n,Q);
 		z.setZero(Q); 
 		beta.setZero(Q); 
@@ -103,7 +108,8 @@ class FDPPSampler
 						   Eigen::ArrayXXd &pi_samples,
 						   Eigen::ArrayXXd &tau_samples,
 						   Eigen::ArrayXd &alpha_samples,
-						   Eigen::ArrayXXi &cluster_assignment);
+						   Eigen::ArrayXXi &cluster_assignment,
+						   Eigen::ArrayXXd &yhat_samples);
 
 		Eigen::ArrayXd get_beta() const{
 			return(beta.array());

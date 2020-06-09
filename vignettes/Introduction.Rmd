@@ -11,108 +11,68 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  eval = FALSE
+  eval = TRUE
 )
 ```
 
 ```{r setup}
 library(rstapDP)
-```
-
-```{r}
-data("ClusterScales_one")
-
-fit <- fdp_staplm(y = ClusterScales_one$BMI,
-                  Z = cbind(1,matrix(ClusterScales_one$sex,ncol=1)),
-                  X = matrix(ClusterScales_one$dists,ncol=1),
-                  tau_0 = 1,
-                  alpha_a = 1, 
-                  alpha_b = 1,
-                  K = 5,
-                  iter_max = 5E4,
-                  burn_in = 4.5E4,
-                  thin = 1,
-                  seed = 43431)
-```
- 
- 
-```{r}
-plot_pairs(fit)
-```
-
-
-
-
-```{r}
 data("ClusterScales_two")
+data("ClusterScales_two_ddata")
+```
 
-fit <- fdp_staplm(y = ClusterScales_two$BMI,
-                  Z = cbind(1,ClusterScales_two$sex),
-                  X = ClusterScales_two$dists_mat,
-                  tau_0 = rep(1,ncol(ClusterScales_two$dists_mat)),
-                  alpha_a = 1, 
-                  alpha_b = 1,
-                  K = 5,
-                  iter_max = 1E4,
-                  burn_in = 9E3,
-                  thin = 1,
+
+
+```{r fit}
+knts <- quantile(ClusterScales_two_ddata$Distance,c(0.25,0.5,0.75))
+fit <- fdp_staplm(BMI ~ sex,
+                  knots = knts,
+                  subject_data = ClusterScales_two %>% dplyr::mutate(simple=simple/max(simple)),
+                  dt_data = ClusterScales_two_ddata,
+                  alpha_a = 15, 
+                  alpha_b = 15,
+                  tau_df = 5,
+                  K = 10,
+                  iter_max = 2E4,
+                  burn_in = 1.5E4,
+                  thin = 2,
                   seed = 43431)
 ```
 
 
 
-```{r}
+```{r pair_plot}
 plot_pairs(fit)
 ```
 
 
 
 
-
-```{r}
-fit <- fdp_stapplm(y = ClusterScales_two$BMI,
-                   Z = cbind(1,ClusterScales_two$sex),
-                   X = ClusterScales_two$dists_mat,
-                   nu_0 = 1,
-                   alpha_a = 1, 
-                   alpha_b = 1,
-                   K = 5,
-                   iter_max = 5,
-                   burn_in = 0,
-                   thin = 3,
-                   seed = 43431)
+```{r samples_plot}
+plotpars(fit)
 ```
 
 
+
+
+```{r,ppc}
+ppc(fit)
+```
+
+## Smooth Scales
 
 
 ```{r}
-plot_pairs(fit)
+fit <- fdp_staplm(BMI ~ sex,
+                  knots = knts,
+                  subject_data = ClusterScales_two %>% dplyr::mutate(simple=simple/max(simple)),
+                  dt_data = ClusterScales_two_ddata,
+                  alpha_a = 15, 
+                  alpha_b = 15,
+                  tau_df = 5,
+                  K = 10,
+                  iter_max = 2E4,
+                  burn_in = 1.5E4,
+                  thin = 2,
+                  seed = 43431)
 ```
-
-
-
-```{r}
-plot_cluster_effects(fit)
-```
-
-
-
-```{r,echo=F}
-# data("Clusterdata_binomial")
-# 
-# fit <- fdp_stappglm(y = Clusterdata_binomial$y,
-#                    n = Clusterdata_binomial$n,
-#                    Z = cbind(1,Clusterdata_binomial$sex),
-#                    X = Clusterdata_binomial$dists,
-#                    nu_0 = 1,
-#                    alpha_a = 1, 
-#                    alpha_b = 1,
-#                    K = 5,
-#                    iter_max = 2,
-#                    burn_in = 0,
-#                    thin = 1,
-#                    seed = 43431)
-
-```
-

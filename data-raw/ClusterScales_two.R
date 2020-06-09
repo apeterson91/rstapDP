@@ -1,37 +1,26 @@
 ## code to prepare `ClusterScales_two.R` dataset goes here
 
 set.seed(3431)
-num_subj <- 1E3
+num_subj <- 5E2
 Z <- rbinom(num_subj,1,.5)
-high_risk <- 1:floor((num_subj/2))
-hrmat <- diag(num_subj)
-hrmat[high_risk,] <- rep(0,num_subj)
-dists <- rgamma(n = num_subj,shape = 15,rate = 15)
-dists_sq <- dists^2
-dists_mat <- cbind((rpois(num_subj,lambda = 2)+1),dists,dists_sq)
-betas_one <- c(3,0,-1)
-betas_two <- c(0,0,0)
-y <- 26 + Z * -2.2 + hrmat %*% dists_mat %*% betas_one  + (diag(num_subj)-hrmat) %*% dists_mat %*%  betas_two + rnorm(num_subj)
+high_risk <- c(rep(0,floor(num_subj/2)),rep(1,num_subj-floor(num_subj/2)))
+cnt <- rpois(num_subj,10)
+ldists <- sapply(cnt,function(x) rgamma(x,shape = 5, rate = 5) )
+f <- function(x) (1 -.1*x-.2*x^2 -.1*x^3)*(x<=1.545)
+exposure <- cbind(cnt,sapply(ldists,sum),sapply(ldists,function(x) sum(f(x))))
+simple <- rexp(num_subj)
 
-## Visualize function
-
-library(tidyverse)
-d <- seq(from=0,to=max(dists),length.out=100)
-dm <- cbind(1,d,d^2)
-truedf <- tibble(Distance = d,
-       Effect = dm %*% betas_one,
-       Null_Effect = dm %*% betas_two) %>% 
-  gather(contains("Effect"),key="Group",value="Spatial Effect") 
-
-truedf %>% ggplot(aes(x=Distance,y=`Spatial Effect`,color=Group)) + geom_line() + theme_bw()
-
-##
-  
+y <- 26 + Z * -2.2 +  high_risk*((simple)/max(simple))*10  + (1-high_risk)*(simple)/max(simple)*-10 + rnorm(num_subj)
 
 
-ClusterScales_two <- dplyr::tibble(BMI = y,
+
+ClusterScales_two <- dplyr::tibble(id=1:num_subj,
+                                   BMI = y,
                                    sex = Z,
-                                   dists_mat = dists_mat)
+                                   simple = simple)
+
+ClusterScales_two_ddata <- purrr::map2_dfr(1:length(ldists),ldists,function(x,y) dplyr::tibble(id=x,Distance=y))
 
 usethis::use_data(ClusterScales_two, overwrite = TRUE)
+usethis::use_data(ClusterScales_two_ddata, overwrite = TRUE)
 

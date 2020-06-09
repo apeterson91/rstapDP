@@ -4,23 +4,22 @@
 \alias{fdp_staplm}
 \title{Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model}
 \usage{
-fdp_staplm(y, Z, X, tau_0, alpha_a, alpha_b, K, iter_max, burn_in, thin,
-  seed)
+fdp_staplm(formula, knots, subject_data, dt_data = NULL, w = rep(1,
+  nrow(subject_data)), tau_df = 1, alpha_a, alpha_b, K, penalize = T,
+  iter_max, burn_in, thin = 1, seed = NULL)
 }
 \arguments{
-\item{y}{vector of outcomes}
+\item{formula}{Similar as for \code{\link[stats]{lm}}.}
 
-\item{Z}{design matrix}
-
-\item{X}{stap design matrix}
-
-\item{tau_0}{normal base measure scale}
+\item{knots}{quantiles of distance}
 
 \item{alpha_a}{alpha gamma prior hyperparameter}
 
 \item{alpha_b}{alpha gamma prior hyperparameter}
 
 \item{K}{truncation number}
+
+\item{penalize}{boolean that denotes whether parameters are penalized or not}
 
 \item{iter_max}{maximum number of iterations}
 
@@ -29,6 +28,10 @@ fdp_staplm(y, Z, X, tau_0, alpha_a, alpha_b, K, iter_max, burn_in, thin,
 \item{thin}{number by which to thin samples}
 
 \item{seed}{rng initializer}
+
+\item{data}{frame}
+
+\item{tau_0}{normal base measure scale}
 }
 \description{
 Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model

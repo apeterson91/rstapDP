@@ -16,7 +16,8 @@ Imports:
     RcppEigen,
     ggplot2,
     stringr,
-    coda
+    coda,
+    mgcv
 LinkingTo: Rcpp, RcppEigen
 Suggests: 
     knitr,
