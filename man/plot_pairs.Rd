@@ -3,7 +3,8 @@
 \name{plot_pairs}
 \alias{plot_pairs}
 \alias{plot_pairs.stapDP}
-\title{Plots pairwise probability clustering plot}
+\title{Plotting functions for stapDP objects 
+Plots pairwise probability clustering plot}
 \usage{
 plot_pairs(x, sort = FALSE, sample = 0)
 
@@ -21,6 +22,7 @@ pairwise probablity}
 ggplot plot object
 }
 \description{
+Plotting functions for stapDP objects 
 Plots pairwise probability clustering plot
 }
 \section{Methods (by class)}{

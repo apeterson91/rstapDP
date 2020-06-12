@@ -141,6 +141,7 @@ void FDPPSampler::draw_var(std::mt19937 &rng){
 				tau_var_matrix(p) =  (1/ unique_taus_sq(k));
 		}
 	}
+
 }
 
 void FDPPSampler::store_samples(Eigen::ArrayXXd &beta_samples,

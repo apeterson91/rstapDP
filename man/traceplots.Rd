@@ -2,10 +2,26 @@
 % Please edit documentation in R/plots.R
 \name{traceplots}
 \alias{traceplots}
+\alias{traceplots.stapDP}
 \title{Diagnostic Traceplots}
 \usage{
-traceplots(x, par = c("probs"))
+traceplots(x, par = c("probs"), prob_filter = 0.1)
+
+\method{traceplots}{stapDP}(x, par = c("probs"), prob_filter = 0.1)
+}
+\arguments{
+\item{x}{a stapDP object}
+
+\item{par}{string of parameter to use}
+
+\item{prob_filter}{median probability of cluster components to include in plot
+default is .1}
 }
 \description{
 Diagnostic Traceplots
 }
+\section{Methods (by class)}{
+\itemize{
+\item \code{stapDP}: 
+}}
+

@@ -6,10 +6,10 @@
 \title{plot cluster effects plots}
 \usage{
 plot_cluster_effects(x, p = 0.95, switch = "color",
-  prob_filter = 0.1)
+  prob_filter = 0.1, mode = T)
 
 \method{plot_cluster_effects}{stapDP}(x, p = 0.95, switch = "color",
-  prob_filter = 0.1)
+  prob_filter = 0.1, mode = T)
 }
 \arguments{
 \item{x}{stapDP object}

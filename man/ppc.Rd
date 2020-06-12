@@ -2,10 +2,25 @@
 % Please edit documentation in R/plots.R
 \name{ppc}
 \alias{ppc}
+\alias{ppc.stapDP}
 \title{Posterior Predictive Checks}
 \usage{
-ppc(x)
+ppc(x, num_reps = 20)
+
+\method{ppc}{stapDP}(x, num_reps = 20)
+}
+\arguments{
+\item{x}{a stapDP object}
+
+\item{num_reps}{number of yhat samples to plot}
 }
 \description{
 Posterior Predictive Checks
+
+Posterior Predictive Checks
 }
+\section{Methods (by class)}{
+\itemize{
+\item \code{stapDP}: 
+}}
+

@@ -14,6 +14,8 @@ stapDP_fit(y, Z, X, w, tau_0, alpha_a, alpha_b, K, iter_max, burn_in, thin,
 
 \item{X}{a matrix of spatial temporal aggregated predictors}
 
+\item{w}{vector of weights for weighted regression}
+
 \item{tau_0}{prior variance for STAP parameters}
 
 \item{alpha_a}{alpha gamma prior hyperparameter}
@@ -29,6 +31,8 @@ stapDP_fit(y, Z, X, w, tau_0, alpha_a, alpha_b, K, iter_max, burn_in, thin,
 \item{thin}{number by which to thin samples}
 
 \item{seed}{rng initializer}
+
+\item{num_posterior_samples}{number of final samples}
 }
 \description{
 Functional Dirichlet Process Linear Regression

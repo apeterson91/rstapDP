@@ -2,9 +2,12 @@
 #' Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model
 #' 
 #' @param formula Similar as for \code{\link[stats]{lm}}. 
-#' @param knots quantiles of distance
-#' @param data frame
-#' @param tau_0 normal base measure scale
+#' @param subject_data data frame of subject level measurements
+#' @param stap_term call to \code{s_stap} with term in dt_data
+#' @param dt_data data frame containing distances and/or times associated with subject data
+#' @param w weights for weighted regression - default is vector of ones 
+#' @param tau_df if penalize = F: normal base measure scale 
+#'        if penalize true this is the degrees of freedom for the inverse chi square base measure. 
 #' @param alpha_a alpha gamma prior hyperparameter
 #' @param alpha_b alpha gamma prior hyperparameter
 #' @param K truncation number
@@ -12,13 +15,16 @@
 #' @param iter_max maximum number of iterations
 #' @param burn_in number of burn in iterations
 #' @param thin number by which to thin samples
-#' @param seed rng initializer
+#' @param knots optional nots argument passed to \code{\link[mgcv]{smooth.construct}}.
+#' @param id_colname string of id column name that is the unique id in both subject_data and dt_data
+#' @param seed random number generator seed will be set to default value if not by user
 #' 
+#' @importFrom stats is.empty.model model.matrix model.response
 #' @export
 #' 
 fdp_staplm <- function(formula,
-					   knots,
 					   subject_data,
+					   stap_term,
 					   dt_data = NULL,
 					   w = rep(1,nrow(subject_data)),
 					   tau_df = 1,
@@ -29,12 +35,21 @@ fdp_staplm <- function(formula,
 					   iter_max,
 					   burn_in,
 					   thin = 1,
+					   knots = NULL,
+					   id_colname = 'id',
 					   seed = NULL){
 
+	## Parameter check
 	stopifnot(burn_in<iter_max && burn_in > 0)
 	stopifnot(alpha_a>0)
 	stopifnot(alpha_b>0)
 	stopifnot(thin>0)
+	stopifnot(id_colname %in% colnames(dt_data))
+	stopifnot(id_colname %in% colnames(subject_data))
+	stopifnot(stap_term$term %in% colnames(dt_data))
+	stopifnot(length(id_colname)==1)
+	## 
+
 	call <- match.call(expand.dots = TRUE)
 	mf <- match.call(expand.dots = FALSE)
 	mf$formula <- formula
@@ -51,27 +66,25 @@ fdp_staplm <- function(formula,
 
 	y <- model.response(mf, "numeric")
 	Z <- model.matrix(mt,mf)
-	X <- splines::bs(subject_data$Distances/max(subject_data$Distances))
-	S <- diag(ncol(Z) + ncol(X)*K)
-	S[1:ncol(Z),1:ncol(Z)] <- 0 ## improper priors on Z beta's
-	# X <- subject_data %>% dplyr::left_join(dt_data) %>% split(.$id) %>% 
-	#   purrr::map(.,function(x){
-	#     if(all(is.na(x$Distance)))
-	#       return(matrix(0,ncol=4))
-	#     else
-	#       return(colSums(cbind(1,x$Distance/length(Distance))))
-	#   }) %>% do.call(rbind,.)
-	# D <- get_D(knots)
-	# X <- get_X_transformed(X,D)
-
+	## Handle Zero exposure in dt_data
+	jdf <- dplyr::left_join(subject_data,dt_data,by=id_colname) %>% 
+	  dplyr::mutate_if(is.double,function(x) tidyr::replace_na(x,0))
+	foo <- mgcv::smooth.construct(stap_term,data=jdf,knots=knots)
+	M <- Matrix::fac2sparse(as.factor(jdf[,id_colname,drop=T]))
+	X <- as.matrix(M %*% foo$X)
+	S <- kronecker(diag(K),foo$S[[1]])
+	S <- rbind(matrix(0,ncol=ncol(S)+ncol(Z),nrow=ncol(Z)),
+	           cbind(matrix(0,nrow=nrow(S),ncol=ncol(Z)),S))
+	
 	
 	fit <- fdp_staplm.fit(y,Z,X, S, alpha_a,alpha_b,K,penalize,tau_df,w,iter_max,burn_in,thin,seed)
+	
     fit <- list(beta = fit$beta,
                 probs = fit$pi,
                 sigma = fit$sigma,
                 alpha = fit$alpha,
-				yhat = fit$yhat,
-				cluster_mat = fit$cluster_assignment,
+                yhat = fit$yhat,
+                cluster_mat = fit$cluster_assignment,
                 scales = if(penalize) fit$tau else matrix(rep(tau_df,K),ncol=K),
                 pmat = fit$PairwiseProbabilityMat,
                 clabels = fit$cluster_assignment,
@@ -79,7 +92,8 @@ fdp_staplm <- function(formula,
                 ncol_X = ncol(X),
                 penalize = penalize,
                 formula = formula,
-				y = y,
+                sobj = foo,
+                y = y,
                 K = K)
 	return(stapDP(fit))
 }
@@ -90,16 +104,19 @@ fdp_staplm <- function(formula,
 #' @param y vector of outcomes
 #' @param Z design matrix
 #' @param X stap design matrix
-#' @param S desi
+#' @param S penalty matrix from (e.g.) \code{\link[mgcv]{smooth.construct}} 
 #' @param alpha_a alpha gamma prior hyperparameter
 #' @param alpha_b alpha gamma prior hyperparameter
 #' @param K truncation number for DP mixture components
-#' @param nu_0 inverse-chi-square degree of freedom for tau base measure 
-#' @param w weights for weighted regression - default is 1
+#' @param penalize boolean value indicating whether or not the stap parameters
+#' should be penalized via a normal prior/L2 penalty (as opposed to using an improper prior)
+#' @param tau_df if penalize = F: normal base measure scale 
+#'        if penalize true this is the degrees of freedom for the inverse chi square base measure. 
+#' @param w weights for weighted regression - default is vector of ones 
 #' @param iter_max maximum number of iterations
-#' @param burn_in number of burn in iterations
+#' @param burn_in number of iterations to burn-in
 #' @param thin number by which to thin samples
-#' @param seed rng initializer
+#' @param seed random number generator seed will be set to default value if not by user
 #' @export
 #' 
 fdp_staplm.fit <- function(y,Z,X,S,
@@ -115,6 +132,7 @@ fdp_staplm.fit <- function(y,Z,X,S,
 	stopifnot(tau_df>0)
 	stopifnot(ncol(S) == nrow(S))
 	stopifnot(ncol(S) == ncol(Z) + ncol(X)*K)
+	stopifnot(length(w) == length(y))
   if(is.null(seed)){
     seed <- 3413
   }

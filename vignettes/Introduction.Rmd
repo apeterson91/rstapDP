@@ -11,68 +11,46 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  eval = TRUE
+  eval = T
 )
 ```
 
 ```{r setup}
 library(rstapDP)
-data("ClusterScales_two")
-data("ClusterScales_two_ddata")
 ```
 
+## STAP
 
 
 ```{r fit}
-knts <- quantile(ClusterScales_two_ddata$Distance,c(0.25,0.5,0.75))
 fit <- fdp_staplm(BMI ~ sex,
-                  knots = knts,
-                  subject_data = ClusterScales_two %>% dplyr::mutate(simple=simple/max(simple)),
-                  dt_data = ClusterScales_two_ddata,
-                  alpha_a = 15, 
-                  alpha_b = 15,
-                  tau_df = 5,
-                  K = 10,
-                  iter_max = 2E4,
-                  burn_in = 1.5E4,
+                  stap_term = s_stap("Distance",7),
+                  subject_data = ClusterScales_stap,
+                  dt_data = ClusterScales_stap_ddata,
+                  alpha_a = 1, 
+                  alpha_b = 1,
+                  tau_df = 2,
+                  K = 5,
+                  iter_max = 1E4,
+                  burn_in = .7E4,
+                  id_colname = 'id',
                   thin = 2,
                   seed = 43431)
 ```
 
 
+```{r ppcs}
+ppc(fit)
+```
 
-```{r pair_plot}
+
+```{r pairs}
 plot_pairs(fit)
 ```
 
 
-
-
-```{r samples_plot}
-plotpars(fit)
+```{r effects}
+plot_cluster_effects(fit)
 ```
 
 
-
-
-```{r,ppc}
-ppc(fit)
-```
-
-## Smooth Scales
-
-
-```{r}
-fit <- fdp_staplm(BMI ~ sex,
-                  knots = knts,
-                  subject_data = ClusterScales_two %>% dplyr::mutate(simple=simple/max(simple)),
-                  dt_data = ClusterScales_two_ddata,
-                  alpha_a = 15, 
-                  alpha_b = 15,
-                  tau_df = 5,
-                  K = 10,
-                  iter_max = 2E4,
-                  burn_in = 1.5E4,
-                  thin = 2,
-                  seed = 43431)
-```

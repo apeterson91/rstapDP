@@ -4,8 +4,8 @@
 \alias{stappDP_fit}
 \title{Penalized Functional Dirichlet Process Logistic Regression}
 \usage{
-stappDP_fit(y, Z, X, w, nu_0, alpha_a, alpha_b, K, iter_max, burn_in, thin,
-  seed, num_posterior_samples)
+stappDP_fit(y, Z, X, S, w, nu_0, alpha_a, alpha_b, K, iter_max, burn_in,
+  thin, seed, num_posterior_samples)
 }
 \arguments{
 \item{y}{a vector of continuous outcomes}
@@ -13,6 +13,8 @@ stappDP_fit(y, Z, X, w, nu_0, alpha_a, alpha_b, K, iter_max, burn_in, thin,
 \item{Z}{a matrix of population level confounders}
 
 \item{X}{a matrix of spatial temporal aggregated predictors}
+
+\item{S}{penalty matrix for stap parameters}
 
 \item{w}{a vector of weights for weighted regression}
 

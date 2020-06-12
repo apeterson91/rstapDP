@@ -4,8 +4,8 @@
 \alias{fdp_staplm.fit}
 \title{Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model}
 \usage{
-fdp_staplm.fit(y, Z, X, alpha_a, alpha_b, K, penalize, tau_df, w = rep(1,
-  length(y)), iter_max, burn_in, thin, seed = NULL)
+fdp_staplm.fit(y, Z, X, S, alpha_a, alpha_b, K, penalize, tau_df,
+  w = rep(1, length(y)), iter_max, burn_in, thin, seed = NULL)
 }
 \arguments{
 \item{y}{vector of outcomes}
@@ -14,23 +14,29 @@ fdp_staplm.fit(y, Z, X, alpha_a, alpha_b, K, penalize, tau_df, w = rep(1,
 
 \item{X}{stap design matrix}
 
+\item{S}{penalty matrix from (e.g.) \code{\link[mgcv]{smooth.construct}}}
+
 \item{alpha_a}{alpha gamma prior hyperparameter}
 
 \item{alpha_b}{alpha gamma prior hyperparameter}
 
 \item{K}{truncation number for DP mixture components}
 
-\item{w}{weights for weighted regression - default is 1}
+\item{penalize}{boolean value indicating whether or not the stap parameters
+should be penalized via a normal prior/L2 penalty (as opposed to using an improper prior)}
+
+\item{tau_df}{if penalize = F: normal base measure scale 
+if penalize true this is the degrees of freedom for the inverse chi square base measure.}
+
+\item{w}{weights for weighted regression - default is vector of ones}
 
 \item{iter_max}{maximum number of iterations}
 
-\item{burn_in}{number of burn in iterations}
+\item{burn_in}{number of iterations to burn-in}
 
 \item{thin}{number by which to thin samples}
 
-\item{seed}{rng initializer}
-
-\item{nu_0}{inverse-chi-square degree of freedom for tau base measure}
+\item{seed}{random number generator seed will be set to default value if not by user}
 }
 \description{
 Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model

@@ -1,6 +1,7 @@
 ## rstapDP: Spatial Temporal Aggregated Dirichlet Process Predictors in R
 <!-- badges: start -->
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Travis build status](https://travis-ci.org/apeterson91/rstapDP.svg?branch=master)](https://travis-ci.org/apeterson91/rstapDP)
 <!-- badges: end -->
 
 ## About

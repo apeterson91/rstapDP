@@ -5,6 +5,7 @@
 #' @param y a vector of continuous outcomes
 #' @param Z a matrix of population level confounders
 #' @param X a matrix of spatial temporal aggregated predictors
+#' @param w  vector of weights for weighted regression
 #' @param tau_0 prior variance for STAP parameters
 #' @param alpha_a alpha gamma prior hyperparameter
 #' @param alpha_b alpha gamma prior hyperparameter
@@ -13,6 +14,7 @@
 #' @param burn_in number of burn in iterations
 #' @param thin number by which to thin samples
 #' @param seed rng initializer
+#' @param num_posterior_samples number of final samples
 stapDP_fit <- function(y, Z, X, w, tau_0, alpha_a, alpha_b, K, iter_max, burn_in, thin, seed, num_posterior_samples) {
     .Call(`_rstapDP_stapDP_fit`, y, Z, X, w, tau_0, alpha_a, alpha_b, K, iter_max, burn_in, thin, seed, num_posterior_samples)
 }
@@ -22,6 +24,7 @@ stapDP_fit <- function(y, Z, X, w, tau_0, alpha_a, alpha_b, K, iter_max, burn_in
 #' @param y a vector of continuous outcomes
 #' @param Z a matrix of population level confounders
 #' @param X a matrix of spatial temporal aggregated predictors
+#' @param S penalty matrix for stap parameters
 #' @param w a vector of weights for weighted regression
 #' @param nu_0 prior degrees of freedom for STAP regression coefficient scales
 #' @param alpha_a alpha gamma prior hyperparameter

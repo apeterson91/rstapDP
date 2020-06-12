@@ -6,6 +6,11 @@
 \usage{
 \method{print}{stapDP}(x, digits = 1)
 }
+\arguments{
+\item{x}{stapDP object}
+
+\item{digits}{number of digits to round off to}
+}
 \description{
 Print and Summary Method
 }

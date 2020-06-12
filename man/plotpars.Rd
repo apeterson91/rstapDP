@@ -2,10 +2,28 @@
 % Please edit documentation in R/plots.R
 \name{plotpars}
 \alias{plotpars}
+\alias{plotpars.stapDP}
 \title{Parameter Histograms}
 \usage{
-plotpars(x, par = c("probs"))
+plotpars(x, par = c("probs"), prob_filter = 0.1)
+
+\method{plotpars}{stapDP}(x, par = c("probs"), prob_filter = 0.1)
+}
+\arguments{
+\item{x}{a stapDP object}
+
+\item{par}{string of parameter to use}
+
+\item{prob_filter}{median probability of cluster components to include in plot
+default is .1}
 }
 \description{
 Parameter Histograms
+
+Parameter Histograms
 }
+\section{Methods (by class)}{
+\itemize{
+\item \code{stapDP}: 
+}}
+

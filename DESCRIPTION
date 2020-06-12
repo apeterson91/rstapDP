@@ -17,7 +17,8 @@ Imports:
     ggplot2,
     stringr,
     coda,
-    mgcv
+    mgcv,
+    Matrix
 LinkingTo: Rcpp, RcppEigen
 Suggests: 
     knitr,
