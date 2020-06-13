@@ -1,11 +1,13 @@
 #' Print and Summary Method
 #'
 #' @export
+#' @method print stapDP
 #' @importFrom stats quantile mad median quantile
 #' @param x stapDP object
 #' @param digits number of digits to round off to
+#' @param ...  ignored
 #' 
-print.stapDP <- function(x,digits=1){
+print.stapDP <- function(x,digits=1,...){
 
 
 	Parameter <- Samples <- iteration_ix <- K <- P <- NULL
@@ -81,12 +83,14 @@ formula_string <- function(formula, break_and_indent = TRUE) {
 #' Diagnostics
 #'
 #' @export
+#' @param x a stapDP object
 #' 
 diagnostics <- function(x)
 	UseMethod("diagnostics")
 
-#' Diagnostics 
 #'
+#' 
+#' @export
 #' @describeIn diagnostics
 #' 
 diagnostics.stapDP <- function(x){

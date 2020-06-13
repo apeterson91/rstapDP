@@ -9,9 +9,10 @@ diagnostics(x)
 
 \method{diagnostics}{stapDP}(x)
 }
+\arguments{
+\item{x}{a stapDP object}
+}
 \description{
-Diagnostics
-
 Diagnostics
 }
 \section{Methods (by class)}{

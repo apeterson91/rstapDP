@@ -21,6 +21,7 @@ plot_pairs <- function(x,sort = FALSE, sample = 0)
 #' @param p probability contained in credible interval
 #' @param switch one of "color" or "facet" for different plotting options
 #' @param  prob_filter all mixture components with median probability < prob_filter are excluded from the plot
+#' @param mode boolean value indicating whether the cluster parameters that minimize the RSS should be used as a point estimate, or samples should be used.
 #' @return plot with cluster effect across space
 #' 
 plot_cluster_effects <- function(x, p = 0.95, switch = "color", prob_filter = 0.1, mode = T)
@@ -97,7 +98,7 @@ plot_cluster_effects.stapDP <- function(x,
 										mode = T){
 
 	K <- Samples <- Parameter <- Lower <- Upper <- medp <- iteration_ix <- 
-		. <- Distance <- Median <- P <-  NULL
+		. <- Distance <- Median <- P <- y <- RSS <- mnRSS <- NULL
 	gd <- data.frame(var = seq(from = 0, to = 1, by = 0.01))
 	colnames(gd) <- x$model$sobj$term
 
@@ -109,14 +110,15 @@ plot_cluster_effects.stapDP <- function(x,
 	if(mode)
 	{
 		x$yhat %>% 
-			dplyr::left_join(dplyr::tibble(id = unique(x$yhat$id), y =fit$model$y)) %>% 
+			dplyr::left_join(dplyr::tibble(id = unique(x$yhat$id), y = x$model$y)) %>% 
 			dplyr::group_by(iteration_ix) %>% dplyr::mutate(RSS = (Samples - y)^2) %>% 
 			dplyr::group_by(iteration_ix) %>% dplyr::summarise(RSS = sum(RSS)) %>% 
 			dplyr::ungroup() %>% dplyr::filter(iteration_ix!=0) %>%  
 			dplyr::mutate(mnRSS = min(RSS)) %>% dplyr::filter(RSS==mnRSS) %>% 
 			dplyr::pull(iteration_ix) -> ix
 
-		x$ranef %>% dplyr::filter(K %in% ks,iteration_ix==ix) %>% tidyr::spread(P,Samples) %>% 
+		x$ranef %>% dplyr::filter(K %in% ks,iteration_ix==ix) %>% 
+		  tidyr::spread(P,Samples) %>% 
 		  dplyr::mutate_if(is.double,function(x) tidyr::replace_na(x,0)) %>%
 		  dplyr::group_by(iteration_ix,K) %>% 
 		  dplyr::summarise_if(is.double,sum) %>% 
@@ -127,13 +129,13 @@ plot_cluster_effects.stapDP <- function(x,
 			mt <- mat %*% (x %>% dplyr::select(-K) %>% as.matrix() %>% t())  
 			colnames(mt) <- paste0("ix_",1:ncol(mt))
 			
-			df <- dplyr::as_tibble(mt) %>% dplyr::mutate(K= rep(y,dplyr::n()),
+			df <- dplyr::as_tibble(mt) %>% dplyr::mutate(K = rep(y,dplyr::n()),
 														 Distance = gd[,1]) %>% 
 			  tidyr::gather(dplyr::contains("ix_"),key="Iteration_ix",value="Samples")
 			}) -> pltdf
 
 		pltdf %>% dplyr::group_by(Distance,K) %>% 
-		  ggplot2::ggplot(ggplot2::aes(x=Distance,y=Median,linetype=K)) + 
+		  ggplot2::ggplot(ggplot2::aes(x=Distance,y=Samples,linetype=K)) + 
 		  ggplot2::geom_line(ggplot2::aes(color=K)) + ggplot2::theme_bw() + 
 		  ggplot2::labs(y="Exposure Effect") -> pl
 	}
@@ -153,16 +155,16 @@ plot_cluster_effects.stapDP <- function(x,
 														 Distance = gd[,1]) %>% 
 			  tidyr::gather(dplyr::contains("ix_"),key="Iteration_ix",value="Samples")
 			}) -> pltdf
+		pltdf %>% dplyr::group_by(Distance,K) %>% 
+		  dplyr::summarise(Lower = quantile(Samples,0.025),
+						   Median = median(Samples),
+						   Upper = quantile(Samples,0.975)) %>% 
+		  ggplot2::ggplot(ggplot2::aes(x=Distance,y=Median,linetype=K)) + 
+		  ggplot2::geom_line(ggplot2::aes(color=K)) + ggplot2::theme_bw() + 
+		  ggplot2::geom_ribbon(ggplot2::aes(ymin=Lower,ymax=Upper),alpha=0.3) + 
+		  ggplot2::labs(y="Exposure Effect") -> pl
 	}
 	
-	pltdf %>% dplyr::group_by(Distance,K) %>% 
-	  dplyr::summarise(Lower = quantile(Samples,0.025),
-	                   Median = median(Samples),
-	                   Upper = quantile(Samples,0.975)) %>% 
-	  ggplot2::ggplot(ggplot2::aes(x=Distance,y=Median,linetype=K)) + 
-	  ggplot2::geom_line(ggplot2::aes(color=K)) + ggplot2::theme_bw() + 
-	  ggplot2::geom_ribbon(ggplot2::aes(ymin=Lower,ymax=Upper),alpha=0.3) + 
-	  ggplot2::labs(y="Exposure Effect") -> pl
 
 	return(pl)
 

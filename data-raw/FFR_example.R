@@ -1,4 +1,4 @@
-## code to prepare `ClusterScales_stap.R` dataset goes here
+## code to prepare `FFR_subjects` and `FFR_distances` datasets
 
 set.seed(3431)
 num_subj <- 1E3
@@ -15,13 +15,11 @@ y <- 26 + Z * -2.2 +  high_risk*((exposure))  + (1-high_risk)*(exposure)*0 + rno
 
 
 
-ClusterScales_stap <- dplyr::tibble(id=1:num_subj,
+FFR_subjects <- dplyr::tibble(id=1:num_subj,
                                       BMI = y,
                                       sex = Z)
 
-ClusterScales_stap_ddata <- purrr::map2_dfr(1:length(ldists),ldists,function(x,y) dplyr::tibble(id=x,
-                                                                                                Distance=y))
+FFR_distances <- purrr::map2_dfr(1:length(ldists),ldists,function(x,y) dplyr::tibble(id=x,Distance=y))
 
-usethis::use_data(ClusterScales_stap, overwrite = TRUE)
-usethis::use_data(ClusterScales_stap_ddata, overwrite = TRUE)
-
+usethis::use_data(FFR_subjects, overwrite = TRUE)
+usethis::use_data(FFR_distances, overwrite = TRUE)

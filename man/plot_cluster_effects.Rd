@@ -19,6 +19,8 @@ plot_cluster_effects(x, p = 0.95, switch = "color",
 \item{switch}{one of "color" or "facet" for different plotting options}
 
 \item{prob_filter}{all mixture components with median probability < prob_filter are excluded from the plot}
+
+\item{mode}{boolean value indicating whether the cluster parameters that minimize the RSS should be used as a point estimate, or samples should be used.}
 }
 \value{
 plot with cluster effect across space

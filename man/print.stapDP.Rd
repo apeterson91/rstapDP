@@ -4,12 +4,14 @@
 \alias{print.stapDP}
 \title{Print and Summary Method}
 \usage{
-\method{print}{stapDP}(x, digits = 1)
+\method{print}{stapDP}(x, digits = 1, ...)
 }
 \arguments{
 \item{x}{stapDP object}
 
 \item{digits}{number of digits to round off to}
+
+\item{...}{ignored}
 }
 \description{
 Print and Summary Method

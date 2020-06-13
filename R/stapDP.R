@@ -7,7 +7,7 @@
 stapDP <- function(object){
 
 	K <- Samples <- Parameter <- Lower <- Upper <- medp <- iteration_ix <- 
-		. <- Distance <- Median <- P <-  NULL
+		. <- Distance <- Median <- P <-  id <- NULL
 	pardf <- rbind(dplyr::tibble(iteration_ix = 1:length(object$alpha),
 	                             Parameter = "alpha",
 	                             Samples = object$alpha), 
@@ -39,7 +39,7 @@ stapDP <- function(object){
 	probs <- dplyr::as_tibble(object$probs,quiet=T) 
 	colnames(probs) <- paste0("pi","_",1:object$K)
 	probs <- probs %>% dplyr::mutate(iteration_ix = 1:dplyr::n()) %>% 
-		tidyr::gather(contains("pi"),key="Parameter",value="Samples") %>% 
+		tidyr::gather(dplyr::contains("pi"),key="Parameter",value="Samples") %>% 
 		dplyr::mutate(K = as.integer(stringr::str_replace( stringr::str_extract(Parameter,"_[0-9]{2}|_[0-9]{1}"),"_","")))
 
 	ys <- object$yhat
@@ -49,7 +49,7 @@ stapDP <- function(object){
 	colnames(ys) <- paste("V_",1:ncol(object$yhat))
 
 	ys <- dplyr::as_tibble(ys,quiet=T) %>% dplyr::mutate(iteration_ix = 1:dplyr::n()) %>% 
-		tidyr::gather(contains("V_"),key="id",value="Samples") %>% 
+		tidyr::gather(dplyr::contains("V_"),key="id",value="Samples") %>% 
 		dplyr::mutate(id = as.integer(stringr::str_replace(id,"V_","")))
 
 	yhat <- dplyr::tibble(iteration_ix = as.integer(gd$iteration_ix), 

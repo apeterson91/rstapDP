@@ -1,19 +1,20 @@
-#ifndef _FDPSampler_
-#define _FDPSampler_
+#ifndef _FDPPSampler_
+#define _FDPPSampler_
 
-#include "beta_rng.hpp"
+#include "../auxiliary/beta_rng.hpp"
 
-class FDPSampler
+class FDPPSampler
 {
 	private:
 		const Eigen::MatrixXd &X;
+		const Eigen::MatrixXd &S;
 		const Eigen::MatrixXd &Z;
 		const Eigen::VectorXd &y;
 		const Eigen::VectorXd &w;
+		Eigen::VectorXd yhat;
 		Eigen::MatrixXd X_fit;
 		Eigen::MatrixXd X_K;
 		Eigen::MatrixXd V;
-		Eigen::MatrixXd correction_mat;
 		Eigen::ArrayXd pi;
 		Eigen::ArrayXd u;
 		Eigen::ArrayXi iter_cluster_assignment;
@@ -24,9 +25,10 @@ class FDPSampler
 		Eigen::VectorXd beta;
 		Eigen::VectorXd z;
 		Eigen::ArrayXXd b;
-		Eigen::MatrixXd tau_matrix;
+		Eigen::ArrayXd unique_taus_sq;
+		Eigen::MatrixXd tau_var_matrix;
 		const double alpha_b;
-		const Eigen::ArrayXd tau_0;
+		const double nu_0;
 		Eigen::ArrayXd u_posterior_beta_alpha;
 		Eigen::ArrayXd u_posterior_beta_beta;
 		double sigma;
@@ -42,28 +44,32 @@ class FDPSampler
 		const int Q;
 		int sample_ix = 0;
 		bool initializing = true;
+		bool flag = true;
+		const double log_factor;
 
 	public:
-		Eigen::MatrixXd P_matrix;
-		FDPSampler(const Eigen::VectorXd &y,
+		Eigen::ArrayXXd P_matrix;
+		FDPPSampler(const Eigen::VectorXd &y,
 				   const Eigen::MatrixXd &Z,
 				   const Eigen::MatrixXd &X,
+				   const Eigen::MatrixXd &S,
 				   const Eigen::VectorXd &w,
 				   const double &alpha_a,
 				   const double &alpha_b,
-				   const Eigen::ArrayXd &tau_0,
+				   const double &nu_0,
 				   const int &K,
 				   std::mt19937 &rng
 				   ): 
-			X(X), Z(Z), y(y),w(w),
-			alpha_b(alpha_b), tau_0(tau_0),
+			X(X), Z(Z), S(S), y(y),w(w),
+			alpha_b(alpha_b),nu_0(nu_0),
 			n(y.rows()), P(Z.cols()), K(K),
-			Q(Z.cols() + X.cols()*K), P_two(X.cols())
+			Q(Z.cols() + X.cols()*K), P_two(X.cols()),
+			log_factor(log(pow(10,-16)) - log(n))
 	{
 
 		P_matrix.setZero(n,n);
-		correction_mat.setZero(Q,Q);
-		tau_matrix.setZero(Q,Q);
+		unique_taus_sq.setZero(K);
+		tau_var_matrix.setZero(Q,Q);
 		X_fit.setZero(n,Q);
 		z.setZero(Q); 
 		beta.setZero(Q); 
@@ -99,10 +105,11 @@ class FDPSampler
 
 		void store_samples(Eigen::ArrayXXd &beta_samples,
 						   Eigen::ArrayXd &sigma_samples,
-						   Eigen::ArrayXXd &tau_samples,
 						   Eigen::ArrayXXd &pi_samples,
+						   Eigen::ArrayXXd &tau_samples,
 						   Eigen::ArrayXd &alpha_samples,
-						   Eigen::ArrayXXi &cluster_assignment);
+						   Eigen::ArrayXXi &cluster_assignment,
+						   Eigen::ArrayXXd &yhat_samples);
 
 		Eigen::ArrayXd get_beta() const{
 			return(beta.array());
@@ -124,6 +131,6 @@ class FDPSampler
 
 };
 
-#include "FDPSampler.inl"
+#include "FDPPSampler.inl"
 #endif
 

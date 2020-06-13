@@ -1,8 +1,9 @@
-#' The `rsstap package.`
+#' The `rstapDP package.`
 #' 
-#' @description  rsstap is a package that implements spatial-temporal aggregated predictor functions using splines in R. This allows for the modeling of features impact on measured subjects that can be related either through space or time.
-#' @name rsstap-package
-#' @aliases rsstap
+#' @description  rstapDP is a package that implements clustered spatial-temporal aggregated predictor functions with the Dirichlet Process in R.
+#' This allows for the modeling of features impact on measured subjects that can be related either through space or time as a function of some unobserved latent variable.
+#' @name rstapDP-package
+#' @aliases rstapDP 
 
 
 ## usethis namespace: start

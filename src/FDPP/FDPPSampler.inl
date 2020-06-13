@@ -9,7 +9,7 @@ void FDPPSampler::iteration_sample(std::mt19937 &rng){
 	V = (X_fit.transpose() * w.asDiagonal() * X_fit + tau_var_matrix + S ).inverse();
 
 	beta = V.llt().matrixL().toDenseMatrix() * z * sigma + V * X_fit.transpose() * w.asDiagonal() *  y; 
-	if(isnan(beta(0)) & flag ){
+	if(std::isnan(beta(0)) & flag ){
 		Rcpp::Rcout << "things are NaN" << std::endl;
 		Rcpp::Rcout << " V block" << V.block(0,0,5,5) << std::endl;
 		Rcpp::Rcout << "w.diagonal" << w.head(5)  << std::endl;
