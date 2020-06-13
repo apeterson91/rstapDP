@@ -25,8 +25,8 @@ library(rstapDP)
 ```{r fit}
 fit <- fdp_staplm(BMI ~ sex,
                   stap_term = s_stap("Distance",7),
-                  subject_data = ClusterScales_stap,
-                  dt_data = ClusterScales_stap_ddata,
+                  subject_data = FFR_subjects,
+                  dt_data = FFR_distances,
                   alpha_a = 1, 
                   alpha_b = 1,
                   tau_df = 2,
