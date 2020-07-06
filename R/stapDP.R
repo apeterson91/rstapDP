@@ -36,7 +36,7 @@ stapDP <- function(object){
 
 	scales <- object$scales
 	colnames(scales) <- paste0("tau_",1:(object$K))
-	probs <- dplyr::as_tibble(object$probs,quiet=T) 
+	probs <- suppressMessages(dplyr::as_tibble(object$probs,quiet = T))
 	colnames(probs) <- paste0("pi","_",1:object$K)
 	probs <- probs %>% dplyr::mutate(iteration_ix = 1:dplyr::n()) %>% 
 		tidyr::gather(dplyr::contains("pi"),key="Parameter",value="Samples") %>% 
@@ -71,6 +71,8 @@ stapDP <- function(object){
 				model = list(formula = object$formula,
 							 K=(object$K),
 							 y=object$y,
+							 alpha_a = object$alpha_a,
+							 alpha_b = object$alpha_b,
 							 sobj = object$sobj)
 				)
 

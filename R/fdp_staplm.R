@@ -1,6 +1,14 @@
 
 #' Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model
 #' 
+#' @details This function fits a linear model in a bayesian paradigm with
+#' improper priors assigned to the "standard" regression covariates designated 
+#' in the formula argument and a Dirichlet process prior with normal base measure and 
+#' scale tau_df if penalize = F or inverse-chi square(tau_df) otherwise assigned to the 
+#' stap_term basis function expansion. 
+#' The concentration parameter is assigned the hyperparameters alpha_a and alpha_b.
+#' The residual variance is also assigned an improper prior.
+#' 
 #' @param formula Similar as for \code{\link[stats]{lm}}. 
 #' @param subject_data data frame of subject level measurements
 #' @param stap_term call to \code{s_stap} with term in dt_data
@@ -21,6 +29,7 @@
 #' 
 #' @importFrom stats is.empty.model model.matrix model.response
 #' @export
+#' @return a stapDP model object
 #' 
 fdp_staplm <- function(formula,
 					   subject_data,
@@ -93,6 +102,8 @@ fdp_staplm <- function(formula,
                 penalize = penalize,
                 formula = formula,
                 sobj = foo,
+				alpha_a = alpha_a,
+				alpha_b = alpha_b,
                 y = y,
                 K = K)
 	return(stapDP(fit))
@@ -136,7 +147,7 @@ fdp_staplm.fit <- function(y,Z,X,S,
   if(is.null(seed)){
     seed <- 3413
   }
-  num_posterior_samples <- length(seq(from=burn_in+1,to=iter_max,by=thin))
+  num_posterior_samples <- sum((seq(from=burn_in+1,to=iter_max,by=1) %%thin)==0)
 
   if(penalize)
 	  fit <- stappDP_fit(y,Z,X,S,w,tau_df,alpha_a,alpha_b,K,iter_max,burn_in,thin,seed,num_posterior_samples)

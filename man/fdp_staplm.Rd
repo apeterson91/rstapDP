@@ -43,6 +43,18 @@ if penalize true this is the degrees of freedom for the inverse chi square base 
 
 \item{seed}{random number generator seed will be set to default value if not by user}
 }
+\value{
+a stapDP model object
+}
 \description{
 Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model
+}
+\details{
+This function fits a linear model in a bayesian paradigm with
+improper priors assigned to the "standard" regression covariates designated 
+in the formula argument and a Dirichlet process prior with normal base measure and 
+scale tau_df if penalize = F or inverse-chi square(tau_df) otherwise assigned to the 
+stap_term basis function expansion. 
+The concentration parameter is assigned the hyperparameters alpha_a and alpha_b.
+The residual variance is also assigned an improper prior.
 }
