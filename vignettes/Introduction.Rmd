@@ -30,8 +30,8 @@ fit <- fdp_staplm(BMI ~ sex + sap(FFR),
                   alpha_b = 1,
                   tau_df = 2,
                   K = 5,
-                  iter_max = 1E3,
-                  burn_in = 5E2,
+                  iter_max = 30,
+                  burn_in = 15,
                   thin = 2,
                   seed = 43431)
 ```

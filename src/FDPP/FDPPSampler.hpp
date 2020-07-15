@@ -2,6 +2,7 @@
 #define _FDPPSampler_
 
 #include "../auxiliary/beta_rng.hpp"
+#include <Eigen/Dense>
 
 class FDPPSampler
 {
@@ -44,6 +45,7 @@ class FDPPSampler
 		const int Q;
 		const int num_penalties;
 		int sample_ix = 0;
+		int num_nonzero;
 		bool initializing = true;
 		bool flag = true;
 		const double log_factor;

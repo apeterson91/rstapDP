@@ -1,5 +1,3 @@
-#include <fstream>
-
 void FDPPSampler::iteration_sample(std::mt19937 &rng){
 
 	calculate_b();
@@ -12,15 +10,22 @@ void FDPPSampler::iteration_sample(std::mt19937 &rng){
 
 	V = (X_fit.transpose() * w.asDiagonal() * X_fit + PenaltyMat).inverse();
 
-	beta = V.llt().matrixL().toDenseMatrix() * z * sigma  + 
-		   V * X_fit.transpose() * w.asDiagonal() *  y; 
+	beta = V.llt().matrixL().toDenseMatrix() * sigma * z + V * X_fit.transpose() * w.asDiagonal() * y ;
+
 
 	if(std::isnan(beta(0)) & flag ){
 		Rcpp::Rcout << "things are NaN" << std::endl;
 		Rcpp::Rcout << " V block: \n" << V.block(0,0,5,5) << std::endl;
-		Rcpp::Rcout << " cluster_count:\n" << cluster_count << std::endl;
-		Rcpp::Rcout << " taus: \n" << unique_taus << std::endl;
+		Rcpp::Rcout << "new V" << std::endl;
+		V = (X_fit.transpose() * w.asDiagonal() * X_fit + PenaltyMat).ldlt().solve(Eigen::MatrixXd::Identity(Q,Q));
+		beta = V.ldlt().matrixL().toDenseMatrix() * sigma * z + V * X_fit.transpose() * w.asDiagonal() * y ;
 		flag = false;
+	}
+
+	if(std::isnan(beta(0))){
+		V = (X_fit.transpose() * w.asDiagonal() * X_fit + PenaltyMat).ldlt().solve(Eigen::MatrixXd::Identity(Q,Q));
+		beta = V.ldlt().matrixL().toDenseMatrix() * sigma * z + V * X_fit.transpose() * w.asDiagonal() * y ;
+		Rcpp::Rcout << "Counter" << std::endl;
 	}
 
 	yhat = X_fit * beta;
@@ -67,7 +72,7 @@ void FDPPSampler::stick_break(std::mt19937 &rng){
 void FDPPSampler::sample_cluster_labels(std::mt19937 &rng){
 
 	cluster_matrix.setZero(n,K);
-	X_K.setZero(n,P_two*K);
+	num_nonzero = K;
 	int cntr = 0;
 	for(int i = 0; i < n ; i ++){
 		probs = b.row(i);
@@ -87,6 +92,7 @@ void FDPPSampler::sample_cluster_labels(std::mt19937 &rng){
 		cluster_count(k_) = (iter_cluster_assignment == k_).count();
 		X_K.block(0,k,n,P_two) = cluster_matrix.col(k_).asDiagonal() * X;
 		if(cluster_count(k_) == 0){
+			num_nonzero --;
 			for(int pen_ix = 0; pen_ix < num_penalties; pen_ix ++ ){
 				unique_taus(k_,pen_ix) = rgamma(rng);
 				PenaltyMat = unique_taus(k_,pen_ix)  * S.block(0,Q*pen_ix,Q,Q);
