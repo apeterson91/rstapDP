@@ -18,7 +18,8 @@ Imports:
     stringr,
     coda,
     mgcv,
-    Matrix
+    Matrix,
+    rbenvo
 LinkingTo: Rcpp, RcppEigen
 Suggests: 
     knitr,

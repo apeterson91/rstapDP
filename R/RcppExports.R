@@ -17,8 +17,8 @@
 #' @param thin number by which to thin samples
 #' @param seed rng initializer
 #' @param num_posterior_samples total number of posterior samples
-stappDP_fit <- function(y, Z, X, S, w, nu_0, alpha_a, alpha_b, K, iter_max, burn_in, thin, seed, num_posterior_samples) {
-    .Call(`_rstapDP_stappDP_fit`, y, Z, X, S, w, nu_0, alpha_a, alpha_b, K, iter_max, burn_in, thin, seed, num_posterior_samples)
+stappDP_fit <- function(y, Z, X, S, w, nu_0, alpha_a, alpha_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples) {
+    .Call(`_rstapDP_stappDP_fit`, y, Z, X, S, w, nu_0, alpha_a, alpha_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples)
 }
 
 #' Functional Dirichlet Process Linear Regression
@@ -37,5 +37,33 @@ stappDP_fit <- function(y, Z, X, S, w, nu_0, alpha_a, alpha_b, K, iter_max, burn
 #' @param num_posterior_samples number of final samples
 stapDP_fit <- function(y, Z, X, w, tau_0, alpha_a, alpha_b, K, iter_max, burn_in, thin, seed, num_posterior_samples) {
     .Call(`_rstapDP_stapDP_fit`, y, Z, X, w, tau_0, alpha_a, alpha_b, K, iter_max, burn_in, thin, seed, num_posterior_samples)
+}
+
+#' Computes Green and Lau loss function with unknown classification
+#'
+#' @param cluster_assignment iter_total x J cluster assignment matrix
+#' @param pmat J x J pairwise probability of co-clustering matrix
+#' @param tau penalty parameter 
+green_loss_unknown <- function(cluster_assignment, pmat, tau) {
+    .Call(`_rstapDP_green_loss_unknown`, cluster_assignment, pmat, tau)
+}
+
+#' Computes Green and Lau Loss function with known classification
+#'
+#' @param cluster_assignment iter_total x J cluster assignment matrix
+#' @param pmat J x J pairwise probability of co-clustering matrix
+#' @param true_cluster_assignment J x J true Adjacency Matrix
+#' @param a mis-classification penalty parameter
+#' @param b classification penalty parameter
+green_loss_known <- function(cluster_assignment, pmat, true_cluster_assignment, a, b) {
+    .Call(`_rstapDP_green_loss_known`, cluster_assignment, pmat, true_cluster_assignment, a, b)
+}
+
+#' Computes Square loss with unknown classification
+#'
+#' @param cluster_assignment iter_total x J cluster assignment matrix
+#' @param pmat J x J pairwise probability of co-clustering matrix
+square_error <- function(cluster_assignment, pmat) {
+    .Call(`_rstapDP_square_error`, cluster_assignment, pmat)
 }
 

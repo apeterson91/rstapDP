@@ -11,29 +11,27 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  eval = T
+  eval = F
 )
 ```
 
 ```{r setup}
 library(rstapDP)
+library(rbenvo)
 ```
 
 ## STAP
 
 
 ```{r fit}
-fit <- fdp_staplm(BMI ~ sex,
-                  stap_term = s_stap("Distance",7),
-                  subject_data = FFR_subjects,
-                  dt_data = FFR_distances,
+fit <- fdp_staplm(BMI ~ sex + sap(FFR),
+                  benvo = FFR_benvo,
                   alpha_a = 1, 
                   alpha_b = 1,
                   tau_df = 2,
                   K = 5,
-                  iter_max = 1E4,
-                  burn_in = .7E4,
-                  id_colname = 'id',
+                  iter_max = 1E3,
+                  burn_in = 5E2,
                   thin = 2,
                   seed = 43431)
 ```
@@ -52,5 +50,4 @@ plot_pairs(fit)
 ```{r effects}
 plot_cluster_effects(fit)
 ```
-
 

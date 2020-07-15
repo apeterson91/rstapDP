@@ -4,8 +4,8 @@
 \alias{stappDP_fit}
 \title{Penalized Functional Dirichlet Process Logistic Regression}
 \usage{
-stappDP_fit(y, Z, X, S, w, nu_0, alpha_a, alpha_b, K, iter_max, burn_in,
-  thin, seed, num_posterior_samples)
+stappDP_fit(y, Z, X, S, w, nu_0, alpha_a, alpha_b, K, num_penalties,
+  iter_max, burn_in, thin, seed, num_posterior_samples)
 }
 \arguments{
 \item{y}{a vector of continuous outcomes}

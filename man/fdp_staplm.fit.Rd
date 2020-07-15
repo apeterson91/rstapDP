@@ -14,7 +14,7 @@ fdp_staplm.fit(y, Z, X, S, alpha_a, alpha_b, K, penalize, tau_df,
 
 \item{X}{stap design matrix}
 
-\item{S}{penalty matrix from (e.g.) \code{\link[mgcv]{smooth.construct}}}
+\item{S}{list of penalty matrices from \code{\link[mgcv]{jagam}}}
 
 \item{alpha_a}{alpha gamma prior hyperparameter}
 

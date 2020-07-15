@@ -4,21 +4,14 @@
 \alias{fdp_staplm}
 \title{Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model}
 \usage{
-fdp_staplm(formula, subject_data, stap_term, dt_data = NULL, w = rep(1,
-  nrow(subject_data)), tau_df = 1, alpha_a, alpha_b, K, penalize = T,
-  iter_max, burn_in, thin = 1, knots = NULL, id_colname = "id",
-  seed = NULL)
+fdp_staplm(formula, benvo, weights = NULL, tau_df = 1, alpha_a = 1,
+  alpha_b = 1, K = 5, penalize = T, iter_max = 1000,
+  burn_in = 500, thin = 1, id_colname = "id", seed = NULL)
 }
 \arguments{
-\item{formula}{Similar as for \code{\link[stats]{lm}}.}
+\item{formula}{Similar as for \code{\link[rsstap]{sstap_lm}}.}
 
-\item{subject_data}{data frame of subject level measurements}
-
-\item{stap_term}{call to \code{s_stap} with term in dt_data}
-
-\item{dt_data}{data frame containing distances and/or times associated with subject data}
-
-\item{w}{weights for weighted regression - default is vector of ones}
+\item{benvo}{built environment object from the rbenvo package containing the relevant data}
 
 \item{tau_df}{if penalize = F: normal base measure scale 
 if penalize true this is the degrees of freedom for the inverse chi square base measure.}
@@ -37,11 +30,13 @@ if penalize true this is the degrees of freedom for the inverse chi square base 
 
 \item{thin}{number by which to thin samples}
 
-\item{knots}{optional nots argument passed to \code{\link[mgcv]{smooth.construct}}.}
-
 \item{id_colname}{string of id column name that is the unique id in both subject_data and dt_data}
 
 \item{seed}{random number generator seed will be set to default value if not by user}
+
+\item{w}{weights for weighted regression - default is vector of ones}
+
+\item{knots}{optional nots argument passed to \code{\link[mgcv]{smooth.construct}}.}
 }
 \value{
 a stapDP model object

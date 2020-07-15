@@ -9,10 +9,8 @@
 #' The concentration parameter is assigned the hyperparameters alpha_a and alpha_b.
 #' The residual variance is also assigned an improper prior.
 #' 
-#' @param formula Similar as for \code{\link[stats]{lm}}. 
-#' @param subject_data data frame of subject level measurements
-#' @param stap_term call to \code{s_stap} with term in dt_data
-#' @param dt_data data frame containing distances and/or times associated with subject data
+#' @param formula Similar as for \code{\link[rsstap]{sstap_lm}}. 
+#' @param benvo built environment object from the rbenvo package containing the relevant data
 #' @param w weights for weighted regression - default is vector of ones 
 #' @param tau_df if penalize = F: normal base measure scale 
 #'        if penalize true this is the degrees of freedom for the inverse chi square base measure. 
@@ -32,19 +30,16 @@
 #' @return a stapDP model object
 #' 
 fdp_staplm <- function(formula,
-					   subject_data,
-					   stap_term,
-					   dt_data = NULL,
-					   w = rep(1,nrow(subject_data)),
+					   benvo,
+					   weights = NULL,
 					   tau_df = 1,
-					   alpha_a,
-					   alpha_b, 
-					   K,
+					   alpha_a = 1,
+					   alpha_b = 1, 
+					   K = 5,
 					   penalize = T,
-					   iter_max,
-					   burn_in,
+					   iter_max = 1E3,
+					   burn_in = 5E2,
 					   thin = 1,
-					   knots = NULL,
 					   id_colname = 'id',
 					   seed = NULL){
 
@@ -53,40 +48,43 @@ fdp_staplm <- function(formula,
 	stopifnot(alpha_a>0)
 	stopifnot(alpha_b>0)
 	stopifnot(thin>0)
-	stopifnot(id_colname %in% colnames(dt_data))
-	stopifnot(id_colname %in% colnames(subject_data))
-	stopifnot(stap_term$term %in% colnames(dt_data))
-	stopifnot(length(id_colname)==1)
 	## 
-
+	
+	foo <- get_stapless_formula(formula)
+	f <- foo$stapless_formula
+	mf <- rbenvo::subject_design(benvo,f)
+	Z <- mf$X
 	call <- match.call(expand.dots = TRUE)
-	mf <- match.call(expand.dots = FALSE)
-	mf$formula <- formula
-	m <- match(c("formula"),table = names(mf), nomatch=0L)
-	mf <- mf[c(1L,m)]
-	mf$data <- subject_data
-	mf$drop.unused.levels <- TRUE
-	mf[[1L]] <- as.name("model.frame")
-	mf <- eval(mf,parent.frame())
-	mt <- attr(mf,"terms")
-	if(is.empty.model(mt))
-		stop("No intercept or predictors specified.",.call = FALSE)
+	if(nrow(foo$stap_mat)>1)
+		stop("Only one stap/sap/tap term allowed")
+	stap_term <- foo$stap_mat[,1]
+	stap_component <- foo$stap_mat[,2]
+	bw <- as.integer(foo$stap_mat[,3])
+	stap_formula <- foo$fake_formula[[1]]
 
-
-	y <- model.response(mf, "numeric")
-	Z <- model.matrix(mt,mf)
+	
 	## Handle Zero exposure in dt_data
-	jdf <- dplyr::left_join(subject_data,dt_data,by=id_colname) %>% 
-	  dplyr::mutate_if(is.double,function(x) tidyr::replace_na(x,0))
-	foo <- mgcv::smooth.construct(stap_term,data=jdf,knots=knots)
-	M <- Matrix::fac2sparse(as.factor(jdf[,id_colname,drop=T]))
-	X <- as.matrix(M %*% foo$X)
-	S <- kronecker(diag(K),foo$S[[1]])
-	S <- rbind(matrix(0,ncol=ncol(S)+ncol(Z),nrow=ncol(Z)),
-	           cbind(matrix(0,nrow=nrow(S),ncol=ncol(Z)),S))
+	jd <- mgcv::jagam(formula = stap_formula,family = gaussian(),
+					  data = rbenvo::joinvo(benvo,
+											stap_term,
+											stap_component,
+											NA_to_zero = TRUE),
+					  file = tempfile(fileext=".jags"),
+					  weights = NULL,
+					  offset = NULL,
+					  centred = FALSE,
+					  diagonalize = FALSE)
+
+	X <- rbenvo::aggrenvo(benvo,jd$jags.data$X,stap_term,stap_component)
+	S <- lapply(jd$pregam$S,function(x) kronecker(diag(K),x))
+	S <- lapply(S,function(m) rbind(matrix(0,ncol=ncol(m)+ncol(Z),nrow=ncol(Z)),
+	           cbind(matrix(0,nrow=nrow(m),ncol=ncol(Z)),m)))
+	
+	if(is.null(weights))
+	  weights <- rep(1,length(mf$y))
 	
 	
-	fit <- fdp_staplm.fit(y,Z,X, S, alpha_a,alpha_b,K,penalize,tau_df,w,iter_max,burn_in,thin,seed)
+	fit <- fdp_staplm.fit(y = mf$y,Z,X, S, alpha_a,alpha_b,K,penalize,tau_df,weights,iter_max,burn_in,thin,seed)
 	
     fit <- list(beta = fit$beta,
                 probs = fit$pi,
@@ -95,16 +93,17 @@ fdp_staplm <- function(formula,
                 yhat = fit$yhat,
                 cluster_mat = fit$cluster_assignment,
                 scales = if(penalize) fit$tau else matrix(rep(tau_df,K),ncol=K),
+				num_penalties = length(S),
                 pmat = fit$PairwiseProbabilityMat,
                 clabels = fit$cluster_assignment,
                 Znames = colnames(Z),
                 ncol_X = ncol(X),
                 penalize = penalize,
                 formula = formula,
-                sobj = foo,
-				alpha_a = alpha_a,
-				alpha_b = alpha_b,
-                y = y,
+                sobj = jd$pregam$sobj,
+        				alpha_a = alpha_a,
+        				alpha_b = alpha_b,
+                y = mf$y,
                 K = K)
 	return(stapDP(fit))
 }
@@ -115,7 +114,7 @@ fdp_staplm <- function(formula,
 #' @param y vector of outcomes
 #' @param Z design matrix
 #' @param X stap design matrix
-#' @param S penalty matrix from (e.g.) \code{\link[mgcv]{smooth.construct}} 
+#' @param S list of penalty matrices from \code{\link[mgcv]{jagam}} 
 #' @param alpha_a alpha gamma prior hyperparameter
 #' @param alpha_b alpha gamma prior hyperparameter
 #' @param K truncation number for DP mixture components
@@ -141,17 +140,19 @@ fdp_staplm.fit <- function(y,Z,X,S,
 						   thin,seed = NULL){
 
 	stopifnot(tau_df>0)
-	stopifnot(ncol(S) == nrow(S))
-	stopifnot(ncol(S) == ncol(Z) + ncol(X)*K)
+	stopifnot(nrow(S) == ncol(Z) + ncol(X)*K)
 	stopifnot(length(w) == length(y))
   if(is.null(seed)){
     seed <- 3413
   }
+
   num_posterior_samples <- sum((seq(from=burn_in+1,to=iter_max,by=1) %%thin)==0)
 
-  if(penalize)
-	  fit <- stappDP_fit(y,Z,X,S,w,tau_df,alpha_a,alpha_b,K,iter_max,burn_in,thin,seed,num_posterior_samples)
-  else
+  if(penalize){
+	  num_penalties <- length(S) ## default for smoothing
+	  S <- do.call(cbind,S)
+	  fit <- stappDP_fit(y,Z,X,S,w,tau_df,alpha_a,alpha_b,K,num_penalties,iter_max,burn_in,thin,seed,num_posterior_samples)
+  }else
 	  fit <- stapDP_fit(y,Z,X,w,
 						  tau_df,alpha_a,alpha_b,
 						  K,iter_max,burn_in,thin,

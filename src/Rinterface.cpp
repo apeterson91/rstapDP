@@ -8,6 +8,7 @@
 
 
 #include "auxiliary/print_function.hpp"
+#include "green_loss.hpp"
 // via the depends attribute we tell Rcpp to create hooks for
 // RcppEigen so that the build process will know what to do
 //
@@ -39,6 +40,7 @@ Rcpp::List stappDP_fit(const Eigen::VectorXd &y,
 					   const double &alpha_a,
 					   const double &alpha_b,
 					   const int &K,
+					   const int &num_penalties,
 					   const int &iter_max,
 					   const int &burn_in,
 					   const int &thin,
@@ -63,14 +65,16 @@ Rcpp::List stappDP_fit(const Eigen::VectorXd &y,
 	beta_samples.setZero(num_posterior_samples,Z.cols() + X.cols()*K);
 	sigma_samples.setZero(num_posterior_samples);
 	pi_samples.setZero(num_posterior_samples,K);
-	tau_samples.setZero(num_posterior_samples,K);
+	tau_samples.setZero(num_posterior_samples,K*num_penalties);
 	yhat_samples.setZero(num_posterior_samples,y.rows());
 
 	const int chain = 1;
 	int sample_ix = 0;
 
 	FDPPSampler sampler(y,Z,X,S,w, alpha_a,
-					   alpha_b,nu_0,K,rng);
+					   alpha_b,nu_0,K,
+					   num_penalties,rng);
+
 
 
 	for(int iter_ix = 1; iter_ix <= iter_max; iter_ix ++){
