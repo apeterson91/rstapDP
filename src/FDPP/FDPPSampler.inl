@@ -110,6 +110,7 @@ void FDPPSampler::update_weights(std::mt19937 &rng){
 
 	stick_break(rng);
 	posterior_b_alpha = 1.0 / alpha_b - (log(1 - u.array())).head(K-1).sum();
+	posterior_b_alpha = 1.0 / posterior_b_alpha;
 	std::gamma_distribution<double>  rgamma(posterior_a_alpha,posterior_b_alpha);
 	alpha = rgamma(rng);
 
