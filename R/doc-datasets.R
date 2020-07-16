@@ -27,3 +27,13 @@
 #' 
 #' 
 "FFR_distances"
+
+#' Samll benvo for use in \pkg{rstapDP} examples and vignettes.
+#'
+#' @name FFR_benvo 
+#' @format  A benvo consisting of the \code{FFR_subjects} and \code{FFR_distances} dataframes
+#' @details see \code{\link[rstapDP]{FFR_subjects}} and \code{\link[rstapDP]{FFR_distances}}
+#' For information on the dataframes. See \code{\link[rbenvo]{Benvo}} for information on benvos.
+#' 
+#' 
+"FFR_benvo"

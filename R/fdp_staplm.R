@@ -3,50 +3,49 @@
 #' 
 #' @details This function fits a linear model in a bayesian paradigm with
 #' improper priors assigned to the "standard" regression covariates designated 
-#' in the formula argument and a Dirichlet process prior with normal base measure and 
-#' scale tau_df if penalize = F or inverse-chi square(tau_df) otherwise assigned to the 
-#' stap_term basis function expansion. 
-#' The concentration parameter is assigned the hyperparameters alpha_a and alpha_b.
-#' The residual variance is also assigned an improper prior.
+#' in the formula argument and a Dirichlet process prior with normal-gamma base measure 
+#' assigned to the stap basis function expansion using penalized splines via \code{\link[mgcv]{jagam}}.
+#'
+#' The concentration parameter is assigned gamma prior with  hyperparameters shape alpha_a and scale alpha_b.
+#'  Precision parameters sigma_a,sigma_b, tau_a,tau_b are similar for the residual and penalties' precision, respectively.
 #' 
-#' @param formula Similar as for \code{\link[rsstap]{sstap_lm}}. 
+#' @param formula Similar as for \code{\link[rsstap]{sstap_lm}}, though fdp_staplm is currently restricted to only one stap term.
 #' @param benvo built environment object from the rbenvo package containing the relevant data
-#' @param w weights for weighted regression - default is vector of ones 
-#' @param tau_df if penalize = F: normal base measure scale 
-#'        if penalize true this is the degrees of freedom for the inverse chi square base measure. 
+#' @param weights weights for weighted regression - default is vector of ones 
 #' @param alpha_a alpha gamma prior hyperparameter
 #' @param alpha_b alpha gamma prior hyperparameter
+#' @param sigma_a precision gamma prior hyperparameter
+#' @param sigma_b precision gamma prior hyperparameter
+#' @param tau_a penalty parameters gamma prior hyperparameter
+#' @param tau_b penalty parameters gamma prior hyperparameter
 #' @param K truncation number
-#' @param penalize boolean that denotes whether parameters are penalized or not
 #' @param iter_max maximum number of iterations
 #' @param burn_in number of burn in iterations
 #' @param thin number by which to thin samples
-#' @param knots optional nots argument passed to \code{\link[mgcv]{smooth.construct}}.
-#' @param id_colname string of id column name that is the unique id in both subject_data and dt_data
 #' @param seed random number generator seed will be set to default value if not by user
 #' 
-#' @importFrom stats is.empty.model model.matrix model.response
+#' @importFrom stats is.empty.model model.matrix model.response as.formula gaussian terms
 #' @export
 #' @return a stapDP model object
 #' 
 fdp_staplm <- function(formula,
-					   benvo,
-					   weights = NULL,
-					   tau_df = 1,
-					   alpha_a = 1,
-					   alpha_b = 1, 
-					   K = 5,
-					   penalize = T,
-					   iter_max = 1E3,
-					   burn_in = 5E2,
-					   thin = 1,
-					   id_colname = 'id',
-					   seed = NULL){
+                       benvo,
+                       weights = NULL,
+          					   alpha_a = 1,
+          					   alpha_b = 1, 
+          					   sigma_a = 1,
+          					   sigma_b = 1,
+          					   tau_a = 1,
+          					   tau_b = 1,
+          					   K = 5,
+          					   iter_max = 1E3,
+          					   burn_in = 5E2,
+          					   thin = 1,
+          					   seed = NULL){
 
 	## Parameter check
 	stopifnot(burn_in<iter_max && burn_in > 0)
-	stopifnot(alpha_a>0)
-	stopifnot(alpha_b>0)
+	stopifnot(any(c(alpha_a,alpha_b,sigma_a,sigma_b,tau_a,tau_b)>0))
 	stopifnot(thin>0)
 	## 
 	
@@ -84,25 +83,25 @@ fdp_staplm <- function(formula,
 	  weights <- rep(1,length(mf$y))
 	
 	
-	fit <- fdp_staplm.fit(y = mf$y,Z,X, S, alpha_a,alpha_b,K,penalize,tau_df,weights,iter_max,burn_in,thin,seed)
+	fit <- fdp_staplm.fit(y = mf$y,Z,X, S,weights, alpha_a,alpha_b,sigma_a,sigma_b,
+	                      tau_a,tau_b,K,iter_max,burn_in,thin,seed)
 	
     fit <- list(beta = fit$beta,
                 probs = fit$pi,
                 sigma = fit$sigma,
-                alpha = fit$alpha,
+                alpha = fit$alpha, 
                 yhat = fit$yhat,
                 cluster_mat = fit$cluster_assignment,
-                scales = if(penalize) fit$tau else matrix(rep(tau_df,K),ncol=K),
+                scales =  fit$tau,
 				num_penalties = length(S),
                 pmat = fit$PairwiseProbabilityMat,
                 clabels = fit$cluster_assignment,
                 Znames = colnames(Z),
                 ncol_X = ncol(X),
-                penalize = penalize,
                 formula = formula,
-                sobj = jd$pregam$sobj,
-        				alpha_a = alpha_a,
-        				alpha_b = alpha_b,
+                sobj = jd$pregam$smooth[[1]],
+				alpha_a = alpha_a,
+				alpha_b = alpha_b,
                 y = mf$y,
                 K = K)
 	return(stapDP(fit))
@@ -117,12 +116,12 @@ fdp_staplm <- function(formula,
 #' @param S list of penalty matrices from \code{\link[mgcv]{jagam}} 
 #' @param alpha_a alpha gamma prior hyperparameter
 #' @param alpha_b alpha gamma prior hyperparameter
+#' @param sigma_a precision gamma prior hyperparameter
+#' @param sigma_b precision gamma prior hyperparameter
+#' @param tau_a penalty parameters gamma prior hyperparameter
+#' @param tau_b penalty parameters gamma prior hyperparameter
 #' @param K truncation number for DP mixture components
-#' @param penalize boolean value indicating whether or not the stap parameters
-#' should be penalized via a normal prior/L2 penalty (as opposed to using an improper prior)
-#' @param tau_df if penalize = F: normal base measure scale 
-#'        if penalize true this is the degrees of freedom for the inverse chi square base measure. 
-#' @param w weights for weighted regression - default is vector of ones 
+#' @param weights weights for weighted regression - default is vector of ones 
 #' @param iter_max maximum number of iterations
 #' @param burn_in number of iterations to burn-in
 #' @param thin number by which to thin samples
@@ -130,33 +129,33 @@ fdp_staplm <- function(formula,
 #' @export
 #' 
 fdp_staplm.fit <- function(y,Z,X,S,
-						   alpha_a,
-						   alpha_b, 
-						   K,
-						   penalize,
-						   tau_df,
-						   w = rep(1,length(y)),
-						   iter_max,burn_in,
-						   thin,seed = NULL){
+                           weights = rep(1,length(y)),
+                           alpha_a = 1,
+                           alpha_b = 1, 
+                           sigma_a = 1,
+                           sigma_b = 1,
+                           tau_a = 1,
+                           tau_b = 1,
+                           K = 5,
+                           iter_max,burn_in,
+                           thin,seed = NULL){
 
-	stopifnot(tau_df>0)
+	stopifnot(c(sigma_a,sigma_b,tau_a,tau_b,alpha_a,alpha_b)>0)
 	stopifnot(nrow(S) == ncol(Z) + ncol(X)*K)
-	stopifnot(length(w) == length(y))
+	stopifnot(length(weights) == length(y))
   if(is.null(seed)){
     seed <- 3413
   }
 
   num_posterior_samples <- sum((seq(from=burn_in+1,to=iter_max,by=1) %%thin)==0)
+  stopifnot(num_posterior_samples>0)
 
-  if(penalize){
-	  num_penalties <- length(S) ## default for smoothing
-	  S <- do.call(cbind,S)
-	  fit <- stappDP_fit(y,Z,X,S,w,tau_df,alpha_a,alpha_b,K,num_penalties,iter_max,burn_in,thin,seed,num_posterior_samples)
-  }else
-	  fit <- stapDP_fit(y,Z,X,w,
-						  tau_df,alpha_a,alpha_b,
-						  K,iter_max,burn_in,thin,
-						  seed,num_posterior_samples)
+  num_penalties <- length(S) ## default for smoothing
+  S <- do.call(cbind,S)
+  fit <- stappDP_fit(y,Z,X,S,weights,alpha_a,alpha_b,
+					 sigma_a,sigma_b,tau_a,tau_b,
+					 K,num_penalties,iter_max,burn_in,
+					 thin,seed,num_posterior_samples)
 
 
   return(fit)

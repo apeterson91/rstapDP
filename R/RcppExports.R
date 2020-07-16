@@ -8,35 +8,21 @@
 #' @param X a matrix of spatial temporal aggregated predictors
 #' @param S penalty matrix for stap parameters
 #' @param w a vector of weights for weighted regression
-#' @param nu_0 prior degrees of freedom for STAP regression coefficient scales
-#' @param alpha_a alpha gamma prior hyperparameter
-#' @param alpha_b alpha gamma prior hyperparameter
+#' @param alpha_a alpha gamma prior shape hyperparameter
+#' @param alpha_b alpha gamma prior scale hyperparameter
+#' @param sigma_a precision gamma prior shape hyperparameter
+#' @param sigma_b precision gamma prior scale hyperparameter
+#' @param tau_a penalty gamma prior shape hyperparameter
+#' @param tau_b penalty gamma prior scale hyperparameter
 #' @param K truncation number
+#' @param num_penalties number of penalty matrices accounted for in S
 #' @param iter_max maximum number of iterations
 #' @param burn_in number of burn in iterations
 #' @param thin number by which to thin samples
 #' @param seed rng initializer
 #' @param num_posterior_samples total number of posterior samples
-stappDP_fit <- function(y, Z, X, S, w, nu_0, alpha_a, alpha_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples) {
-    .Call(`_rstapDP_stappDP_fit`, y, Z, X, S, w, nu_0, alpha_a, alpha_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples)
-}
-
-#' Functional Dirichlet Process Linear Regression
-#' @param y a vector of continuous outcomes
-#' @param Z a matrix of population level confounders
-#' @param X a matrix of spatial temporal aggregated predictors
-#' @param w  vector of weights for weighted regression
-#' @param tau_0 prior variance for STAP parameters
-#' @param alpha_a alpha gamma prior hyperparameter
-#' @param alpha_b alpha gamma prior hyperparameter
-#' @param K truncation number
-#' @param iter_max maximum number of iterations
-#' @param burn_in number of burn in iterations
-#' @param thin number by which to thin samples
-#' @param seed rng initializer
-#' @param num_posterior_samples number of final samples
-stapDP_fit <- function(y, Z, X, w, tau_0, alpha_a, alpha_b, K, iter_max, burn_in, thin, seed, num_posterior_samples) {
-    .Call(`_rstapDP_stapDP_fit`, y, Z, X, w, tau_0, alpha_a, alpha_b, K, iter_max, burn_in, thin, seed, num_posterior_samples)
+stappDP_fit <- function(y, Z, X, S, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples) {
+    .Call(`_rstapDP_stappDP_fit`, y, Z, X, S, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples)
 }
 
 #' Computes Green and Lau loss function with unknown classification

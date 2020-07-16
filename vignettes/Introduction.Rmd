@@ -11,13 +11,15 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  eval = F
+  eval = T
 )
 ```
 
 ```{r setup}
 library(rstapDP)
+library(tidyverse)
 library(rbenvo)
+theme_set(theme_bw())
 ```
 
 ## STAP
@@ -26,13 +28,10 @@ library(rbenvo)
 ```{r fit}
 fit <- fdp_staplm(BMI ~ sex + sap(FFR),
                   benvo = FFR_benvo,
-                  alpha_a = 1, 
-                  alpha_b = 1,
-                  tau_df = 2,
                   K = 5,
-                  iter_max = 30,
-                  burn_in = 15,
-                  thin = 2,
+                  iter_max = 5000,
+                  burn_in = 3000,
+                  thin = 1,
                   seed = 43431)
 ```
 
@@ -46,8 +45,20 @@ ppc(fit)
 plot_pairs(fit)
 ```
 
+```{r truthpltdf,echo=F}
+
+truth <- tibble(Distance = seq(from=0,to=1,by=0.01),
+                Truth = 3*pweibull(Distance,shape = 5, scale = .6,lower.tail = F),
+                Cluster = "High Risk") %>% 
+  rbind(tibble(Distance = seq(from =0,to=1,by=0.01),
+               Truth = 0,
+               Cluster = "Low Risk")) %>% mutate(Cluster = factor(Cluster)) 
+
+truth <- geom_line(aes(x=Distance,y=Truth,color=Cluster),data=truth)
+  
+```
 
 ```{r effects}
-plot_cluster_effects(fit)
+plot_cluster_effects(fit,mode=F) + truth
 ```
 

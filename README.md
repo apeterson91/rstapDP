@@ -1,4 +1,4 @@
-## rstapDP: Spatial Temporal Aggregated Dirichlet Process Predictors in R
+## `rstapDP`: Spatial Temporal Aggregated Dirichlet Process Predictors in R
 <!-- badges: start -->
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Travis build status](https://travis-ci.org/apeterson91/rstapDP.svg?branch=master)](https://travis-ci.org/apeterson91/rstapDP)
@@ -6,7 +6,7 @@
 
 ## About
 
-This is an R package that fits a Linear Model with normally distributed residual error with a Dirichlet Process Prior 
+This is an R package that (currently) fits a Linear Model with normally distributed residual error with a Dirichlet Process Prior 
 placed on a subset of the regression coefficients. The primary target audience is researchers interested in the effect
 of built environment features (BEFs) on human health, though other applications are possible. 
 
@@ -14,8 +14,8 @@ of built environment features (BEFs) on human health, though other applications 
 
 ### Development Version
 
- Currently this package is only available via Github. In order to install the software use the following 
- lines of R code
+ Currently this package is only available via Github. It is in active development and thus caution is warraranted to anyone interested in using it.
+ In order to install the software use the following lines of R code
 
  ```r
  if(!require(devtools)){

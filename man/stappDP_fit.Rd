@@ -4,8 +4,9 @@
 \alias{stappDP_fit}
 \title{Penalized Functional Dirichlet Process Logistic Regression}
 \usage{
-stappDP_fit(y, Z, X, S, w, nu_0, alpha_a, alpha_b, K, num_penalties,
-  iter_max, burn_in, thin, seed, num_posterior_samples)
+stappDP_fit(y, Z, X, S, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a,
+  tau_b, K, num_penalties, iter_max, burn_in, thin, seed,
+  num_posterior_samples)
 }
 \arguments{
 \item{y}{a vector of continuous outcomes}
@@ -18,13 +19,21 @@ stappDP_fit(y, Z, X, S, w, nu_0, alpha_a, alpha_b, K, num_penalties,
 
 \item{w}{a vector of weights for weighted regression}
 
-\item{nu_0}{prior degrees of freedom for STAP regression coefficient scales}
+\item{alpha_a}{alpha gamma prior shape hyperparameter}
 
-\item{alpha_a}{alpha gamma prior hyperparameter}
+\item{alpha_b}{alpha gamma prior scale hyperparameter}
 
-\item{alpha_b}{alpha gamma prior hyperparameter}
+\item{sigma_a}{precision gamma prior shape hyperparameter}
+
+\item{sigma_b}{precision gamma prior scale hyperparameter}
+
+\item{tau_a}{penalty gamma prior shape hyperparameter}
+
+\item{tau_b}{penalty gamma prior scale hyperparameter}
 
 \item{K}{truncation number}
+
+\item{num_penalties}{number of penalty matrices accounted for in S}
 
 \item{iter_max}{maximum number of iterations}
 

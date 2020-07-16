@@ -2,12 +2,16 @@
 % Please edit documentation in R/green_loss.R
 \name{green_loss}
 \alias{green_loss}
-\title{Lau and Green posterior loss function}
+\alias{green_loss.stapDP}
+\title{Lau and Green classification loss function}
 \usage{
 green_loss(object, truth = NULL, tau = 0.5, a = 1, b = 1)
+
+\method{green_loss}{stapDP}(object, truth = NULL, tau = 0.5, a = 1,
+  b = 1)
 }
 \arguments{
-\item{object}{an ndp or bndp object}
+\item{object}{a stapDP object}
 
 \item{truth}{True adjacency matrix}
 
@@ -23,5 +27,11 @@ configuration, (2) best_loss_ix:  The index corresponding to the "best" partitio
 and (3) mode: the best partition itself
 }
 \description{
-Lau and Green posterior loss function
+Lau and Green classification loss function
 }
+\section{Methods (by class)}{
+\itemize{
+\item \code{stapDP}: 
+}}
+
+\keyword{internal}

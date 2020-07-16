@@ -4,25 +4,30 @@
 \alias{fdp_staplm}
 \title{Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model}
 \usage{
-fdp_staplm(formula, benvo, weights = NULL, tau_df = 1, alpha_a = 1,
-  alpha_b = 1, K = 5, penalize = T, iter_max = 1000,
-  burn_in = 500, thin = 1, id_colname = "id", seed = NULL)
+fdp_staplm(formula, benvo, weights = NULL, alpha_a = 1, alpha_b = 1,
+  sigma_a = 1, sigma_b = 1, tau_a = 1, tau_b = 1, K = 5,
+  iter_max = 1000, burn_in = 500, thin = 1, seed = NULL)
 }
 \arguments{
-\item{formula}{Similar as for \code{\link[rsstap]{sstap_lm}}.}
+\item{formula}{Similar as for \code{\link[rsstap]{sstap_lm}}, though fdp_staplm is currently restricted to only one stap term.}
 
 \item{benvo}{built environment object from the rbenvo package containing the relevant data}
 
-\item{tau_df}{if penalize = F: normal base measure scale 
-if penalize true this is the degrees of freedom for the inverse chi square base measure.}
+\item{weights}{weights for weighted regression - default is vector of ones}
 
 \item{alpha_a}{alpha gamma prior hyperparameter}
 
 \item{alpha_b}{alpha gamma prior hyperparameter}
 
-\item{K}{truncation number}
+\item{sigma_a}{precision gamma prior hyperparameter}
 
-\item{penalize}{boolean that denotes whether parameters are penalized or not}
+\item{sigma_b}{precision gamma prior hyperparameter}
+
+\item{tau_a}{penalty parameters gamma prior hyperparameter}
+
+\item{tau_b}{penalty parameters gamma prior hyperparameter}
+
+\item{K}{truncation number}
 
 \item{iter_max}{maximum number of iterations}
 
@@ -30,13 +35,7 @@ if penalize true this is the degrees of freedom for the inverse chi square base 
 
 \item{thin}{number by which to thin samples}
 
-\item{id_colname}{string of id column name that is the unique id in both subject_data and dt_data}
-
 \item{seed}{random number generator seed will be set to default value if not by user}
-
-\item{w}{weights for weighted regression - default is vector of ones}
-
-\item{knots}{optional nots argument passed to \code{\link[mgcv]{smooth.construct}}.}
 }
 \value{
 a stapDP model object
@@ -47,9 +46,9 @@ Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear M
 \details{
 This function fits a linear model in a bayesian paradigm with
 improper priors assigned to the "standard" regression covariates designated 
-in the formula argument and a Dirichlet process prior with normal base measure and 
-scale tau_df if penalize = F or inverse-chi square(tau_df) otherwise assigned to the 
-stap_term basis function expansion. 
-The concentration parameter is assigned the hyperparameters alpha_a and alpha_b.
-The residual variance is also assigned an improper prior.
+in the formula argument and a Dirichlet process prior with normal-gamma base measure 
+assigned to the stap basis function expansion using penalized splines via \code{\link[mgcv]{jagam}}.
+
+The concentration parameter is assigned gamma prior with  hyperparameters shape alpha_a and scale alpha_b.
+ Precision parameters sigma_a,sigma_b, tau_a,tau_b are similar for the residual and penalties' precision, respectively.
 }
