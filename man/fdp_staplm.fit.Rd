@@ -4,8 +4,9 @@
 \alias{fdp_staplm.fit}
 \title{Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model}
 \usage{
-fdp_staplm.fit(y, Z, X, S, alpha_a, alpha_b, K, penalize, tau_df,
-  w = rep(1, length(y)), iter_max, burn_in, thin, seed = NULL)
+fdp_staplm.fit(y, Z, X, S, weights = rep(1, length(y)), alpha_a = 1,
+  alpha_b = 1, sigma_a = 1, sigma_b = 1, tau_a = 1, tau_b = 1,
+  K = 5, iter_max, burn_in, thin, seed = NULL)
 }
 \arguments{
 \item{y}{vector of outcomes}
@@ -14,21 +15,23 @@ fdp_staplm.fit(y, Z, X, S, alpha_a, alpha_b, K, penalize, tau_df,
 
 \item{X}{stap design matrix}
 
-\item{S}{penalty matrix from (e.g.) \code{\link[mgcv]{smooth.construct}}}
+\item{S}{list of penalty matrices from \code{\link[mgcv]{jagam}}}
+
+\item{weights}{weights for weighted regression - default is vector of ones}
 
 \item{alpha_a}{alpha gamma prior hyperparameter}
 
 \item{alpha_b}{alpha gamma prior hyperparameter}
 
+\item{sigma_a}{precision gamma prior hyperparameter}
+
+\item{sigma_b}{precision gamma prior hyperparameter}
+
+\item{tau_a}{penalty parameters gamma prior hyperparameter}
+
+\item{tau_b}{penalty parameters gamma prior hyperparameter}
+
 \item{K}{truncation number for DP mixture components}
-
-\item{penalize}{boolean value indicating whether or not the stap parameters
-should be penalized via a normal prior/L2 penalty (as opposed to using an improper prior)}
-
-\item{tau_df}{if penalize = F: normal base measure scale 
-if penalize true this is the degrees of freedom for the inverse chi square base measure.}
-
-\item{w}{weights for weighted regression - default is vector of ones}
 
 \item{iter_max}{maximum number of iterations}
 

@@ -14,19 +14,6 @@
 plot_pairs <- function(x,sort = FALSE, sample = 0)
     UseMethod("plot_pairs")
 
-#' plot cluster effects plots
-#' 
-#' @export
-#' @param x stapDP object
-#' @param p probability contained in credible interval
-#' @param switch one of "color" or "facet" for different plotting options
-#' @param  prob_filter all mixture components with median probability < prob_filter are excluded from the plot
-#' @param mode boolean value indicating whether the cluster parameters that minimize the RSS should be used as a point estimate, or samples should be used.
-#' @return plot with cluster effect across space
-#' 
-plot_cluster_effects <- function(x, p = 0.95, switch = "color", prob_filter = 0.1, mode = T)
-    UseMethod("plot_cluster_effects")
-
 #'
 #' @export
 #' @describeIn plot_pairs plot_pairwise probability matrix
@@ -85,8 +72,22 @@ plot_pairs.stapDP <- function(x,sort = FALSE,sample = 0){
     return(p)
 }
 
+#' Cluster Spatial Temporal Effects
+#' 
+#' @export
+#' @keywords internal
+#' @param x stapDP object
+#' @param p probability contained in credible interval
+#' @param switch one of "color" or "facet" for different plotting options
+#' @param  prob_filter all mixture components with median probability < prob_filter are excluded from the plot
+#' @param mode boolean value indicating whether the cluster parameters that minimize the RSS should be used as a point estimate, or samples should be used.
+#' @return plot with cluster effect across space
+#' 
+plot_cluster_effects <- function(x, p = 0.95, switch = "color", prob_filter = 0.1, mode = T)
+    UseMethod("plot_cluster_effects")
 
-#' plot cluster effects plots
+
+#' 
 #' 
 #' @export
 #' @describeIn plot_cluster_effects 

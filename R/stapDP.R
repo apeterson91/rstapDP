@@ -35,12 +35,13 @@ stapDP <- function(object){
 					P = stringr::str_replace(stringr::str_extract(Parameter,"P:[0-9]{2}|P:[0-9]{1}"),"P:",""))
 
 	scales <- object$scales
-	colnames(scales) <- paste0("tau_",1:(object$K))
+	colnames(scales) <- paste0("tau_",1:(object$K*object$num_penalties))
 	probs <- suppressMessages(dplyr::as_tibble(object$probs,quiet = T))
 	colnames(probs) <- paste0("pi","_",1:object$K)
 	probs <- probs %>% dplyr::mutate(iteration_ix = 1:dplyr::n()) %>% 
 		tidyr::gather(dplyr::contains("pi"),key="Parameter",value="Samples") %>% 
-		dplyr::mutate(K = as.integer(stringr::str_replace( stringr::str_extract(Parameter,"_[0-9]{2}|_[0-9]{1}"),"_","")))
+		dplyr::mutate(K = as.integer(stringr::str_replace( stringr::str_extract(Parameter,"_[0-9]{2}|_[0-9]{1}"),"_",""))) %>%
+		dplyr::mutate(K = factor(K,levels=(1:object$K)))
 
 	ys <- object$yhat
 	gd <- expand.grid(id =paste("V_",1:ncol(object$yhat)),

@@ -3,7 +3,7 @@
 \name{plot_cluster_effects}
 \alias{plot_cluster_effects}
 \alias{plot_cluster_effects.stapDP}
-\title{plot cluster effects plots}
+\title{Cluster Spatial Temporal Effects}
 \usage{
 plot_cluster_effects(x, p = 0.95, switch = "color",
   prob_filter = 0.1, mode = T)
@@ -26,12 +26,11 @@ plot_cluster_effects(x, p = 0.95, switch = "color",
 plot with cluster effect across space
 }
 \description{
-plot cluster effects plots
-
-plot cluster effects plots
+Cluster Spatial Temporal Effects
 }
 \section{Methods (by class)}{
 \itemize{
 \item \code{stapDP}: 
 }}
 
+\keyword{internal}
