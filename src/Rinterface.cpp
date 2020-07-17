@@ -79,7 +79,9 @@ Rcpp::List stappDP_fit(const Eigen::VectorXd &y,
 
 
 	for(int iter_ix = 1; iter_ix <= iter_max; iter_ix ++){
+
 		print_progress(iter_ix,burn_in,iter_max,chain);
+
 		sampler.iteration_sample(rng);
 		if(iter_ix > burn_in && (iter_ix % thin == 0)){
 			sampler.store_samples(beta_samples,sigma_samples,pi_samples,

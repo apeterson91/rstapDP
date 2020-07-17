@@ -46,7 +46,6 @@ plot_pairs(fit)
 ```
 
 ```{r truthpltdf,echo=F}
-
 truth <- tibble(Distance = seq(from=0,to=1,by=0.01),
                 Truth = 3*pweibull(Distance,shape = 5, scale = .6,lower.tail = F),
                 Cluster = "High Risk") %>% 

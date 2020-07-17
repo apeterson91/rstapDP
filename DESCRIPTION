@@ -20,8 +20,9 @@ Imports:
     coda,
     mgcv,
     Matrix,
-    rbenvo,
-    lme4
+    rbenvo (>= 0.1.0),
+    lme4,
+    RcppProgress
 LinkingTo: Rcpp, RcppEigen
 Suggests: 
     knitr,

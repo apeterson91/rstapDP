@@ -107,6 +107,7 @@ plot_cluster_effects.stapDP <- function(x,
 
 	ks <- x$probs %>% dplyr::group_by(K) %>% dplyr::summarise(medp=median(Samples))%>%
 		dplyr::filter(medp>prob_filter) %>% dplyr::pull(K)
+	P <- max(as.integer(x$ranef$P))
 
 	if(mode)
 	{
@@ -127,7 +128,7 @@ plot_cluster_effects.stapDP <- function(x,
 		  dplyr::select(-iteration_ix) %>% 
 		  split(.$K) %>% 
 		  purrr::map2_dfr(.,names(.),function(x,y) {
-			mt <- mat %*% (x %>% dplyr::select(-K) %>% as.matrix() %>% t())  
+			mt <- mat %*% (x %>% dplyr::select(as.character(1:P)) %>% as.matrix() %>% t())  
 			colnames(mt) <- paste0("ix_",1:ncol(mt))
 			
 			df <- dplyr::as_tibble(mt) %>% dplyr::mutate(K = rep(y,dplyr::n()),
@@ -149,7 +150,7 @@ plot_cluster_effects.stapDP <- function(x,
 		  dplyr::select(-iteration_ix) %>% 
 		  split(.$K) %>% 
 		  purrr::map2_dfr(.,names(.),function(x,y) {
-			mt <- mat %*% (x %>% dplyr::select(-K) %>% as.matrix() %>% t())  
+			mt <- mat %*% (x %>% dplyr::select(as.character(1:P)) %>% as.matrix() %>% t())  
 			colnames(mt) <- paste0("ix_",1:ncol(mt))
 			
 			df <- dplyr::as_tibble(mt) %>% dplyr::mutate(K= rep(y,dplyr::n()),
