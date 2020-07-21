@@ -37,3 +37,4 @@ Journal of the American Statistical Association 103 (1131-1154).
 \seealso{
 the supplementary section of the reference for the sorting algorithm.
 }
+\keyword{internal}

@@ -20,3 +20,4 @@ Diagnostics
 \item \code{stapDP}: 
 }}
 
+\keyword{internal}

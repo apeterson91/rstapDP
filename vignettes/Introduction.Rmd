@@ -5,6 +5,25 @@ vignette: >
   %\VignetteIndexEntry{Introduction}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteDepends{dplyr}
+  %\VignetteDepends{ggplot2}
+  %\VignetteDepends{rbenvo}
+references:
+- id: rodriguez
+  title: Nested Dirichlet Process
+  author:
+  - family: Rodriguez
+    given: Abel
+  container-title: Journal of the American Statistical Association
+  volume: 103
+  DOI: 10.1198/016214508000000553
+  issue: 483
+  publisher: Taylor \& Francis
+  page: 1131--1154
+  type: article-journal
+  issued:
+    year: 2012
+    month: 1
 ---
 
 ```{r, include = FALSE}
@@ -15,17 +34,78 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+
+# Motivation
+
+The [`rstap`](https://biostatistics4socialimpact.github.io/rstap) 
+and [`rsstap`](https://apeterson91.github.io/rsstap) packages introduced 
+Spatial Temporal Aggregated Predictor (STAP) models for estimating the effect of 
+spatio-temporal exposure to nearby Built Environment Features (BEFs) on human health. The effects
+estimated in those models were estimated to be homogenous at the level of the entire population; It was assumed in the model formulation that all individuals have the same effect of living near a BEF.The `rstapDP` package removes this assumption by
+allowing for heterogeneity in the STAP effect across the population. 
+
+## Illustrative Example
+
+For example, consider a sample of individuals near Fast Food Restaurants (FFRs) where half of the subjets are at "high risk"
+of having an average increase in their BMI as a consequence of living near the FFR.
+In contrast the other half of the population are "low risk" as they experience no increase
+in BMI. Identifying these effects without knowing these individuals' risk status, 
+or the number of risk populations requires the estimation of some number of STAP effects $f_i(\mathcal{D}_i)$ where $f(\cdot)$ is the (say) spatial exposure function relating how the average of health outcome $Y_i$ increases as a function of where a new FFR is placed relative to the subjects.
+
+
+
+The STAP-DP model which `rstapDP` impliments incorporates these ideas in a regression setting as follows:
+
+$$
+E[Y_i] =  \mathbf{Z}_i^{T} \mathbf{\delta} + f_i(\mathcal{D}_i) \quad i = 1,...,n.
+$$
+
+Above, $f_i(\mathcal{D})$, the smooth function of BEF exposure distances is modeled through
+spline regression coefficients, $\mathbf{\beta}_i$ similar to the `rsstap` package. However, in the `rstapDP` package, we place a Dirichlet Process (DP)  prior on these regression coefficients:
+
+$$
+f_i(\mathcal{D}_i) = \sum_{j=0}^{J}\sum_{d \in \mathcal{D}_i} \beta_{i,j}\phi_j(d)\\
+(\mathbf{\beta}_i,\mathbf{\tau}_i)  \sim  DP(\alpha,G_0)\\
+G_0 \equiv MVN(0,\mathbf{I}\sigma^{-2} \mathbf{\tau}_i)\times \text{Gamma}(a_{\tau},b_{\tau})\\
+\alpha \sim \text{Gamma}(a_{\alpha},b_{\alpha}).
+$$
+
+By placing a DP prior on the $\mathbf{\beta}$ coefficients, heterogenous effects clustering is induced, allowing for the estimation of the aforementioned high/low risk spatial exposure effects.
+
+In the following sections, this idea will be briefly illustrated using the simple simulated example. For more information, check out the `rstapDP` [documentation](https://apeterson91.github.io/rstapDP/reference/index.html).
+
+## Exploratory Data Analysis
+We'll begin by loading the appropriate libaries.
+
+
+```{r setup,message=F,results='hide',warning=FALSE}
 library(rstapDP)
-library(tidyverse)
+library(dplyr)
+library(ggplot2)
 library(rbenvo)
 theme_set(theme_bw())
+data("FFR_benvo")
 ```
 
-## STAP
+For this simple illustrative example, we'll use the data `FFR_benvo` (see [here](https://apeterson91.github.io/rbenvo/) for more information on `benvos`) which comes with the `rstapDP` package. This data is simulated in the manner previously described: with one high risk group that experiences an increase in the pseudo-BMI measure as a function of nearby FFRs, and one group that does not. We can get a brief description of the FFR data by calling the print and summary functions of the `FFR_benvo` object.
+
+```{r benvo_eda`}
+FFR_benvo
+```
 
 
-```{r fit}
+```{r benvo_eda2}
+bef_summary(FFR_benvo)
+```
+
+
+## Model Fitting and Results
+
+The following syntax shows how to fit the STAP-DP model. The `rstapDP`package fits the above model using a truncated DP Gibbs Sampler via `Rcpp`. We'll use the default prior reccomendations for the DP base measure and prior precision, drawing 5000 samples with the first 3000 used for burn in. Note that more/fewer iterations may be required depending on the complexity or 
+size of the data.
+
+
+```{r fit,results='hide',messages=F}
 fit <- fdp_staplm(BMI ~ sex + sap(FFR),
                   benvo = FFR_benvo,
                   K = 5,
@@ -36,28 +116,43 @@ fit <- fdp_staplm(BMI ~ sex + sap(FFR),
 ```
 
 
+With our model fitting complete, our first check will be to look at convergence diagnostics on the residual variance and concentration parameter as well as the posterior predictive checks via the `ppc` function.
+
+```{r diagnostics}
+diagnostics(fit)
+```
+
 ```{r ppcs}
 ppc(fit)
 ```
 
+An additional graphical check that can be used to identify clustering patterns is the pairwise probability matrix as described in [@rodriguez p.1136]
 
 ```{r pairs}
 plot_pairs(fit)
 ```
 
+Finally, we should take at look at the estimated and true exposure curves.
+
 ```{r truthpltdf,echo=F}
 truth <- tibble(Distance = seq(from=0,to=1,by=0.01),
                 Truth = 3*pweibull(Distance,shape = 5, scale = .6,lower.tail = F),
-                Cluster = "High Risk") %>% 
+                Cluster = "High Risk") %>%
   rbind(tibble(Distance = seq(from =0,to=1,by=0.01),
                Truth = 0,
-               Cluster = "Low Risk")) %>% mutate(Cluster = factor(Cluster)) 
+               Cluster = "Low Risk")) %>% mutate(Cluster = factor(Cluster))
 
 truth <- geom_line(aes(x=Distance,y=Truth,color=Cluster),data=truth)
   
 ```
 
+
+
 ```{r effects}
-plot_cluster_effects(fit,mode=F) + truth
+plot(fit) + truth
 ```
 
+The curves themselves, including the distance at which the exposure effect becomes negligible, in addition to the proportion with which individuals are assigned to these curves are the typical primary objectives for those interested in this model. However, we empahsize the importance of using the posterior predictive checks and diagnostics prior to reading too much into any curve or parameter estimates.
+
+
+# References

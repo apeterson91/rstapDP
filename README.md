@@ -6,9 +6,9 @@
 
 ## About
 
-This is an R package that (currently) fits a Linear Model with normally distributed residual error with a Dirichlet Process Prior 
-placed on a subset of the regression coefficients. The primary target audience is researchers interested in the effect
-of built environment features (BEFs) on human health, though other applications are possible. 
+The rstapDP package offers functions that fit a Linear Model with  a Dirichlet Process Prior 
+placed on a subset of the regression coefficients used to model the nonlinear effect of built environment feature (BEF) exposure across space/time. 
+The primary target audience is researchers interested in the effect of BEFs on human health, though other applications are possible. 
 
 ## Installation
 

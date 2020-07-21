@@ -5,6 +5,7 @@
 #' @template rodriguez
 #'
 #' @export
+#' @keywords internal
 #' @param x stapDP object
 #' @param sort boolean asking whether sorting algorithm should be used to sort
 #' pairwise probablity
@@ -14,6 +15,7 @@
 plot_pairs <- function(x,sort = FALSE, sample = 0)
     UseMethod("plot_pairs")
 
+#'
 #'
 #' @export
 #' @describeIn plot_pairs plot_pairwise probability matrix
@@ -72,7 +74,9 @@ plot_pairs.stapDP <- function(x,sort = FALSE,sample = 0){
     return(p)
 }
 
-#' Cluster Spatial Temporal Effects
+
+
+#' Cluster-Specific Spatial Temporal Effects
 #' 
 #' @export
 #' @keywords internal
@@ -80,23 +84,12 @@ plot_pairs.stapDP <- function(x,sort = FALSE,sample = 0){
 #' @param p probability contained in credible interval
 #' @param switch one of "color" or "facet" for different plotting options
 #' @param  prob_filter all mixture components with median probability < prob_filter are excluded from the plot
-#' @param mode boolean value indicating whether the cluster parameters that minimize the RSS should be used as a point estimate, or samples should be used.
+#' @param ... ignored
 #' @return plot with cluster effect across space
 #' 
-plot_cluster_effects <- function(x, p = 0.95, switch = "color", prob_filter = 0.1, mode = T)
-    UseMethod("plot_cluster_effects")
-
-
-#' 
-#' 
-#' @export
-#' @describeIn plot_cluster_effects 
-#' 
-plot_cluster_effects.stapDP <- function(x,
-										p = 0.95, 
-										switch = "color",
-										prob_filter = 0.1,
-										mode = T){
+plot.stapDP <- function(x,p = 0.95, 
+						switch = "color",
+						prob_filter = 0.1,...){
 
 	K <- Samples <- Parameter <- Lower <- Upper <- medp <- iteration_ix <- 
 		. <- Distance <- Median <- P <- y <- RSS <- mnRSS <- NULL
@@ -107,66 +100,41 @@ plot_cluster_effects.stapDP <- function(x,
 
 	ks <- x$probs %>% dplyr::group_by(K) %>% dplyr::summarise(medp=median(Samples))%>%
 		dplyr::filter(medp>prob_filter) %>% dplyr::pull(K)
+
+	if(length(ks)==0)
+		stop("No clusters included with set prob_filter, try a lower")
 	P <- max(as.integer(x$ranef$P))
 
-	if(mode)
-	{
-		x$yhat %>% 
-			dplyr::left_join(dplyr::tibble(id = unique(x$yhat$id), y = x$model$y)) %>% 
-			dplyr::group_by(iteration_ix) %>% dplyr::mutate(RSS = (Samples - y)^2) %>% 
-			dplyr::group_by(iteration_ix) %>% dplyr::summarise(RSS = sum(RSS)) %>% 
-			dplyr::ungroup() %>% dplyr::filter(iteration_ix!=0) %>%  
-			dplyr::mutate(mnRSS = min(RSS)) %>% dplyr::filter(RSS==mnRSS) %>% 
-			dplyr::pull(iteration_ix) -> ix
-
-		x$ranef %>% dplyr::filter(K %in% ks,iteration_ix==ix) %>% 
-		  tidyr::spread(P,Samples) %>% 
-		  dplyr::mutate_if(is.double,function(x) tidyr::replace_na(x,0)) %>%
-		  dplyr::group_by(iteration_ix,K) %>% 
-		  dplyr::summarise_if(is.double,sum) %>% 
-		  dplyr::ungroup() %>% 
-		  dplyr::select(-iteration_ix) %>% 
-		  split(.$K) %>% 
-		  purrr::map2_dfr(.,names(.),function(x,y) {
-			mt <- mat %*% (x %>% dplyr::select(as.character(1:P)) %>% as.matrix() %>% t())  
-			colnames(mt) <- paste0("ix_",1:ncol(mt))
-			
-			df <- dplyr::as_tibble(mt) %>% dplyr::mutate(K = rep(y,dplyr::n()),
-														 Distance = gd[,1]) %>% 
-			  tidyr::gather(dplyr::contains("ix_"),key="Iteration_ix",value="Samples")
-			}) -> pltdf
-
-		pltdf %>% dplyr::group_by(Distance,K) %>% 
-		  ggplot2::ggplot(ggplot2::aes(x=Distance,y=Samples,linetype=K)) + 
-		  ggplot2::geom_line(ggplot2::aes(color=K)) + ggplot2::theme_bw() + 
-		  ggplot2::labs(y="Exposure Effect") -> pl
-	}
-	else{
-		x$ranef %>% dplyr::filter(K %in% ks) %>% tidyr::spread(P,Samples) %>% 
-		  dplyr::mutate_if(is.double,function(x) tidyr::replace_na(x,0)) %>%
-		  dplyr::group_by(iteration_ix,K) %>% 
-		  dplyr::summarise_if(is.double,sum) %>% 
-		  dplyr::ungroup() %>% 
-		  dplyr::select(-iteration_ix) %>% 
-		  split(.$K) %>% 
-		  purrr::map2_dfr(.,names(.),function(x,y) {
-			mt <- mat %*% (x %>% dplyr::select(as.character(1:P)) %>% as.matrix() %>% t())  
-			colnames(mt) <- paste0("ix_",1:ncol(mt))
-			
-			df <- dplyr::as_tibble(mt) %>% dplyr::mutate(K= rep(y,dplyr::n()),
-														 Distance = gd[,1]) %>% 
-			  tidyr::gather(dplyr::contains("ix_"),key="Iteration_ix",value="Samples")
-			}) -> pltdf
-		pltdf %>% dplyr::group_by(Distance,K) %>% 
-		  dplyr::summarise(Lower = quantile(Samples,0.025),
-						   Median = median(Samples),
-						   Upper = quantile(Samples,0.975)) %>% 
-		  ggplot2::ggplot(ggplot2::aes(x=Distance,y=Median,linetype=K)) + 
-		  ggplot2::geom_line(ggplot2::aes(color=K)) + ggplot2::theme_bw() + 
+	x$ranef %>% dplyr::filter(K %in% ks) %>% tidyr::spread(P,Samples) %>% 
+	  dplyr::mutate_if(is.double,function(x) tidyr::replace_na(x,0)) %>%
+	  dplyr::group_by(iteration_ix,K) %>% 
+	  dplyr::summarise_if(is.double,sum) %>% 
+	  dplyr::ungroup() %>% 
+	  dplyr::select(-iteration_ix) %>% 
+	  split(.$K) %>% 
+	  purrr::map2_dfr(.,names(.),function(x,y) {
+		mt <- mat %*% (x %>% dplyr::select(as.character(1:P)) %>% as.matrix() %>% t())  
+		colnames(mt) <- paste0("ix_",1:ncol(mt))
+		
+		df <- dplyr::as_tibble(mt) %>% dplyr::mutate(K= rep(y,dplyr::n()),
+													 Distance = gd[,1]) %>% 
+		  tidyr::gather(dplyr::contains("ix_"),key="Iteration_ix",value="Samples")
+		}) -> pltdf
+	pltdf %>% dplyr::group_by(Distance,K) %>% 
+	  dplyr::summarise(Lower = quantile(Samples,0.025),
+					   Median = median(Samples),
+					   Upper = quantile(Samples,0.975)) %>% 
+	  ggplot2::ggplot(ggplot2::aes(x=Distance,y=Median,linetype=K)) -> p   
+	if (switch=="color"){
+		p + ggplot2::geom_line(ggplot2::aes(color=K)) + ggplot2::theme_bw() + 
 		  ggplot2::geom_ribbon(ggplot2::aes(ymin=Lower,ymax=Upper),alpha=0.3) + 
 		  ggplot2::labs(y="Exposure Effect") -> pl
-	}
-	
+	}else{
+		p + ggplot2::geom_line() + ggplot2::theme_bw() + 
+		  ggplot2::geom_ribbon(ggplot2::aes(ymin=Lower,ymax=Upper),alpha=0.3) + 
+		  ggplot2::facet_wrap(~K) + 
+		  ggplot2::labs(y="Exposure Effect") -> pl
+	} 	
 
 	return(pl)
 
@@ -175,6 +143,7 @@ plot_cluster_effects.stapDP <- function(x,
 #' Diagnostic Traceplots
 #' 
 #' @export
+#' @keywords internal
 #' @param x a stapDP object
 #' @param par string of parameter to use
 #' @param prob_filter median probability of cluster components to include in plot
@@ -184,7 +153,7 @@ traceplots <- function(x,par=c("probs"),prob_filter = .1){
 	UseMethod("traceplots")
 }
 
-#' 
+#'
 #' 
 #' @export
 #' @describeIn traceplots
@@ -201,10 +170,7 @@ traceplots.stapDP <- function(x,par=c("probs"),prob_filter = .1){
 		p <- x$pardf %>% dplyr::filter(Parameter == !!par) %>% ggplot2::ggplot(ggplot2::aes(x=iteration_ix,y=Samples,color=Parameter)) + ggplot2::geom_line() + ggplot2::theme_bw()
 	else{
 		if(par == "fixef")
-			p <- x[[par]] %>% ggplot2::ggplot(ggplot2::aes(x = iteration_ix ,y = Samples,color = Parameter)) + ggplot2::geom_line() + ggplot2::theme_bw() + ggplot2::facet_wrap(~Parameter, 
-			scales = "free") + ggplot2::theme(strip.background=ggplot2::element_blank())
-		else
-			p <- x[[par]] %>% dplyr::filter(K %in% ks) %>% 
+			p <- x[[par]] %>% ggplot2::ggplot(ggplot2::aes(x = iteration_ix ,y = Samples,color = Parameter)) + ggplot2::geom_line() + ggplot2::theme_bw() + ggplot2::facet_wrap(~Parameter, scales = "free") + ggplot2::theme(strip.background=ggplot2::element_blank()) else p <- x[[par]] %>% dplyr::filter(K %in% ks) %>% 
 				ggplot2::ggplot(ggplot2::aes(x = iteration_ix,y = Samples,color=Parameter)) + 
 				ggplot2::geom_line() + 
 				ggplot2::theme_bw() + ggplot2::facet_wrap(~Parameter + K,scales="free") + ggplot2::theme(strip.background = ggplot2::element_blank())
@@ -225,6 +191,7 @@ plotpars <- function(x,par=c("probs"),prob_filter = .1)
 
 #' Parameter Histograms
 #'
+#' @keywords internal
 #' @export
 #' @describeIn plotpars
 #'
@@ -254,6 +221,8 @@ plotpars.stapDP <- function(x,par=c("probs"),prob_filter = .1){
 #' Posterior Predictive Checks 
 #'
 #' @export
+#' @template reference-bda
+#' @keywords internal
 #' @param x a stapDP object
 #' @param num_reps number of yhat samples to plot
 #'
@@ -268,6 +237,10 @@ ppc <- function(x,num_reps = 20)
 ppc.stapDP <- function(x,num_reps = 20){
 
 	Samples <- Parameter <- iteration_ix <- NULL
+
+	max_num_iter <- max(x$yhat$iteration_ix)
+	if(num_reps > max_num_iter)
+		stop("Not enough iterations to display this many samples")
 
 	samp <- c(0,sample(1:max(x$yhat$iteration_ix),num_reps))
 	p <- suppressWarnings(x$yhat %>% dplyr::filter(iteration_ix %in% samp) %>% 

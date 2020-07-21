@@ -6,9 +6,9 @@
 \title{Small dataset for use in \pkg{rstapDP} examples and vignettes.}
 \format{A data frame with 1000 rows and 3 columns
 \describe{
-\item{\code{id}}{:The subject unique identifier}
-\item{\code{sex}}{:The measurement unique identifier}
-\item{\code{BMI}}{:The Built Environment Unique identifier}
+\item{\code{id}}{The subject unique identifier}
+\item{\code{sex}}{The measurement unique identifier}
+\item{\code{BMI}}{The Built Environment Unique identifier}
 }}
 \usage{
 FFR_subjects

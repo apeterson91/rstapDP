@@ -10,7 +10,7 @@
 print.stapDP <- function(x,digits=1,...){
 
 
-	Parameter <- Samples <- iteration_ix <- K <- P <- NULL
+	Parameter <- Samples <- iteration_ix <- K <- P <- med <- NULL
 	cat("fdp_staplm \n")
 	cat("\n Observations:", nrow(x$pmat))
 	cat("\n Formula: ", formula_string(x$model$formula))
@@ -26,33 +26,22 @@ print.stapDP <- function(x,digits=1,...){
 
 	.printfr(t(.median_and_madsd(mat)),digits)
 
-	mat <- x$pardf %>% tidyr::spread(Parameter,Samples) %>% dplyr::select(-iteration_ix) %>% 
-		as.matrix()
+	cat("\n ----------------------- \n ")
 
-	.printfr(.median_and_madsd(mat),digits)
+	cat("Number of Clusters\n ")
+
+	cat(summary(apply(x$cmat,1,function(x) length(unique(x)))))
+
+	topKs <- x$probs %>% dplyr::group_by(K) %>% dplyr::summarise(med = median(Samples)) %>% dplyr::filter(med>0.001) %>% dplyr::arrange(dplyr::desc(med)) %>% utils::head(5) %>% 
+		dplyr::pull(K)
 
 	cat("\n ----------------------- \n ")
 
-	cat("\n Random Effects  \n ")
-
-	mat<- x$ranef %>% dplyr::select(-K,-P) %>% 
-		tidyr::spread(Parameter,Samples)  %>% dplyr::select(-iteration_ix) %>% 
-		as.matrix()
-	for(k in 0:(x$model$K-1)){
-  		p <- ncol(mat) / x$model$K
-  		start <- (k*p+1)
-  		end <- start + p - 1
-  	  .printfr(t(.median_and_madsd(mat[,start:end,drop=F])),digits)
-		}
-
-	cat("\n Scales  \n ")
-
-	.printfr(t(.median_and_madsd(x$scales)),digits)
-
-
 	cat("\n Cluster Probabilities  \n ")
 
-	.printfr(t(.median_and_madsd(x$probs %>% dplyr::select(-K) %>% tidyr::spread(Parameter,Samples) %>% dplyr::select(-iteration_ix))),digits)
+	.printfr(t(.median_and_madsd(x$probs %>% dplyr::select(-Parameter) %>% dplyr::filter(K %in% topKs) %>%
+								 tidyr::spread(K,Samples) %>% dplyr::select(-iteration_ix))),digits)
+
 
 	cat("\n ----------------------- \n ")
 	cat("\n Auxiliary Variables \n ")
@@ -83,8 +72,9 @@ formula_string <- function(formula, break_and_indent = TRUE) {
 #' Diagnostics
 #'
 #' @export
+#' @keywords internal
 #' @param x a stapDP object
-#' 
+#'
 diagnostics <- function(x)
 	UseMethod("diagnostics")
 
@@ -95,15 +85,32 @@ diagnostics <- function(x)
 #' 
 diagnostics.stapDP <- function(x){
 
-	Parameter <- NULL
-
-	alpha <- coda::as.mcmc(x$pardf %>% dplyr::filter(Parameter == 'alpha' ) %>% dplyr::pull())
+	Parameter <- Samples<- iteration_ix <- select <- NULL
+	alphasamps <- x$pardf %>% dplyr::filter(Parameter == 'alpha' ) %>% dplyr::pull() 
+	alpha <- coda::as.mcmc(alphasamps)
 
 	sigma <- coda::as.mcmc(x$pardf %>% dplyr::filter(Parameter == 'sigma' ) %>% dplyr::pull())
 
-	mat <- c(coda::geweke.diag(alpha)[1]$z,coda::geweke.diag(sigma)[1]$z)
-	names(mat) <- c("alpha","sigma")
+	K <- max(as.integer(x$probs$K))
+
+	lbls <- paste0("pi_",1:K)
+	pis <- coda::as.mcmc(x$probs %>% tidyr::spread(Parameter,Samples)  %>%
+						 dplyr::mutate_at(lbls,function(x) tidyr::replace_na(x,0)) %>%
+						 dplyr::group_by(iteration_ix) %>% 
+						 dplyr::summarise_at(lbls,sum) %>% 
+						   select(lbls) %>% as.matrix())
+
+	matone <- c(coda::geweke.diag(alpha)[1]$z,coda::geweke.diag(sigma)[1]$z)
+	names(matone) <- c("alpha","sigma")
+	mattwo <- coda::geweke.diag(pis)[1]$z
 
 	cat("Diagnostics: \n ")
-	print(mat)
+	if(all(alphasamps==0)){
+		cat("Alpha has collapsed at zero. Expect to see NaN values for pis~=zero ")
+		cat("\n")
+	}
+	print(matone)
+	cat("\n")
+	print(mattwo)
+	return(invisible(list(alpha_sigma = matone,pis = mattwo)))
 }

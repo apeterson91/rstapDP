@@ -52,7 +52,7 @@ get_stapless_formula <- function(f){
 	str <- purrr::map(stap_mat[,2],function(x) {
 	  switch(x,
 	         "Distance-Time"= "t2(Distance,Time,bs='ps')", 
-	         "Distance" = "s(Distance,bs='ps')",
+	         "Distance" = "s(Distance,bs='ps',k=5)",
 	         "Time"= "s(Time,bs='ps')")
 	  })
 

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Print and Summary Method — print.stapDP • rstapDP</title>
+<title>Cluster-Specific Spatial Temporal Effects — plot.stapDP • rstapDP</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Print and Summary Method — print.stapDP" />
-<meta property="og:description" content="Print and Summary Method" />
+<meta property="og:title" content="Cluster-Specific Spatial Temporal Effects — plot.stapDP" />
+<meta property="og:description" content="Cluster-Specific Spatial Temporal Effects" />
 
 
 
@@ -115,17 +115,18 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Print and Summary Method</h1>
+    <h1>Cluster-Specific Spatial Temporal Effects</h1>
     
-    <div class="hidden name"><code>print.stapDP.Rd</code></div>
+    <div class="hidden name"><code>plot.stapDP.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Print and Summary Method</p>
+    <p>Cluster-Specific Spatial Temporal Effects</p>
     </div>
 
     <pre class="usage"><span class='co'># S3 method for stapDP</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='no'>x</span>, <span class='kw'>digits</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='no'>...</span>)</pre>
+<span class='fu'><a href='https://rdrr.io/r/base/plot.html'>plot</a></span>(<span class='no'>x</span>, <span class='kw'>p</span> <span class='kw'>=</span> <span class='fl'>0.95</span>, <span class='kw'>switch</span> <span class='kw'>=</span> <span class='st'>"color"</span>,
+  <span class='kw'>prob_filter</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='no'>...</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -135,8 +136,16 @@
       <td><p>stapDP object</p></td>
     </tr>
     <tr>
-      <th>digits</th>
-      <td><p>number of digits to round off to</p></td>
+      <th>p</th>
+      <td><p>probability contained in credible interval</p></td>
+    </tr>
+    <tr>
+      <th>switch</th>
+      <td><p>one of "color" or "facet" for different plotting options</p></td>
+    </tr>
+    <tr>
+      <th>prob_filter</th>
+      <td><p>all mixture components with median probability &lt; prob_filter are excluded from the plot</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -144,6 +153,9 @@
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>plot with cluster effect across space</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

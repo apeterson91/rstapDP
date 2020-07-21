@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Print and Summary Method — print.stapDP • rstapDP</title>
+<title>Computes Square loss with unknown classification — square_error • rstapDP</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Print and Summary Method — print.stapDP" />
-<meta property="og:description" content="Print and Summary Method" />
+<meta property="og:title" content="Computes Square loss with unknown classification — square_error" />
+<meta property="og:description" content="Computes Square loss with unknown classification" />
 
 
 
@@ -115,32 +115,27 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Print and Summary Method</h1>
+    <h1>Computes Square loss with unknown classification</h1>
     
-    <div class="hidden name"><code>print.stapDP.Rd</code></div>
+    <div class="hidden name"><code>square_error.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Print and Summary Method</p>
+    <p>Computes Square loss with unknown classification</p>
     </div>
 
-    <pre class="usage"><span class='co'># S3 method for stapDP</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='no'>x</span>, <span class='kw'>digits</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>square_error</span>(<span class='no'>cluster_assignment</span>, <span class='no'>pmat</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>x</th>
-      <td><p>stapDP object</p></td>
+      <th>cluster_assignment</th>
+      <td><p>iter_total x J cluster assignment matrix</p></td>
     </tr>
     <tr>
-      <th>digits</th>
-      <td><p>number of digits to round off to</p></td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td><p>ignored</p></td>
+      <th>pmat</th>
+      <td><p>J x J pairwise probability of co-clustering matrix</p></td>
     </tr>
     </table>
 

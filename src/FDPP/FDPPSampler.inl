@@ -48,8 +48,8 @@ void FDPPSampler::calculate_b(){
 	residual = y - Z * beta.head(P);
 	int start = P;
 	for(int k = 0; k < K; k++){
-		b.col(k)  =  log(pi(k)) - .5 * log(2 * M_PI ) - log(sigma) -  
-			(.5  * precision * pow( (residual -  X  * beta.segment(start,P_two) ).array(),2));
+		b.col(k)  =  log(pi(k)) - .5 * log(2 * M_PI ) - log(sigma * (1/w.array()))  -  
+			(.5  *  precision * w.array() * pow( (residual -  X  * beta.segment(start,P_two) ).array(),2));
 		start += P_two;
 	}
 
