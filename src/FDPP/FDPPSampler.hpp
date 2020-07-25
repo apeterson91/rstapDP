@@ -7,10 +7,10 @@
 class FDPPSampler
 {
 	private:
+		const Eigen::VectorXd &y;
+		const Eigen::MatrixXd &Z;
 		const Eigen::MatrixXd &X;
 		const Eigen::MatrixXd &S;
-		const Eigen::MatrixXd &Z;
-		const Eigen::VectorXd &y;
 		const Eigen::VectorXd &w;
 		Eigen::VectorXd yhat;
 		Eigen::MatrixXd X_fit;
@@ -54,6 +54,7 @@ class FDPPSampler
 		Eigen::MatrixXd nonzero_ics;
 		bool initializing = true;
 		bool flag = true;
+		const bool fix_alpha;
 		const double log_factor;
 
 	public:
@@ -71,16 +72,21 @@ class FDPPSampler
 				   const double &tau_b,
 				   const int &K,
 				   const int &num_penalties,
+				   const bool &fix_alpha,
 				   std::mt19937 &rng
 				   ): 
-			X(X), Z(Z), S(S), y(y),w(w),
-			alpha_b(alpha_b), tau_a(tau_a),
-			tau_b(tau_b), sigma_a(sigma_a),
+			y(y), Z(Z), X(X), S(S),  w(w),
+			alpha_b(alpha_b),sigma_a(sigma_a),
 			sigma_b(sigma_b),
-			n(y.rows()), P(Z.cols()), K(K),
-			Q(Z.cols() + X.cols()*K), P_two(X.cols()),
-			log_factor(log(pow(10,-16)) - log(n)),
-			num_penalties(num_penalties)
+			tau_a(tau_a), tau_b(tau_b),
+			P(Z.cols()), 
+			P_two(X.cols()),
+			n(y.rows()),
+			K(K),
+			Q(Z.cols() + X.cols()*K), 
+			num_penalties(num_penalties),
+			fix_alpha(fix_alpha),
+			log_factor(log(pow(10,-16)) - log(n))
 	{
 		num_nonzero = K;
 		temp_Q = P + P_two * num_nonzero;
@@ -102,8 +108,12 @@ class FDPPSampler
 		sigma = 1;
 		precision = 1;
 		std::gamma_distribution<double> rgamma(alpha_a,alpha_b);
-		alpha = rgamma(rng);
-		posterior_a_alpha = alpha_a + K - 1;
+		if(fix_alpha)
+			alpha = alpha_a;
+		else{
+			alpha = rgamma(rng);
+			posterior_a_alpha = alpha_a + K - 1;
+		}
 		stick_break(rng);
 		cluster_matrix.setZero(n,K);
 		initialize_beta(rng);

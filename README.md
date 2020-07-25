@@ -1,4 +1,4 @@
-## `rstapDP`: Spatial Temporal Aggregated Dirichlet Process Predictors in R
+## <img src="doc/figures/rstapDP_hex.png" align="right" width=95 height=100 /> `rstapDP`: Spatial Temporal Aggregated Dirichlet Process Predictors in R
 <!-- badges: start -->
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Travis build status](https://travis-ci.org/apeterson91/rstapDP.svg?branch=master)](https://travis-ci.org/apeterson91/rstapDP)
@@ -7,7 +7,7 @@
 ## About
 
 The rstapDP package offers functions that fit a Linear Model with  a Dirichlet Process Prior 
-placed on a subset of the regression coefficients used to model the nonlinear effect of built environment feature (BEF) exposure across space/time. 
+placed on a subset of the regression coefficients used to model the nonlinear heterogeneous effect of built environment feature (BEF) exposure across space/time. 
 The primary target audience is researchers interested in the effect of BEFs on human health, though other applications are possible. 
 
 ## Installation

@@ -17,6 +17,11 @@ stapDP <- function(object){
 
 	fixef <- object$beta[,1:length(object$Znames)]
 
+	Ks <- apply(object$probs,2,median)
+	K <- length(Ks)
+	P <- object$ncol_X
+	probs <- object$probs
+
 	ranef <- object$beta[,(length(object$Znames)+1):ncol(object$beta)]
 
 	colnames(fixef) <- object$Znames
@@ -25,18 +30,18 @@ stapDP <- function(object){
 
 	colnames(ranef) <- paste0("Distance K:",gd$k,"_P:",gd$p)
 
-	fixef <- dplyr::as_tibble(fixef,quiet=T) %>% 
+	fixef <- suppressWarnings(dplyr::as_tibble(fixef,quiet=T)) %>% 
 	  dplyr::mutate(iteration_ix = 1:dplyr::n()) %>% 
 	  tidyr::gather(object$Znames,key = "Parameter", value = "Samples")
 
-	ranef <- dplyr::as_tibble(ranef,quiet=T) %>% dplyr::mutate(iteration_ix = 1:dplyr::n()) %>% 
+	ranef <- suppressWarnings(dplyr::as_tibble(ranef,quiet=T)) %>% dplyr::mutate(iteration_ix = 1:dplyr::n()) %>% 
 	  tidyr::gather(colnames(ranef),key="Parameter",value="Samples") %>% 
 	  dplyr::mutate(K = as.integer(stringr::str_replace(stringr::str_extract(Parameter,"K:[0-9]{2}|K:[0-9]{1}"),"K:","")),
 					P = stringr::str_replace(stringr::str_extract(Parameter,"P:[0-9]{2}|P:[0-9]{1}"),"P:",""))
 
 	scales <- object$scales
 	colnames(scales) <- paste0("tau_",1:(object$K*object$num_penalties))
-	probs <- suppressMessages(dplyr::as_tibble(object$probs,quiet = T))
+	probs <- suppressWarnings(dplyr::as_tibble(probs,quiet = T))
 	colnames(probs) <- paste0("pi","_",1:object$K)
 	probs <- probs %>% dplyr::mutate(iteration_ix = 1:dplyr::n()) %>% 
 		tidyr::gather(dplyr::contains("pi"),key="Parameter",value="Samples") %>% 
@@ -49,7 +54,7 @@ stapDP <- function(object){
 
 	colnames(ys) <- paste("V_",1:ncol(object$yhat))
 
-	ys <- dplyr::as_tibble(ys,quiet=T) %>% dplyr::mutate(iteration_ix = 1:dplyr::n()) %>% 
+	ys <- suppressWarnings(dplyr::as_tibble(ys,quiet=T)) %>% dplyr::mutate(iteration_ix = 1:dplyr::n()) %>% 
 		tidyr::gather(dplyr::contains("V_"),key="id",value="Samples") %>% 
 		dplyr::mutate(id = as.integer(stringr::str_replace(id,"V_","")))
 

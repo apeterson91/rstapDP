@@ -124,16 +124,30 @@
     <p>Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model</p>
     </div>
 
-    <pre class="usage"><span class='fu'>fdp_staplm</span>(<span class='no'>formula</span>, <span class='no'>benvo</span>, <span class='kw'>weights</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>alpha_a</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>alpha_b</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>sigma_a</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>sigma_b</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>tau_a</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>tau_b</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>K</span> <span class='kw'>=</span> <span class='fl'>5</span>,
-  <span class='kw'>iter_max</span> <span class='kw'>=</span> <span class='fl'>1000</span>, <span class='kw'>burn_in</span> <span class='kw'>=</span> <span class='fl'>500</span>, <span class='kw'>thin</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>seed</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>fdp_staplm</span>(
+  <span class='no'>formula</span>,
+  <span class='no'>benvo</span>,
+  <span class='kw'>weights</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>alpha_a</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>alpha_b</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>sigma_a</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>sigma_b</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>tau_a</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>tau_b</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>K</span> <span class='kw'>=</span> <span class='fl'>5</span>,
+  <span class='kw'>iter_max</span> <span class='kw'>=</span> <span class='fl'>1000</span>,
+  <span class='kw'>burn_in</span> <span class='kw'>=</span> <span class='fl'>500</span>,
+  <span class='kw'>thin</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>fix_alpha</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>seed</span> <span class='kw'>=</span> <span class='kw'>NULL</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>formula</th>
-      <td><p>Similar as for <code>sstap_lm</code>, though fdp_staplm is currently restricted to only one stap term.</p></td>
+      <td><p>Similar as for <code><a href='https://rdrr.io/pkg/rsstap/man/sstap_lm.html'>sstap_lm</a></code>, though fdp_staplm is currently restricted to only one stap term.</p></td>
     </tr>
     <tr>
       <th>benvo</th>
@@ -145,7 +159,7 @@
     </tr>
     <tr>
       <th>alpha_a</th>
-      <td><p>alpha gamma prior hyperparameter</p></td>
+      <td><p>alpha gamma prior hyperparameter or alpha if fix_alpha = TRUE</p></td>
     </tr>
     <tr>
       <th>alpha_b</th>
@@ -182,6 +196,10 @@
     <tr>
       <th>thin</th>
       <td><p>number by which to thin samples</p></td>
+    </tr>
+    <tr>
+      <th>fix_alpha</th>
+      <td><p>boolean value indicating whether or not to fix the concentration parameter</p></td>
     </tr>
     <tr>
       <th>seed</th>

@@ -21,8 +21,9 @@
 #' @param thin number by which to thin samples
 #' @param seed rng initializer
 #' @param num_posterior_samples total number of posterior samples
-stappDP_fit <- function(y, Z, X, S, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples) {
-    .Call(`_rstapDP_stappDP_fit`, y, Z, X, S, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples)
+#' @param fix_alpha  boolean value that determines whether or not to fix alpha in sampler
+stappDP_fit <- function(y, Z, X, S, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, fix_alpha) {
+    .Call(`_rstapDP_stappDP_fit`, y, Z, X, S, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, fix_alpha)
 }
 
 #' Computes Green and Lau loss function with unknown classification

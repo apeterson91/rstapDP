@@ -4,9 +4,23 @@
 \alias{fdp_staplm}
 \title{Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model}
 \usage{
-fdp_staplm(formula, benvo, weights = NULL, alpha_a = 1, alpha_b = 1,
-  sigma_a = 1, sigma_b = 1, tau_a = 1, tau_b = 1, K = 5,
-  iter_max = 1000, burn_in = 500, thin = 1, seed = NULL)
+fdp_staplm(
+  formula,
+  benvo,
+  weights = NULL,
+  alpha_a = 1,
+  alpha_b = 1,
+  sigma_a = 1,
+  sigma_b = 1,
+  tau_a = 1,
+  tau_b = 1,
+  K = 5,
+  iter_max = 1000,
+  burn_in = 500,
+  thin = 1,
+  fix_alpha = FALSE,
+  seed = NULL
+)
 }
 \arguments{
 \item{formula}{Similar as for \code{\link[rsstap]{sstap_lm}}, though fdp_staplm is currently restricted to only one stap term.}
@@ -15,7 +29,7 @@ fdp_staplm(formula, benvo, weights = NULL, alpha_a = 1, alpha_b = 1,
 
 \item{weights}{weights for weighted regression - default is vector of ones}
 
-\item{alpha_a}{alpha gamma prior hyperparameter}
+\item{alpha_a}{alpha gamma prior hyperparameter or alpha if fix_alpha = TRUE}
 
 \item{alpha_b}{alpha gamma prior hyperparameter}
 
@@ -34,6 +48,8 @@ fdp_staplm(formula, benvo, weights = NULL, alpha_a = 1, alpha_b = 1,
 \item{burn_in}{number of burn in iterations}
 
 \item{thin}{number by which to thin samples}
+
+\item{fix_alpha}{boolean value indicating whether or not to fix the concentration parameter}
 
 \item{seed}{random number generator seed will be set to default value if not by user}
 }

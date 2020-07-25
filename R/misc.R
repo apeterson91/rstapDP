@@ -2,6 +2,7 @@
 #'
 #' Get formula for typical covariates
 #'
+#' @keywords internal
 #' @param f formula from stap_glm
 #' @return formula without  stap(),sap(),tap() components
 #'

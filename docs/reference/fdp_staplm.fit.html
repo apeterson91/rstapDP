@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model — fdp_staplm.fit • rstapDP</title>
+<title>Functional Dirichlet Process Spatial Temporal Aggregated Predictor Linear Model Fit — fdp_staplm.fit • rstapDP</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model — fdp_staplm.fit" />
-<meta property="og:description" content="Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model" />
+<meta property="og:title" content="Functional Dirichlet Process Spatial Temporal Aggregated Predictor Linear Model Fit — fdp_staplm.fit" />
+<meta property="og:description" content="Functional Dirichlet Process Spatial Temporal Aggregated Predictor Linear Model Fit" />
 
 
 
@@ -115,18 +115,34 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model</h1>
+    <h1>Functional Dirichlet Process Spatial Temporal Aggregated Predictor Linear Model Fit</h1>
     
     <div class="hidden name"><code>fdp_staplm.fit.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model</p>
+    <p>Functional Dirichlet Process Spatial Temporal Aggregated Predictor Linear Model Fit</p>
     </div>
 
-    <pre class="usage"><span class='fu'>fdp_staplm.fit</span>(<span class='no'>y</span>, <span class='no'>Z</span>, <span class='no'>X</span>, <span class='no'>S</span>, <span class='kw'>weights</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='fl'>1</span>, <span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span>(<span class='no'>y</span>)), <span class='kw'>alpha_a</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>alpha_b</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>sigma_a</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>sigma_b</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>tau_a</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>tau_b</span> <span class='kw'>=</span> <span class='fl'>1</span>,
-  <span class='kw'>K</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='no'>iter_max</span>, <span class='no'>burn_in</span>, <span class='no'>thin</span>, <span class='kw'>seed</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>fdp_staplm.fit</span>(
+  <span class='no'>y</span>,
+  <span class='no'>Z</span>,
+  <span class='no'>X</span>,
+  <span class='no'>S</span>,
+  <span class='kw'>weights</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='fl'>1</span>, <span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span>(<span class='no'>y</span>)),
+  <span class='kw'>alpha_a</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>alpha_b</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>sigma_a</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>sigma_b</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>tau_a</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>tau_b</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>K</span> <span class='kw'>=</span> <span class='fl'>5</span>,
+  <span class='no'>iter_max</span>,
+  <span class='no'>burn_in</span>,
+  <span class='kw'>thin</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>fix_alpha</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>seed</span> <span class='kw'>=</span> <span class='kw'>NULL</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -190,6 +206,10 @@
     <tr>
       <th>thin</th>
       <td><p>number by which to thin samples</p></td>
+    </tr>
+    <tr>
+      <th>fix_alpha</th>
+      <td><p>boolean value</p></td>
     </tr>
     <tr>
       <th>seed</th>

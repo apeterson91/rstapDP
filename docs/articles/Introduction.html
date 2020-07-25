@@ -85,16 +85,16 @@
 <div id="motivation" class="section level1">
 <h1 class="hasAnchor">
 <a href="#motivation" class="anchor"></a>Motivation</h1>
-<p>The <a href="https://biostatistics4socialimpact.github.io/rstap"><code>rstap</code></a> and <a href="https://apeterson91.github.io/rsstap"><code>rsstap</code></a> packages introduced Spatial Temporal Aggregated Predictor (STAP) models for estimating the effect of spatio-temporal exposure to nearby Built Environment Features (BEFs) on human health. The effects estimated in those models were estimated to be homogenous at the level of the entire population; It was assumed in the model formulation that all individuals have the same effect of living near a BEF.The <code>rstapDP</code> package removes this assumption by allowing for heterogeneity in the STAP effect across the population.</p>
+<p>The <a href="https://biostatistics4socialimpact.github.io/rstap"><code>rstap</code></a> and <a href="https://apeterson91.github.io/rsstap"><code>rsstap</code></a> packages introduced Spatial Temporal Aggregated Predictor (STAP) models for estimating the effect of spatio-temporal exposure to nearby Built Environment Features (BEFs) on human health. The effects estimated in those models were homogenous; It was assumed in the model formulation that all individuals have the same effect of living near a BEF.The <code>rstapDP</code> package removes this assumption by allowing for heterogeneity in the STAP effect across the population.</p>
 <div id="illustrative-example" class="section level2">
 <h2 class="hasAnchor">
 <a href="#illustrative-example" class="anchor"></a>Illustrative Example</h2>
-<p>For example, consider a sample of individuals near Fast Food Restaurants (FFRs) where half of the subjets are at “high risk” of having an average increase in their BMI as a consequence of living near the FFR. In contrast the other half of the population are “low risk” as they experience no increase in BMI. Identifying these effects without knowing these individuals’ risk status, or the number of risk populations requires the estimation of some number of STAP effects <span class="math inline">\(f_i(\mathcal{D}_i)\)</span> where <span class="math inline">\(f(\cdot)\)</span> is the (say) spatial exposure function relating how the average of health outcome <span class="math inline">\(Y_i\)</span> increases as a function of where a new FFR is placed relative to the subjects.</p>
-<p>The STAP-DP model which <code>rstapDP</code> impliments incorporates these ideas in a regression setting as follows:</p>
+<p>For example, consider a sample of individuals <span class="math inline">\((i=1,...,n)\)</span> near Fast Food Restaurants (FFRs) where half of the subjets are at “high risk”of having an average increase in their BMI as a consequence of living near the FFR. In contrast the other half of the population are “low risk” as they experience no increase in BMI. Identifying these effects without knowing these individuals’ risk status, or the number of risk populations requires the estimation of some number of STAP effects <span class="math inline">\(f_i(\mathcal{D}_i)\)</span> where <span class="math inline">\(f(\cdot)\)</span> is the (say) spatial exposure function relating how the average health outcome <span class="math inline">\(BMI_i\)</span> increases as a function of where a new FFR is placed relative to the subjects.</p>
+<p>The STAP-DP model which <code>rstapDP</code> incorporates these ideas in a regression setting as follows assuming covariate informatino <span class="math inline">\(Z_i\)</span> (e.g. sex and/or an intercept term) is also available:</p>
 <p><span class="math display">\[
-E[Y_i] =  \mathbf{Z}_i^{T} \mathbf{\delta} + f_i(\mathcal{D}_i) \quad i = 1,...,n.
+E[BMI_i] =  \mathbf{Z}_i^{T} \mathbf{\delta} + f_i(\mathcal{D}_i) \quad i = 1,...,n.
 \]</span></p>
-<p>Above, <span class="math inline">\(f_i(\mathcal{D})\)</span>, the smooth function of BEF exposure distances is modeled through spline regression coefficients, <span class="math inline">\(\mathbf{\beta}_i\)</span> similar to the <code>rsstap</code> package. However, in the <code>rstapDP</code> package, we place a Dirichlet Process (DP) prior on these regression coefficients:</p>
+<p>Above, <span class="math inline">\(f_i(\mathcal{D})\)</span>, the smooth function of BEF exposure is modeled through spline regression coefficients, <span class="math inline">\(\mathbf{\beta}_i\)</span> similar to the <code>rsstap</code> package. In the <code>rstapDP</code> package, we place a Dirichlet Process (DP) prior on these regression coefficients:</p>
 <p><span class="math display">\[
 f_i(\mathcal{D}_i) = \sum_{j=0}^{J}\sum_{d \in \mathcal{D}_i} \beta_{i,j}\phi_j(d)\\
 (\mathbf{\beta}_i,\mathbf{\tau}_i)  \sim  DP(\alpha,G_0)\\
@@ -108,13 +108,13 @@ G_0 \equiv MVN(0,\mathbf{I}\sigma^{-2} \mathbf{\tau}_i)\times \text{Gamma}(a_{\t
 <h2 class="hasAnchor">
 <a href="#exploratory-data-analysis" class="anchor"></a>Exploratory Data Analysis</h2>
 <p>We’ll begin by loading the appropriate libaries.</p>
-<div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">rstapDP</span>)
+<div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">rbenvo</span>)
+<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">rstapDP</span>)
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">dplyr</span>)
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">ggplot2</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">rbenvo</span>)
 <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme_get.html">theme_set</a></span>(<span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>())
 <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>(<span class="st">"FFR_benvo"</span>)</pre></body></html></div>
-<p>For this simple illustrative example, we’ll use the data <code>FFR_benvo</code> (see <a href="https://apeterson91.github.io/rbenvo/">here</a> for more information on <code>benvos</code>) which comes with the <code>rstapDP</code> package. This data is simulated in the manner previously described: with one high risk group that experiences an increase in the pseudo-BMI measure as a function of nearby FFRs, and one group that does not. We can get a brief description of the FFR data by calling the print and summary functions of the <code>FFR_benvo</code> object.</p>
+<p>For this simple illustrative example, we’ll use the data <code>FFR_benvo</code> (see <a href="https://apeterson91.github.io/rbenvo/">here</a> for more information on <code>benvos</code>) which comes with the <code>rstapDP</code> package. This data is simulated in the manner previously described: with one high risk group that experiences an increase in the pseudo-BMI measure as a function of nearby FFRs, and one group that does not. There is also a binary sex covariate simulated. We can get a brief description of the FFR data by calling the print and summary functions of the <code>FFR_benvo</code> object.</p>
 <div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="no">FFR_benvo</span>
 <span class="co">#&gt; Subject Data:</span>
 <span class="co">#&gt; ---------------------------:</span>
@@ -140,30 +140,26 @@ G_0 \equiv MVN(0,\mathbf{I}\sigma^{-2} \mathbf{\tau}_i)\times \text{Gamma}(a_{\t
 <p>The following syntax shows how to fit the STAP-DP model. The <code>rstapDP</code>package fits the above model using a truncated DP Gibbs Sampler via <code>Rcpp</code>. We’ll use the default prior reccomendations for the DP base measure and prior precision, drawing 5000 samples with the first 3000 used for burn in. Note that more/fewer iterations may be required depending on the complexity or size of the data.</p>
 <div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="no">fit</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/fdp_staplm.html">fdp_staplm</a></span>(<span class="no">BMI</span> ~ <span class="no">sex</span> + <span class="fu">sap</span>(<span class="no">FFR</span>),
                   <span class="kw">benvo</span> <span class="kw">=</span> <span class="no">FFR_benvo</span>,
-                  <span class="kw">K</span> <span class="kw">=</span> <span class="fl">5</span>,
-                  <span class="kw">iter_max</span> <span class="kw">=</span> <span class="fl">5000</span>,
-                  <span class="kw">burn_in</span> <span class="kw">=</span> <span class="fl">3000</span>,
+                  <span class="kw">K</span> <span class="kw">=</span> <span class="fl">5</span>, <span class="co">## for speed</span>
+                  <span class="kw">iter_max</span> <span class="kw">=</span> <span class="fl">7E3</span>,
+                  <span class="kw">burn_in</span> <span class="kw">=</span> <span class="fl">5E3</span>,
                   <span class="kw">thin</span> <span class="kw">=</span> <span class="fl">1</span>,
-                  <span class="kw">seed</span> <span class="kw">=</span> <span class="fl">43431</span>)
-<span class="co">#&gt; Warning: The `x` argument of `as_tibble.matrix()` must have unique column names if `.name_repair` is omitted as of tibble 2.0.0.</span>
-<span class="co">#&gt; Using compatibility `.name_repair`.</span>
-<span class="co">#&gt; This warning is displayed once every 8 hours.</span>
-<span class="co">#&gt; Call `lifecycle::last_warnings()` to see where this warning was generated.</span></pre></body></html></div>
+                  <span class="kw">seed</span> <span class="kw">=</span> <span class="fl">43431</span>)</pre></body></html></div>
 <p>With our model fitting complete, our first check will be to look at convergence diagnostics on the residual variance and concentration parameter as well as the posterior predictive checks via the <code>ppc</code> function.</p>
 <div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="fu"><a href="../reference/diagnostics.html">diagnostics</a></span>(<span class="no">fit</span>)
 <span class="co">#&gt; Diagnostics: </span>
 <span class="co">#&gt;  Alpha has collapsed at zero. Expect to see NaN values for pis~=zero </span>
 <span class="co">#&gt;    alpha    sigma </span>
-<span class="co">#&gt;      NaN 0.147859 </span>
+<span class="co">#&gt;      NaN 4.903625 </span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt;         pi_1         pi_2         pi_3         pi_4         pi_5 </span>
-<span class="co">#&gt;  0.691993332 -0.657720397 -0.003278971          NaN          NaN</span></pre></body></html></div>
+<span class="co">#&gt;      pi_1      pi_2      pi_3      pi_4      pi_5 </span>
+<span class="co">#&gt;  3.561222 -3.214725 -1.932097       NaN       NaN</span></pre></body></html></div>
 <div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="fu"><a href="../reference/ppc.html">ppc</a></span>(<span class="no">fit</span>)</pre></body></html></div>
 <p><img src="Introduction_files/figure-html/ppcs-1.png" width="700"></p>
 <p>An additional graphical check that can be used to identify clustering patterns is the pairwise probability matrix as described in <span class="citation">(Rodriguez 2012, 1136)</span></p>
-<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="../reference/plot_pairs.html">plot_pairs</a></span>(<span class="no">fit</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="../reference/plot_pairs.html">plot_pairs</a></span>(<span class="no">fit</span>,<span class="kw">sample</span><span class="kw">=</span><span class="fl">500</span>,<span class="kw">sort</span><span class="kw">=</span><span class="fl">TRUE</span>)</pre></body></html></div>
 <p><img src="Introduction_files/figure-html/pairs-1.png" width="700"></p>
-<p>Finally, we should take at look at the estimated and true exposure curves.</p>
+<p>Finally, we’ll take at look at the estimated and true exposure curves.</p>
 <div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>(<span class="no">fit</span>) + <span class="no">truth</span></pre></body></html></div>
 <p><img src="Introduction_files/figure-html/effects-1.png" width="700"></p>
 <p>The curves themselves, including the distance at which the exposure effect becomes negligible, in addition to the proportion with which individuals are assigned to these curves are the typical primary objectives for those interested in this model. However, we empahsize the importance of using the posterior predictive checks and diagnostics prior to reading too much into any curve or parameter estimates.</p>

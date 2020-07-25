@@ -12,7 +12,7 @@
 #' @param formula Similar as for \code{\link[rsstap]{sstap_lm}}, though fdp_staplm is currently restricted to only one stap term.
 #' @param benvo built environment object from the rbenvo package containing the relevant data
 #' @param weights weights for weighted regression - default is vector of ones 
-#' @param alpha_a alpha gamma prior hyperparameter
+#' @param alpha_a alpha gamma prior hyperparameter or alpha if fix_alpha = TRUE
 #' @param alpha_b alpha gamma prior hyperparameter
 #' @param sigma_a precision gamma prior hyperparameter
 #' @param sigma_b precision gamma prior hyperparameter
@@ -22,6 +22,7 @@
 #' @param iter_max maximum number of iterations
 #' @param burn_in number of burn in iterations
 #' @param thin number by which to thin samples
+#' @param fix_alpha boolean value indicating whether or not to fix the concentration parameter
 #' @param seed random number generator seed will be set to default value if not by user
 #' 
 #' @importFrom stats is.empty.model model.matrix model.response as.formula gaussian terms
@@ -31,17 +32,18 @@
 fdp_staplm <- function(formula,
                        benvo,
                        weights = NULL,
-          					   alpha_a = 1,
-          					   alpha_b = 1, 
-          					   sigma_a = 1,
-          					   sigma_b = 1,
-          					   tau_a = 1,
-          					   tau_b = 1,
-          					   K = 5,
-          					   iter_max = 1E3,
-          					   burn_in = 5E2,
-          					   thin = 1,
-          					   seed = NULL){
+					   alpha_a = 1,
+					   alpha_b = 1, 
+					   sigma_a = 1,
+					   sigma_b = 1,
+					   tau_a = 1,
+					   tau_b = 1,
+					   K = 5,
+					   iter_max = 1E3,
+					   burn_in = 5E2,
+					   thin = 1,
+					   fix_alpha = FALSE,
+					   seed = NULL){
 
 	## Parameter check
 	stopifnot(burn_in<iter_max && burn_in > 0)
@@ -60,6 +62,14 @@ fdp_staplm <- function(formula,
 	stap_component <- foo$stap_mat[,2]
 	bw <- as.integer(foo$stap_mat[,3])
 	stap_formula <- foo$fake_formula[[1]]
+	if(!all(stap_term %in% benvo@bef_names))
+		stop("sap,tap, or stap term must be applied to a BEF in the included benvo")
+	bvo_lookup <- sapply(stap_term, function(x) paste0(rbenvo::component_lookup(benvo,x),collapse="-"))
+	if(!all(bvo_lookup == stap_component )){
+		ics <- which(bvo_lookup!=stap_term)
+		stop(paste0(stap_term[ics]," do not have the ", stap_component[ics], " data in the included benvo needed for the sap/tap/stap term that you included in the formula"))
+	}
+
 
 	
 	## Handle Zero exposure in dt_data
@@ -84,7 +94,7 @@ fdp_staplm <- function(formula,
 	
 	
 	fit <- fdp_staplm.fit(y = mf$y,Z,X, S,weights, alpha_a,alpha_b,sigma_a,sigma_b,
-	                      tau_a,tau_b,K,iter_max,burn_in,thin,seed)
+	                      tau_a,tau_b,K,iter_max,burn_in,thin,fix_alpha,seed)
 	
     fit <- list(beta = fit$beta,
                 probs = fit$pi,
@@ -108,7 +118,7 @@ fdp_staplm <- function(formula,
 }
 
 
-#'  Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model
+#'  Functional Dirichlet Process Spatial Temporal Aggregated Predictor Linear Model Fit
 #' 
 #' @param y vector of outcomes
 #' @param Z design matrix
@@ -125,6 +135,7 @@ fdp_staplm <- function(formula,
 #' @param iter_max maximum number of iterations
 #' @param burn_in number of iterations to burn-in
 #' @param thin number by which to thin samples
+#' @param fix_alpha boolean value 
 #' @param seed random number generator seed will be set to default value if not by user
 #' @export
 #' 
@@ -137,8 +148,11 @@ fdp_staplm.fit <- function(y,Z,X,S,
                            tau_a = 1,
                            tau_b = 1,
                            K = 5,
-                           iter_max,burn_in,
-                           thin,seed = NULL){
+                           iter_max,
+						   burn_in,
+                           thin = 1,
+						   fix_alpha = FALSE,
+						   seed = NULL){
 
 	stopifnot(c(sigma_a,sigma_b,tau_a,tau_b,alpha_a,alpha_b)>0)
 	stopifnot(nrow(S) == ncol(Z) + ncol(X)*K)
@@ -155,7 +169,7 @@ fdp_staplm.fit <- function(y,Z,X,S,
   fit <- stappDP_fit(y,Z,X,S,weights,alpha_a,alpha_b,
 					 sigma_a,sigma_b,tau_a,tau_b,
 					 K,num_penalties,iter_max,burn_in,
-					 thin,seed,num_posterior_samples)
+					 thin,seed,num_posterior_samples,fix_alpha)
 
 
   return(fit)

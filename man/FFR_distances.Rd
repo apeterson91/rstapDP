@@ -4,11 +4,13 @@
 \name{FFR_distances}
 \alias{FFR_distances}
 \title{Small dataset for use in \pkg{rstapDP} examples and vignettes.}
-\format{A data frame with 9501 rows and 2 columns
+\format{
+A data frame with 9501 rows and 2 columns
 \describe{
 \item{ \code{id}}{ The subject unique identifier}
 \item{\code{Distance}}{The simulated distance between a hypothetical subject and fast food restaurant.}
-}}
+}
+}
 \usage{
 FFR_distances
 }

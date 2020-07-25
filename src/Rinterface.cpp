@@ -30,6 +30,7 @@
 //' @param thin number by which to thin samples
 //' @param seed rng initializer
 //' @param num_posterior_samples total number of posterior samples
+//' @param fix_alpha  boolean value that determines whether or not to fix alpha in sampler
 // [[Rcpp::export]]
 Rcpp::List stappDP_fit(const Eigen::VectorXd &y,
 					   const Eigen::MatrixXd &Z,
@@ -48,7 +49,8 @@ Rcpp::List stappDP_fit(const Eigen::VectorXd &y,
 					   const int &burn_in,
 					   const int &thin,
 					   const int &seed,
-					   const int &num_posterior_samples
+					   const int &num_posterior_samples,
+					   const bool &fix_alpha
 					   ) {
 
     // set seed
@@ -72,10 +74,9 @@ Rcpp::List stappDP_fit(const Eigen::VectorXd &y,
 	yhat_samples.setZero(num_posterior_samples,y.rows());
 
 	const int chain = 1;
-	int sample_ix = 0;
 
 	FDPPSampler sampler(y,Z,X,S,w, alpha_a,alpha_b,tau_a,tau_b,
-						sigma_a,sigma_b,K,num_penalties,rng);
+						sigma_a,sigma_b,K,num_penalties,fix_alpha,rng);
 
 
 	for(int iter_ix = 1; iter_ix <= iter_max; iter_ix ++){

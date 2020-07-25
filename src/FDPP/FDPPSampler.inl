@@ -127,10 +127,12 @@ void FDPPSampler::adjust_zero_clusters(std::mt19937 &rng){
 void FDPPSampler::update_weights(std::mt19937 &rng){
 
 	stick_break(rng);
-	posterior_b_alpha = 1.0 / alpha_b - (log(1 - u.array())).head(K-1).sum();
-	posterior_b_alpha = 1.0 / posterior_b_alpha;
-	std::gamma_distribution<double>  rgamma(posterior_a_alpha,posterior_b_alpha);
-	alpha = rgamma(rng);
+	if(!fix_alpha){
+		posterior_b_alpha = 1.0 / alpha_b - (log(1 - u.array())).head(K-1).sum();
+		posterior_b_alpha = 1.0 / posterior_b_alpha;
+		std::gamma_distribution<double>  rgamma(posterior_a_alpha,posterior_b_alpha);
+		alpha = rgamma(rng);
+	}
 }
 
 
@@ -191,7 +193,6 @@ void FDPPSampler::store_samples(Eigen::ArrayXXd &beta_samples,
 		tau_samples.block(sample_ix,K*pen_ix,1,K) = unique_taus.col(pen_ix);
 	yhat_samples.row(sample_ix) = yhat;
 	sample_ix ++;
-	int j = 0;
 	for(int i = 0; i< n; i ++){
 		for(int k = 0; k < K; k ++){
 			if(cluster_matrix(i,k) == 1)

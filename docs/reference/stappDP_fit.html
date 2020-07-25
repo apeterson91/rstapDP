@@ -124,9 +124,27 @@
     <p>Penalized Functional Dirichlet Process Logistic Regression</p>
     </div>
 
-    <pre class="usage"><span class='fu'>stappDP_fit</span>(<span class='no'>y</span>, <span class='no'>Z</span>, <span class='no'>X</span>, <span class='no'>S</span>, <span class='no'>w</span>, <span class='no'>alpha_a</span>, <span class='no'>alpha_b</span>, <span class='no'>sigma_a</span>, <span class='no'>sigma_b</span>, <span class='no'>tau_a</span>,
-  <span class='no'>tau_b</span>, <span class='no'>K</span>, <span class='no'>num_penalties</span>, <span class='no'>iter_max</span>, <span class='no'>burn_in</span>, <span class='no'>thin</span>, <span class='no'>seed</span>,
-  <span class='no'>num_posterior_samples</span>)</pre>
+    <pre class="usage"><span class='fu'>stappDP_fit</span>(
+  <span class='no'>y</span>,
+  <span class='no'>Z</span>,
+  <span class='no'>X</span>,
+  <span class='no'>S</span>,
+  <span class='no'>w</span>,
+  <span class='no'>alpha_a</span>,
+  <span class='no'>alpha_b</span>,
+  <span class='no'>sigma_a</span>,
+  <span class='no'>sigma_b</span>,
+  <span class='no'>tau_a</span>,
+  <span class='no'>tau_b</span>,
+  <span class='no'>K</span>,
+  <span class='no'>num_penalties</span>,
+  <span class='no'>iter_max</span>,
+  <span class='no'>burn_in</span>,
+  <span class='no'>thin</span>,
+  <span class='no'>seed</span>,
+  <span class='no'>num_posterior_samples</span>,
+  <span class='no'>fix_alpha</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -202,6 +220,10 @@
     <tr>
       <th>num_posterior_samples</th>
       <td><p>total number of posterior samples</p></td>
+    </tr>
+    <tr>
+      <th>fix_alpha</th>
+      <td><p>boolean value that determines whether or not to fix alpha in sampler</p></td>
     </tr>
     </table>
 

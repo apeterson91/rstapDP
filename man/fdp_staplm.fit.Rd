@@ -2,11 +2,27 @@
 % Please edit documentation in R/fdp_staplm.R
 \name{fdp_staplm.fit}
 \alias{fdp_staplm.fit}
-\title{Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model}
+\title{Functional Dirichlet Process Spatial Temporal Aggregated Predictor Linear Model Fit}
 \usage{
-fdp_staplm.fit(y, Z, X, S, weights = rep(1, length(y)), alpha_a = 1,
-  alpha_b = 1, sigma_a = 1, sigma_b = 1, tau_a = 1, tau_b = 1,
-  K = 5, iter_max, burn_in, thin, seed = NULL)
+fdp_staplm.fit(
+  y,
+  Z,
+  X,
+  S,
+  weights = rep(1, length(y)),
+  alpha_a = 1,
+  alpha_b = 1,
+  sigma_a = 1,
+  sigma_b = 1,
+  tau_a = 1,
+  tau_b = 1,
+  K = 5,
+  iter_max,
+  burn_in,
+  thin = 1,
+  fix_alpha = FALSE,
+  seed = NULL
+)
 }
 \arguments{
 \item{y}{vector of outcomes}
@@ -39,8 +55,10 @@ fdp_staplm.fit(y, Z, X, S, weights = rep(1, length(y)), alpha_a = 1,
 
 \item{thin}{number by which to thin samples}
 
+\item{fix_alpha}{boolean value}
+
 \item{seed}{random number generator seed will be set to default value if not by user}
 }
 \description{
-Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model
+Functional Dirichlet Process Spatial Temporal Aggregated Predictor Linear Model Fit
 }

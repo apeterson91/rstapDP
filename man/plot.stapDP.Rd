@@ -4,8 +4,7 @@
 \alias{plot.stapDP}
 \title{Cluster-Specific Spatial Temporal Effects}
 \usage{
-\method{plot}{stapDP}(x, p = 0.95, switch = "color",
-  prob_filter = 0.1, ...)
+\method{plot}{stapDP}(x, p = 0.95, switch = "color", prob_filter = 0.1, ...)
 }
 \arguments{
 \item{x}{stapDP object}

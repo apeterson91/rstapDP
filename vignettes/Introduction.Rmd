@@ -41,27 +41,24 @@ The [`rstap`](https://biostatistics4socialimpact.github.io/rstap)
 and [`rsstap`](https://apeterson91.github.io/rsstap) packages introduced 
 Spatial Temporal Aggregated Predictor (STAP) models for estimating the effect of 
 spatio-temporal exposure to nearby Built Environment Features (BEFs) on human health. The effects
-estimated in those models were estimated to be homogenous at the level of the entire population; It was assumed in the model formulation that all individuals have the same effect of living near a BEF.The `rstapDP` package removes this assumption by
-allowing for heterogeneity in the STAP effect across the population. 
+estimated in those models were homogenous; It was assumed in the model formulation that all individuals have the same effect of living near a BEF.The `rstapDP` package removes this assumption by allowing for heterogeneity in the STAP effect across the population. 
 
 ## Illustrative Example
 
-For example, consider a sample of individuals near Fast Food Restaurants (FFRs) where half of the subjets are at "high risk"
-of having an average increase in their BMI as a consequence of living near the FFR.
+For example, consider a sample of individuals $(i=1,...,n)$ near Fast Food Restaurants (FFRs) where half of the subjets are at "high risk"of having an average increase in their BMI as a consequence of living near the FFR. 
 In contrast the other half of the population are "low risk" as they experience no increase
 in BMI. Identifying these effects without knowing these individuals' risk status, 
-or the number of risk populations requires the estimation of some number of STAP effects $f_i(\mathcal{D}_i)$ where $f(\cdot)$ is the (say) spatial exposure function relating how the average of health outcome $Y_i$ increases as a function of where a new FFR is placed relative to the subjects.
+or the number of risk populations requires the estimation of some number of STAP effects $f_i(\mathcal{D}_i)$ where $f(\cdot)$ is the (say) spatial exposure function relating how the average health outcome $BMI_i$ increases as a function of where a new FFR is placed relative to the subjects.
 
 
-
-The STAP-DP model which `rstapDP` impliments incorporates these ideas in a regression setting as follows:
+The STAP-DP model which `rstapDP`  incorporates these ideas in a regression setting as follows assuming covariate informatino $Z_i$ (e.g. sex and/or an intercept term) is also available:
 
 $$
-E[Y_i] =  \mathbf{Z}_i^{T} \mathbf{\delta} + f_i(\mathcal{D}_i) \quad i = 1,...,n.
+E[BMI_i] =  \mathbf{Z}_i^{T} \mathbf{\delta} + f_i(\mathcal{D}_i) \quad i = 1,...,n.
 $$
 
-Above, $f_i(\mathcal{D})$, the smooth function of BEF exposure distances is modeled through
-spline regression coefficients, $\mathbf{\beta}_i$ similar to the `rsstap` package. However, in the `rstapDP` package, we place a Dirichlet Process (DP)  prior on these regression coefficients:
+Above, $f_i(\mathcal{D})$, the smooth function of BEF exposure  is modeled through
+spline regression coefficients, $\mathbf{\beta}_i$ similar to the `rsstap` package. In the `rstapDP` package, we place a Dirichlet Process (DP)  prior on these regression coefficients:
 
 $$
 f_i(\mathcal{D}_i) = \sum_{j=0}^{J}\sum_{d \in \mathcal{D}_i} \beta_{i,j}\phi_j(d)\\
@@ -79,15 +76,15 @@ We'll begin by loading the appropriate libaries.
 
 
 ```{r setup,message=F,results='hide',warning=FALSE}
+library(rbenvo)
 library(rstapDP)
 library(dplyr)
 library(ggplot2)
-library(rbenvo)
 theme_set(theme_bw())
 data("FFR_benvo")
 ```
 
-For this simple illustrative example, we'll use the data `FFR_benvo` (see [here](https://apeterson91.github.io/rbenvo/) for more information on `benvos`) which comes with the `rstapDP` package. This data is simulated in the manner previously described: with one high risk group that experiences an increase in the pseudo-BMI measure as a function of nearby FFRs, and one group that does not. We can get a brief description of the FFR data by calling the print and summary functions of the `FFR_benvo` object.
+For this simple illustrative example, we'll use the data `FFR_benvo` (see [here](https://apeterson91.github.io/rbenvo/) for more information on `benvos`) which comes with the `rstapDP` package. This data is simulated in the manner previously described: with one high risk group that experiences an increase in the pseudo-BMI measure as a function of nearby FFRs, and one group that does not. There is also a binary sex covariate simulated. We can get a brief description of the FFR data by calling the print and summary functions of the `FFR_benvo` object.
 
 ```{r benvo_eda`}
 FFR_benvo
@@ -108,9 +105,9 @@ size of the data.
 ```{r fit,results='hide',messages=F}
 fit <- fdp_staplm(BMI ~ sex + sap(FFR),
                   benvo = FFR_benvo,
-                  K = 5,
-                  iter_max = 5000,
-                  burn_in = 3000,
+                  K = 5, ## for speed
+                  iter_max = 7E3,
+                  burn_in = 5E3,
                   thin = 1,
                   seed = 43431)
 ```
@@ -129,10 +126,10 @@ ppc(fit)
 An additional graphical check that can be used to identify clustering patterns is the pairwise probability matrix as described in [@rodriguez p.1136]
 
 ```{r pairs}
-plot_pairs(fit)
+plot_pairs(fit,sample=500,sort=TRUE)
 ```
 
-Finally, we should take at look at the estimated and true exposure curves.
+Finally, we'll take at look at the estimated and true exposure curves.
 
 ```{r truthpltdf,echo=F}
 truth <- tibble(Distance = seq(from=0,to=1,by=0.01),

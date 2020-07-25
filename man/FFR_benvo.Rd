@@ -4,7 +4,9 @@
 \name{FFR_benvo}
 \alias{FFR_benvo}
 \title{Samll benvo for use in \pkg{rstapDP} examples and vignettes.}
-\format{A benvo consisting of the \code{FFR_subjects} and \code{FFR_distances} dataframes}
+\format{
+A benvo consisting of the \code{FFR_subjects} and \code{FFR_distances} dataframes
+}
 \usage{
 FFR_benvo
 }

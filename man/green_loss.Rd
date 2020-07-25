@@ -7,8 +7,7 @@
 \usage{
 green_loss(object, truth = NULL, tau = 0.5, a = 1, b = 1)
 
-\method{green_loss}{stapDP}(object, truth = NULL, tau = 0.5, a = 1,
-  b = 1)
+\method{green_loss}{stapDP}(object, truth = NULL, tau = 0.5, a = 1, b = 1)
 }
 \arguments{
 \item{object}{a stapDP object}

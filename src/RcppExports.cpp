@@ -7,8 +7,8 @@
 using namespace Rcpp;
 
 // stappDP_fit
-Rcpp::List stappDP_fit(const Eigen::VectorXd& y, const Eigen::MatrixXd& Z, const Eigen::MatrixXd& X, const Eigen::MatrixXd& S, const Eigen::VectorXd& w, const double& alpha_a, const double& alpha_b, const double& sigma_a, const double& sigma_b, const double& tau_a, const double& tau_b, const int& K, const int& num_penalties, const int& iter_max, const int& burn_in, const int& thin, const int& seed, const int& num_posterior_samples);
-RcppExport SEXP _rstapDP_stappDP_fit(SEXP ySEXP, SEXP ZSEXP, SEXP XSEXP, SEXP SSEXP, SEXP wSEXP, SEXP alpha_aSEXP, SEXP alpha_bSEXP, SEXP sigma_aSEXP, SEXP sigma_bSEXP, SEXP tau_aSEXP, SEXP tau_bSEXP, SEXP KSEXP, SEXP num_penaltiesSEXP, SEXP iter_maxSEXP, SEXP burn_inSEXP, SEXP thinSEXP, SEXP seedSEXP, SEXP num_posterior_samplesSEXP) {
+Rcpp::List stappDP_fit(const Eigen::VectorXd& y, const Eigen::MatrixXd& Z, const Eigen::MatrixXd& X, const Eigen::MatrixXd& S, const Eigen::VectorXd& w, const double& alpha_a, const double& alpha_b, const double& sigma_a, const double& sigma_b, const double& tau_a, const double& tau_b, const int& K, const int& num_penalties, const int& iter_max, const int& burn_in, const int& thin, const int& seed, const int& num_posterior_samples, const bool& fix_alpha);
+RcppExport SEXP _rstapDP_stappDP_fit(SEXP ySEXP, SEXP ZSEXP, SEXP XSEXP, SEXP SSEXP, SEXP wSEXP, SEXP alpha_aSEXP, SEXP alpha_bSEXP, SEXP sigma_aSEXP, SEXP sigma_bSEXP, SEXP tau_aSEXP, SEXP tau_bSEXP, SEXP KSEXP, SEXP num_penaltiesSEXP, SEXP iter_maxSEXP, SEXP burn_inSEXP, SEXP thinSEXP, SEXP seedSEXP, SEXP num_posterior_samplesSEXP, SEXP fix_alphaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -30,7 +30,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const int& >::type thin(thinSEXP);
     Rcpp::traits::input_parameter< const int& >::type seed(seedSEXP);
     Rcpp::traits::input_parameter< const int& >::type num_posterior_samples(num_posterior_samplesSEXP);
-    rcpp_result_gen = Rcpp::wrap(stappDP_fit(y, Z, X, S, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples));
+    Rcpp::traits::input_parameter< const bool& >::type fix_alpha(fix_alphaSEXP);
+    rcpp_result_gen = Rcpp::wrap(stappDP_fit(y, Z, X, S, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, fix_alpha));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -76,7 +77,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_rstapDP_stappDP_fit", (DL_FUNC) &_rstapDP_stappDP_fit, 18},
+    {"_rstapDP_stappDP_fit", (DL_FUNC) &_rstapDP_stappDP_fit, 19},
     {"_rstapDP_green_loss_unknown", (DL_FUNC) &_rstapDP_green_loss_unknown, 3},
     {"_rstapDP_green_loss_known", (DL_FUNC) &_rstapDP_green_loss_known, 5},
     {"_rstapDP_square_error", (DL_FUNC) &_rstapDP_square_error, 2},

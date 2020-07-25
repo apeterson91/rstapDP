@@ -15,3 +15,4 @@ formula without  stap(),sap(),tap() components
 \description{
 Get formula for typical covariates
 }
+\keyword{internal}

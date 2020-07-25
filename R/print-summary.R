@@ -29,17 +29,16 @@ print.stapDP <- function(x,digits=1,...){
 	cat("\n ----------------------- \n ")
 
 	cat("Number of Clusters\n ")
-
-	cat(summary(apply(x$cmat,1,function(x) length(unique(x)))))
-
-	topKs <- x$probs %>% dplyr::group_by(K) %>% dplyr::summarise(med = median(Samples)) %>% dplyr::filter(med>0.001) %>% dplyr::arrange(dplyr::desc(med)) %>% utils::head(5) %>% 
-		dplyr::pull(K)
+	cnumsum <- summary(apply(x$cmat,1,function(x) length(unique(x))))
+	cat(names(cnumsum))
+	cat("\n")
+	cat(cnumsum)
 
 	cat("\n ----------------------- \n ")
 
 	cat("\n Cluster Probabilities  \n ")
 
-	.printfr(t(.median_and_madsd(x$probs %>% dplyr::select(-Parameter) %>% dplyr::filter(K %in% topKs) %>%
+	.printfr(t(.median_and_madsd(x$probs %>% dplyr::select(-Parameter) %>% 
 								 tidyr::spread(K,Samples) %>% dplyr::select(-iteration_ix))),digits)
 
 
@@ -85,7 +84,7 @@ diagnostics <- function(x)
 #' 
 diagnostics.stapDP <- function(x){
 
-	Parameter <- Samples<- iteration_ix <- select <- NULL
+	Parameter <- Samples<- iteration_ix <- NULL
 	alphasamps <- x$pardf %>% dplyr::filter(Parameter == 'alpha' ) %>% dplyr::pull() 
 	alpha <- coda::as.mcmc(alphasamps)
 
@@ -98,7 +97,7 @@ diagnostics.stapDP <- function(x){
 						 dplyr::mutate_at(lbls,function(x) tidyr::replace_na(x,0)) %>%
 						 dplyr::group_by(iteration_ix) %>% 
 						 dplyr::summarise_at(lbls,sum) %>% 
-						   select(lbls) %>% as.matrix())
+						   dplyr::select(lbls) %>% as.matrix())
 
 	matone <- c(coda::geweke.diag(alpha)[1]$z,coda::geweke.diag(sigma)[1]$z)
 	names(matone) <- c("alpha","sigma")
