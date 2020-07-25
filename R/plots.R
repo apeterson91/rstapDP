@@ -5,7 +5,6 @@
 #' @template rodriguez
 #'
 #' @export
-#' @keywords internal
 #' @param x stapDP object
 #' @param sort boolean asking whether sorting algorithm should be used to sort
 #' pairwise probablity
@@ -79,7 +78,6 @@ plot_pairs.stapDP <- function(x,sort = FALSE,sample = 0){
 #' Cluster-Specific Spatial Temporal Effects
 #' 
 #' @export
-#' @keywords internal
 #' @param x stapDP object
 #' @param p probability contained in credible interval
 #' @param switch one of "color" or "facet" for different plotting options
@@ -143,7 +141,6 @@ plot.stapDP <- function(x,p = 0.95,
 #' Diagnostic Traceplots
 #' 
 #' @export
-#' @keywords internal
 #' @param x a stapDP object
 #' @param par string of parameter to use
 #' @param prob_filter median probability of cluster components to include in plot
@@ -191,7 +188,6 @@ plotpars <- function(x,par=c("probs"),prob_filter = .1)
 
 #' Parameter Histograms
 #'
-#' @keywords internal
 #' @export
 #' @describeIn plotpars
 #'
@@ -222,7 +218,6 @@ plotpars.stapDP <- function(x,par=c("probs"),prob_filter = .1){
 #'
 #' @export
 #' @template reference-bda
-#' @keywords internal
 #' @param x a stapDP object
 #' @param num_reps number of yhat samples to plot
 #'

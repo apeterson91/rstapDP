@@ -70,8 +70,9 @@ formula_string <- function(formula, break_and_indent = TRUE) {
 
 #' Diagnostics
 #'
+#' Reports the Geweke diagnostic statistic for the concentration parameter alpha,
+#' residual standard deviation sigma and cluster specific probabilities \eqn{\pi_k}.
 #' @export
-#' @keywords internal
 #' @param x a stapDP object
 #'
 diagnostics <- function(x)
