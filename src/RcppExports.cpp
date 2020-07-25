@@ -35,52 +35,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// green_loss_unknown
-Eigen::ArrayXd green_loss_unknown(const Eigen::ArrayXXi& cluster_assignment, const Eigen::ArrayXXd& pmat, const double& tau);
-RcppExport SEXP _rstapDP_green_loss_unknown(SEXP cluster_assignmentSEXP, SEXP pmatSEXP, SEXP tauSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::ArrayXXi& >::type cluster_assignment(cluster_assignmentSEXP);
-    Rcpp::traits::input_parameter< const Eigen::ArrayXXd& >::type pmat(pmatSEXP);
-    Rcpp::traits::input_parameter< const double& >::type tau(tauSEXP);
-    rcpp_result_gen = Rcpp::wrap(green_loss_unknown(cluster_assignment, pmat, tau));
-    return rcpp_result_gen;
-END_RCPP
-}
-// green_loss_known
-Eigen::ArrayXd green_loss_known(const Eigen::ArrayXXi& cluster_assignment, const Eigen::ArrayXXd& pmat, const Eigen::ArrayXXi& true_cluster_assignment, const double& a, const double& b);
-RcppExport SEXP _rstapDP_green_loss_known(SEXP cluster_assignmentSEXP, SEXP pmatSEXP, SEXP true_cluster_assignmentSEXP, SEXP aSEXP, SEXP bSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::ArrayXXi& >::type cluster_assignment(cluster_assignmentSEXP);
-    Rcpp::traits::input_parameter< const Eigen::ArrayXXd& >::type pmat(pmatSEXP);
-    Rcpp::traits::input_parameter< const Eigen::ArrayXXi& >::type true_cluster_assignment(true_cluster_assignmentSEXP);
-    Rcpp::traits::input_parameter< const double& >::type a(aSEXP);
-    Rcpp::traits::input_parameter< const double& >::type b(bSEXP);
-    rcpp_result_gen = Rcpp::wrap(green_loss_known(cluster_assignment, pmat, true_cluster_assignment, a, b));
-    return rcpp_result_gen;
-END_RCPP
-}
-// square_error
-Eigen::ArrayXd square_error(const Eigen::ArrayXXi& cluster_assignment, const Eigen::ArrayXXd& pmat);
-RcppExport SEXP _rstapDP_square_error(SEXP cluster_assignmentSEXP, SEXP pmatSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::ArrayXXi& >::type cluster_assignment(cluster_assignmentSEXP);
-    Rcpp::traits::input_parameter< const Eigen::ArrayXXd& >::type pmat(pmatSEXP);
-    rcpp_result_gen = Rcpp::wrap(square_error(cluster_assignment, pmat));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_rstapDP_stappDP_fit", (DL_FUNC) &_rstapDP_stappDP_fit, 19},
-    {"_rstapDP_green_loss_unknown", (DL_FUNC) &_rstapDP_green_loss_unknown, 3},
-    {"_rstapDP_green_loss_known", (DL_FUNC) &_rstapDP_green_loss_known, 5},
-    {"_rstapDP_square_error", (DL_FUNC) &_rstapDP_square_error, 2},
     {NULL, NULL, 0}
 };
 

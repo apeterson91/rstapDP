@@ -25,4 +25,3 @@ Diagnostic Traceplots
 \item \code{stapDP}: 
 }}
 
-\keyword{internal}
