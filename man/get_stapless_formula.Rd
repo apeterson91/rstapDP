@@ -7,7 +7,7 @@
 get_stapless_formula(f)
 }
 \arguments{
-\item{f}{formula from stap_glm}
+\item{f}{formula from fdp_stapDP}
 }
 \value{
 formula without  stap(),sap(),tap() components

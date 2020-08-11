@@ -27,4 +27,3 @@ Parameter Histograms
 \item \code{stapDP}: 
 }}
 
-\keyword{internal}

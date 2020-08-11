@@ -12,7 +12,7 @@ print.stapDP <- function(x,digits=1,...){
 
 	Parameter <- Samples <- iteration_ix <- K <- P <- med <- NULL
 	cat("fdp_staplm \n")
-	cat("\n Observations:", nrow(x$pmat))
+	cat("\n Observations:", length(x$model$y))
 	cat("\n Formula: ", formula_string(x$model$formula))
 	cat("\n Fixed predictors: ",length(unique(x$fixef$Parameter)))
 	cat("\n K: ",as.character(x$model$K))

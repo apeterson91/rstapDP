@@ -22,7 +22,8 @@ Imports:
     Matrix,
     rbenvo (>= 0.1.0),
     lme4,
-    RcppProgress
+    RcppProgress,
+    rsstap
 LinkingTo: Rcpp, RcppEigen
 Suggests: 
     knitr,

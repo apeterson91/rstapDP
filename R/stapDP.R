@@ -71,6 +71,8 @@ stapDP <- function(object){
 				ranef = ranef,
 				probs = probs,
 				yhat = yhat,
+				D = object$D,
+				subj_b = object$subj_b,
 				scales = scales,
 				pmat = object$pmat,
 				cmat = object$cluster_mat,

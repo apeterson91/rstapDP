@@ -1,15 +1,17 @@
-#' Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model
+#' Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Mixed Effects Regression Model
 #' 
-#' @details This function fits a linear model in a bayesian paradigm with
+#' @details This function fits a linear mixed effects regression model in a bayesian paradigm with
 #' improper priors assigned to the "standard" regression covariates designated 
 #' in the formula argument and a Dirichlet process prior with normal-gamma base measure 
 #' assigned to the stap basis function expansion using penalized splines via \code{\link[mgcv]{jagam}}.
+#' normal priors are placed on the latent group variables and an improper prior is placed on the 
+#' correlation matrix leading to a Wishart posterior.
 #'
 #' The concentration parameter is assigned gamma prior with  hyperparameters shape alpha_a and scale alpha_b.
 #'  Precision parameters sigma_a,sigma_b, tau_a,tau_b are similar for the residual and penalties' precision, respectively.
 #' 
-#' @param formula Similar as for \code{\link[rsstap]{sstap_lm}}, though fdp_staplm is currently restricted to only one stap term.
-#' @param benvo built environment object from the rbenvo package containing the relevant data
+#' @param formula Similar as for \code{\link[rsstap]{sstap_lmer}}, though fdp_staplmer is currently restricted to only one stap term.
+#' @param benvo built environment - \code{\link[rbenvo]{Benvo}} - object from containing the relevant subject - Built Environment data
 #' @param weights weights for weighted regression - default is vector of ones 
 #' @param alpha_a alpha gamma prior hyperparameter or alpha if fix_alpha = TRUE
 #' @param alpha_b alpha gamma prior hyperparameter
@@ -28,101 +30,92 @@
 #' @export
 #' @return a stapDP model object
 #' 
-fdp_staplm <- function(formula,
-                       benvo,
-                       weights = NULL,
-					   alpha_a = 1,
-					   alpha_b = 1, 
-					   sigma_a = 1,
-					   sigma_b = 1,
-					   tau_a = 1,
-					   tau_b = 1,
-					   K = 5,
-					   iter_max = 1E3,
-					   burn_in = 5E2,
-					   thin = 1,
-					   fix_alpha = FALSE,
-					   seed = NULL){
+fdp_staplmer <- function(formula,
+						 benvo,
+						 weights = NULL,
+						 alpha_a = 1,
+						 alpha_b = 1, 
+						 sigma_a = 1,
+						 sigma_b = 1,
+						 tau_a = 1,
+						 tau_b = 1,
+						 K = 5,
+						 iter_max = 1E3,
+						 burn_in = 5E2,
+						 thin = 1,
+						 fix_alpha = FALSE,
+						 seed = NULL){
 
 	## Parameter check
 	stopifnot(burn_in<iter_max && burn_in > 0)
 	stopifnot(any(c(alpha_a,alpha_b,sigma_a,sigma_b,tau_a,tau_b)>0))
 	stopifnot(thin>0)
 	## 
-	
-	foo <- get_stapless_formula(formula)
-	f <- foo$stapless_formula
-	mf <- rbenvo::subject_design(benvo,f)
-	Z <- mf$X
 	call <- match.call(expand.dots = TRUE)
-	if(nrow(foo$stap_mat)>1)
+	
+	spec <- get_stapDPspec(formula,K,benvo)
+	foo <- spec$stapless_formula
+	mf <- rbenvo::longitudinal_design(benvo,foo)
+	W <- get_W(mf$glmod)
+	subj_mat <- get_subjmat(mf$glmod)
+
+	if(length(spec$term)>1)
 		stop("Only one stap/sap/tap term allowed")
-	stap_term <- foo$stap_mat[,1]
-	stap_component <- foo$stap_mat[,2]
-	bw <- as.integer(foo$stap_mat[,3])
-	stap_formula <- foo$fake_formula[[1]]
-	if(!all(stap_term %in% benvo@bef_names))
-		stop("sap,tap, or stap term must be applied to a BEF in the included benvo")
-	bvo_lookup <- sapply(stap_term, function(x) paste0(rbenvo::component_lookup(benvo,x),collapse="-"))
-	if(!all(bvo_lookup == stap_component )){
-		ics <- which(bvo_lookup!=stap_term)
-		stop(paste0(stap_term[ics]," do not have the ", stap_component[ics], " data in the included benvo needed for the sap/tap/stap term that you included in the formula"))
-	}
 
-
-	
-	## Handle Zero exposure in dt_data
-	jd <- mgcv::jagam(formula = stap_formula,family = gaussian(),
-					  data = rbenvo::joinvo(benvo,
-											stap_term,
-											stap_component,
-											NA_to_zero = TRUE),
-					  file = tempfile(fileext=".jags"),
-					  weights = NULL,
-					  offset = NULL,
-					  centred = FALSE,
-					  diagonalize = FALSE)
-
-	X <- rbenvo::aggrenvo(benvo,jd$jags.data$X,stap_term,stap_component)
-	S <- lapply(jd$pregam$S,function(x) kronecker(diag(K),x))
-	S <- lapply(S,function(m) rbind(matrix(0,ncol=ncol(m)+ncol(Z),nrow=ncol(Z)),
-	           cbind(matrix(0,nrow=nrow(m),ncol=ncol(Z)),m)))
-	
 	if(is.null(weights))
 	  weights <- rep(1,length(mf$y))
 	
 	
-	fit <- fdp_staplm.fit(y = mf$y,Z,X, S,weights, alpha_a,alpha_b,sigma_a,sigma_b,
-	                      tau_a,tau_b,K,iter_max,burn_in,thin,fix_alpha,seed)
+	fit <- fdp_staplmer.fit(y = mf$y,
+							Z = mf$X,
+							X = spec$X,
+							W = W,
+							S = spec$S,
+							subj_mat = Matrix::t(subj_mat),
+							subj_n = Matrix::rowSums(subj_mat),
+							weights, 
+							alpha_a,
+							alpha_b,
+							sigma_a,
+							sigma_b,
+							tau_a,tau_b,
+							K,iter_max,
+							burn_in,thin,
+							fix_alpha,seed)
 	
     fit <- list(beta = fit$beta,
                 probs = fit$pi,
                 sigma = fit$sigma,
                 alpha = fit$alpha, 
                 yhat = fit$yhat,
+				subj_b = fit$subj_b,
+				D = fit$subj_D,
+                num_penalties = length(spec$S),
                 cluster_mat = fit$cluster_assignment,
                 scales =  fit$tau,
-				num_penalties = length(S),
                 pmat = fit$PairwiseProbabilityMat,
                 clabels = fit$cluster_assignment,
-                Znames = colnames(Z),
-                ncol_X = ncol(X),
+                Znames = colnames(mf$X),
+                ncol_X = ncol(spec$X[[1]]),
                 formula = formula,
-                sobj = jd$pregam$smooth[[1]],
-				alpha_a = alpha_a,
-				alpha_b = alpha_b,
+        				alpha_a = alpha_a,
+        				alpha_b = alpha_b,
                 y = mf$y,
                 K = K)
+
 	return(stapDP(fit))
 }
 
 
-#'  Functional Dirichlet Process Spatial Temporal Aggregated Predictor Linear Model Fit
+#'  Functional Dirichlet Process Spatial Temporal Aggregated Predictor Linear Mixed Effects Regression Model Fit
 #' 
 #' @param y vector of outcomes
 #' @param Z design matrix
 #' @param X stap design matrix
+#' @param W group terms design matrix from \code{\link[lme4]{glFormula}}
 #' @param S list of penalty matrices from \code{\link[mgcv]{jagam}} 
+#' @param subj_mat matrix indexing subject-measurement locations in (Z,X,W)
+#' @param subj_n  vector of number of subject measurements
 #' @param alpha_a alpha gamma prior hyperparameter
 #' @param alpha_b alpha gamma prior hyperparameter
 #' @param sigma_a precision gamma prior hyperparameter
@@ -138,20 +131,22 @@ fdp_staplm <- function(formula,
 #' @param seed random number generator seed will be set to default value if not by user
 #' @export
 #' 
-fdp_staplm.fit <- function(y,Z,X,S,
-                           weights = rep(1,length(y)),
-                           alpha_a = 1,
-                           alpha_b = 1, 
-                           sigma_a = 1,
-                           sigma_b = 1,
-                           tau_a = 1,
-                           tau_b = 1,
-                           K = 5,
-                           iter_max,
-						   burn_in,
-                           thin = 1,
-						   fix_alpha = FALSE,
-						   seed = NULL){
+fdp_staplmer.fit <- function(y,Z,X,W,S,
+                             subj_mat,
+							 subj_n,
+							 weights = rep(1,length(y)),
+							 alpha_a = 1,
+							 alpha_b = 1, 
+							 sigma_a = 1,
+							 sigma_b = 1,
+							 tau_a = 1,
+							 tau_b = 1,
+							 K = 5,
+							 iter_max,
+							 burn_in,
+							 thin = 1,
+							 fix_alpha = FALSE,
+							 seed = NULL){
 
 	stopifnot(c(sigma_a,sigma_b,tau_a,tau_b,alpha_a,alpha_b)>0)
 	stopifnot(nrow(S) == ncol(Z) + ncol(X)*K)
@@ -165,7 +160,9 @@ fdp_staplm.fit <- function(y,Z,X,S,
 
   num_penalties <- length(S) ## default for smoothing
   S <- do.call(cbind,S)
-  fit <- stappDP_fit(y,Z,X,S,weights,alpha_a,alpha_b,
+  X <- do.call(cbind,X)
+  fit <- stappDP_mer_fit(y,Z,X,W,S,weights,subj_mat,
+					 subj_n,alpha_a,alpha_b,
 					 sigma_a,sigma_b,tau_a,tau_b,
 					 K,num_penalties,iter_max,burn_in,
 					 thin,seed,num_posterior_samples,fix_alpha)

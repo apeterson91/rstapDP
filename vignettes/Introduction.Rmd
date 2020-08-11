@@ -98,7 +98,7 @@ bef_summary(FFR_benvo)
 
 ## Model Fitting and Results
 
-The following syntax shows how to fit the STAP-DP model. The `rstapDP`package fits the above model using a truncated DP Gibbs Sampler via `Rcpp`. We'll use the default prior reccomendations for the DP base measure and prior precision, drawing 5000 samples with the first 3000 used for burn in. Note that more/fewer iterations may be required depending on the complexity or 
+The following syntax shows how to fit the STAP-DP model. The `rstapDP`package fits the above model using a truncated DP Gibbs Sampler via `Rcpp`. We'll use the default prior recommendations for the DP base measure and prior precision, drawing 5000 samples with the first 3000 used for burn in. Note that more/fewer iterations may be required depending on the complexity or 
 size of the data.
 
 

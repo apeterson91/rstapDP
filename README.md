@@ -44,3 +44,4 @@ Please note that `rstapDP` is released with a [Contributor Code of Conduct](http
 This work was developed with support from NIH grant R01-HL131610 (PI: Sanchez).
 
 
+Special thanks to Adam Youncan for help with the package hex.

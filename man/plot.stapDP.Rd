@@ -23,4 +23,3 @@ plot with cluster effect across space
 \description{
 Cluster-Specific Spatial Temporal Effects
 }
-\keyword{internal}

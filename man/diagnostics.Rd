@@ -13,11 +13,11 @@ diagnostics(x)
 \item{x}{a stapDP object}
 }
 \description{
-Diagnostics
+Reports the Geweke diagnostic statistic for the concentration parameter alpha,
+residual standard deviation sigma and cluster specific probabilities \eqn{\pi_k}.
 }
 \section{Methods (by class)}{
 \itemize{
 \item \code{stapDP}: 
 }}
 
-\keyword{internal}
