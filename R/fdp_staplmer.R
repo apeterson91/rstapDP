@@ -83,25 +83,25 @@ fdp_staplmer <- function(formula,
 							burn_in,thin,
 							fix_alpha,seed)
 	
-    fit <- list(beta = fit$beta,
-                probs = fit$pi,
-                sigma = fit$sigma,
-                alpha = fit$alpha, 
-                yhat = fit$yhat,
-				subj_b = fit$subj_b,
-				D = fit$subj_D,
-                num_penalties = length(spec$S),
-                cluster_mat = fit$cluster_assignment,
-                scales =  fit$tau,
-                pmat = fit$PairwiseProbabilityMat,
-                clabels = fit$cluster_assignment,
-                Znames = colnames(mf$X),
-                ncol_X = ncol(spec$X[[1]]),
+    fit <- list(pars = list(beta = fit$beta,
+							pi = fit$pi,
+							sigma = fit$sigma,
+							alpha = fit$alpha,
+							yhat = fit$yhat,
+							subj_b = fit$subj_b,
+							subj_D = fit$subj_D,
+							cluster_mat = fit$cluster_mat,
+							scales = fit$tau,
+							pmat = fit$PairwiseProbabilityMat,
+							clabels = fit$cluster_assignment
+							),
+				spec = spec,
+				mf= mf,
                 formula = formula,
-        				alpha_a = alpha_a,
-        				alpha_b = alpha_b,
-                y = mf$y,
-                K = K)
+				alpha_a = alpha_a,
+				alpha_b = alpha_b,
+                K = K
+	)
 
 	return(stapDP(fit))
 }

@@ -8,9 +8,11 @@ stappDP_mer_fit(
   y,
   Z,
   X,
-  W_,
+  W,
   S,
   w,
+  subj_mat_,
+  subj_n,
   alpha_a,
   alpha_b,
   sigma_a,
@@ -33,6 +35,8 @@ stappDP_mer_fit(
 \item{Z}{a matrix of population level confounders}
 
 \item{X}{a matrix of spatial temporal aggregated predictors}
+
+\item{W}{a design matrix for group specific terms}
 
 \item{S}{penalty matrix for stap parameters}
 
@@ -65,8 +69,6 @@ stappDP_mer_fit(
 \item{num_posterior_samples}{total number of posterior samples}
 
 \item{fix_alpha}{boolean value that determines whether or not to fix alpha in sampler}
-
-\item{W}{a design matrix for group specific terms}
 }
 \description{
 Penalized Functional Dirichlet Process Linear Mixed Effects Regression

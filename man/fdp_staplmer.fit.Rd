@@ -10,6 +10,8 @@ fdp_staplmer.fit(
   X,
   W,
   S,
+  subj_mat,
+  subj_n,
   weights = rep(1, length(y)),
   alpha_a = 1,
   alpha_b = 1,
@@ -35,6 +37,10 @@ fdp_staplmer.fit(
 \item{W}{group terms design matrix from \code{\link[lme4]{glFormula}}}
 
 \item{S}{list of penalty matrices from \code{\link[mgcv]{jagam}}}
+
+\item{subj_mat}{matrix indexing subject-measurement locations in (Z,X,W)}
+
+\item{subj_n}{vector of number of subject measurements}
 
 \item{weights}{weights for weighted regression - default is vector of ones}
 

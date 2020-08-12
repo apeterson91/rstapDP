@@ -53,8 +53,12 @@ get_W <- function(glmod){
 		stop("Only one grouping level currently allowed")
 
 	cnms <- cnms[[1]]
-	if(cnms[1]=="(Intercept)")
-		return(cbind(1,glmod$fr[,cnms[2:length(cnms)]]))
+	if(cnms[1]=="(Intercept)"){
+		if(length(cnms)>1)
+			return(cbind(1,glmod$fr[,cnms[2:length(cnms),drop=F]]))
+		else
+			return(matrix(1,nrow=nrow(glmod$fr),ncol=1))
+	}
 	else
 		return(glmod$fr[,cnms,drop=F])
 

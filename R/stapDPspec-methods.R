@@ -21,7 +21,6 @@
 #' @aliases get_k get_terms_ix get_component has_bw get_smooth_obj 
 #'
 #' @param x stapDPspec object
-#' @template args-term
 #' @details Methods for stapDPspec objects. Function names are typically self-explanatory.
 
 
@@ -183,10 +182,10 @@ get_smooth_obj <- function(x,term = NULL){
 }
 
 
-get_stap <- function(x,term,component,beta,family)
+get_stap <- function(x,term,component,beta)
 	UseMethod("get_stap")
 
-get_stap.stapDPspec <- function(x,term,component,beta,family){
+get_stap.stapDPspec <- function(x,term,component,beta){
 
 	gd <- get_grid(x,term,component)
 
@@ -194,20 +193,7 @@ get_stap.stapDPspec <- function(x,term,component,beta,family){
 
 	mat <- mgcv::Predict.matrix(sob,gd)
 
-	lbls <- get_lbls(x,term,colnames(beta))
-
-	if(has_bw(x,term)){
-		lbls_bw <- lbls[stringr::str_detect(lbls,"_bw")]
-		lbls_wi <- lbls[stringr::str_detect(lbls,"_wi")]
-		beta_ <- beta[,lbls_bw]
-		eta_within = family$linkinv(tcrossprod(mat,beta_))
-		beta_ <- beta[,lbls_wi] 
-		eta <- family$linkinv(tcrossprod(mat,beta_))
-		return(list(grid=gd,eta=eta,eta_within=eta_within))
-	}
-
-	beta <- beta[,lbls] 
-	eta <- family$linkinv(tcrossprod(mat,beta))
+	eta <- abind::abind(lapply(1:dim(beta)[3], function(x) tcrossprod(mat,beta[,,x])),along=3)
 
 	return(list(grid=gd,
 	            eta = eta))

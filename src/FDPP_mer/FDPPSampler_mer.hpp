@@ -121,7 +121,7 @@ class FDPPSampler_mer
 		subj_b.setZero(n,W.cols());
 		nonzero_ics = Eigen::MatrixXd::Identity(temp_Q,temp_Q);
 		beta_temp.setZero(P + P_two*num_nonzero);
-		X_K.setZero(n,P_two*num_nonzero);
+		X_K.setZero(N,P_two*num_nonzero);
 		u.setZero(K);
 		pi.setZero(K);
 		u_posterior_beta_alpha.setZero(K);

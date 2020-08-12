@@ -14,15 +14,14 @@ print.stapDP <- function(x,digits=1,...){
 	cat("fdp_staplm \n")
 	cat("\n Observations:", length(x$model$y))
 	cat("\n Formula: ", formula_string(x$model$formula))
-	cat("\n Fixed predictors: ",length(unique(x$fixef$Parameter)))
+	cat("\n Fixed predictors: ", ncol(x$delta))
 	cat("\n K: ",as.character(x$model$K))
 	
 	cat("\n ----------------------- \n ")
 
 	cat("\n Fixed Effects  \n ")
 
-	mat<- x$fixef %>% tidyr::spread(Parameter,Samples)  %>% dplyr::select(-iteration_ix) %>% 
-		as.matrix()
+	mat<- x$delta
 
 	.printfr(t(.median_and_madsd(mat)),digits)
 
@@ -38,8 +37,7 @@ print.stapDP <- function(x,digits=1,...){
 
 	cat("\n Cluster Probabilities  \n ")
 
-	.printfr(t(.median_and_madsd(x$probs %>% dplyr::select(-Parameter) %>% 
-								 tidyr::spread(K,Samples) %>% dplyr::select(-iteration_ix))),digits)
+	.printfr(t(.median_and_madsd(x$probs)) ,digits)
 
 
 	cat("\n ----------------------- \n ")

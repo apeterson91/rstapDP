@@ -6,55 +6,51 @@
 #'
 stapDP <- function(object){
 
-	K <- Samples <- Parameter <- Lower <- Upper <- medp <- iteration_ix <- 
+	 Samples <- Parameter <- Lower <- Upper <- medp <- iteration_ix <- 
 		. <- Distance <- Median <- P <-  id <- NULL
-	pardf <- rbind(dplyr::tibble(iteration_ix = 1:length(object$alpha),
+	
+
+	K <- object$K
+	pardf <- rbind(dplyr::tibble(iteration_ix = 1:length(object$pars$alpha),
 	                             Parameter = "alpha",
-	                             Samples = object$alpha), 
-			dplyr::tibble(iteration_ix = 1:length(object$sigma),
+	                             Samples = object$pars$alpha), 
+			dplyr::tibble(iteration_ix = 1:length(object$pars$sigma),
 			              Parameter = "sigma",
-			              Samples = object$sigma)) 
+			              Samples = object$pars$sigma)) 
 
-	fixef <- object$beta[,1:length(object$Znames)]
 
-	Ks <- apply(object$probs,2,median)
-	K <- length(Ks)
-	P <- object$ncol_X
-	probs <- object$probs
 
-	ranef <- object$beta[,(length(object$Znames)+1):ncol(object$beta)]
+	P <- ncol(object$spec$X[[1]])
+	probs <- object$pars$pi
+	num_penalties <- length(object$spec$S)
+	clnms <- Reduce(c,
+	                lapply(1:K,function(x) paste0("K: " , x," ",colnames(object$spec$X[[1]]) ))
+	                )
 
-	colnames(fixef) <- object$Znames
+	beta <- object$pars$beta
+	colnames(beta) <- c(colnames(object$mf$X),
+						clnms)
+	delta <- beta[,colnames(object$mf$X)]
 
-	gd <- expand.grid(p=1:object$ncol_X,k=1:object$K)
+	beta <- beta[,clnms]
+	clnm_k <- lapply(1:K,function(x) grep(x=clnms,pattern = paste0("K: ",x),value=T))
 
-	colnames(ranef) <- paste0("Distance K:",gd$k,"_P:",gd$p)
+	beta <- lapply(clnm_k,function(k) beta[,k])
+	beta <- abind::abind(beta,along=3)
 
-	fixef <- suppressWarnings(dplyr::as_tibble(fixef,quiet=T)) %>% 
+
+	scales <- object$pars$scales
+	colnames(scales) <- paste0("tau_",1:(K*num_penalties))
+	colnames(probs) <- paste0("pi","_",1:K)
+
+	ys <- object$pars$yhat
+	gd <- expand.grid(id =paste("V_",1:ncol(object$pars$yhat)),
+					  iteration_ix = 1:length(object$pars$alpha))
+
+	colnames(ys) <- paste("V_",1:ncol(object$pars$yhat))
+
+	ys <- suppressWarnings(dplyr::as_tibble(ys,quiet=T)) %>% 
 	  dplyr::mutate(iteration_ix = 1:dplyr::n()) %>% 
-	  tidyr::gather(object$Znames,key = "Parameter", value = "Samples")
-
-	ranef <- suppressWarnings(dplyr::as_tibble(ranef,quiet=T)) %>% dplyr::mutate(iteration_ix = 1:dplyr::n()) %>% 
-	  tidyr::gather(colnames(ranef),key="Parameter",value="Samples") %>% 
-	  dplyr::mutate(K = as.integer(stringr::str_replace(stringr::str_extract(Parameter,"K:[0-9]{2}|K:[0-9]{1}"),"K:","")),
-					P = stringr::str_replace(stringr::str_extract(Parameter,"P:[0-9]{2}|P:[0-9]{1}"),"P:",""))
-
-	scales <- object$scales
-	colnames(scales) <- paste0("tau_",1:(object$K*object$num_penalties))
-	probs <- suppressWarnings(dplyr::as_tibble(probs,quiet = T))
-	colnames(probs) <- paste0("pi","_",1:object$K)
-	probs <- probs %>% dplyr::mutate(iteration_ix = 1:dplyr::n()) %>% 
-		tidyr::gather(dplyr::contains("pi"),key="Parameter",value="Samples") %>% 
-		dplyr::mutate(K = as.integer(stringr::str_replace( stringr::str_extract(Parameter,"_[0-9]{2}|_[0-9]{1}"),"_",""))) %>%
-		dplyr::mutate(K = factor(K,levels=(1:object$K)))
-
-	ys <- object$yhat
-	gd <- expand.grid(id =paste("V_",1:ncol(object$yhat)),
-					  iteration_ix = 1:length(object$alpha))
-
-	colnames(ys) <- paste("V_",1:ncol(object$yhat))
-
-	ys <- suppressWarnings(dplyr::as_tibble(ys,quiet=T)) %>% dplyr::mutate(iteration_ix = 1:dplyr::n()) %>% 
 		tidyr::gather(dplyr::contains("V_"),key="id",value="Samples") %>% 
 		dplyr::mutate(id = as.integer(stringr::str_replace(id,"V_","")))
 
@@ -63,26 +59,29 @@ stapDP <- function(object){
 						  id = as.integer(gd$id))
 
 	yhat <- suppressMessages(yhat %>% dplyr::right_join(ys))
-	yhat <- rbind(yhat,dplyr::tibble(iteration_ix = rep(0,length(object$y)),Parameter=rep("yobs",length(object$y)), id = 1:length(object$y),Samples = object$y))
+	yhat <- rbind(yhat,dplyr::tibble(iteration_ix = rep(0,length(object$mf$y)),Parameter=rep("yobs",length(object$mf$y)), id = 1:length(object$mf$y),Samples = object$mf$y))
 
 
 	out <- list(pardf = pardf,
-				fixef = fixef,
-				ranef = ranef,
+				delta = delta,
+				beta = beta,
 				probs = probs,
 				yhat = yhat,
-				D = object$D,
-				subj_b = object$subj_b,
 				scales = scales,
-				pmat = object$pmat,
-				cmat = object$cluster_mat,
+				pmat = object$pars$pmat,
+				cmat = object$pars$clabels,
 				model = list(formula = object$formula,
 							 K=(object$K),
-							 y=object$y,
+							 y=object$mf$y,
 							 alpha_a = object$alpha_a,
-							 alpha_b = object$alpha_b,
-							 sobj = object$sobj)
+							 alpha_b = object$alpha_b),
+				spec = object$spec
 				)
+	if(!is.null(object$pars$subj_b)){
+		## Do better post processing here
+		out$subj_b <- object$pars$subj_b
+		out$subj_D <- object$pars$subj_D
+	}
 
     structure(out, class = c("stapDP"))
 }

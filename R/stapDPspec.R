@@ -126,7 +126,14 @@ stapDPspec <- function(stapless_formula,fake_formula,stap_mat,K,benvo){
 	term <- stap_mat[,1]
 	component <- stap_mat[,2]
 	between_within <- as.integer(stap_mat[,3])
-	dimension <- as.integer(stringr::str_replace(stap_mat[,4],"\\)","-1"))
+	dimension <- sapply(stap_mat[,4],function(x){ 
+							if(length(x)==1) 
+								return(-1)
+							else 
+								as.integer(stringr::str_replace(stringr::str_replace(stap_mat[,4],
+																					 "\\)",""),
+																"k = ",""))
+		   })
 	if(!(all(unique(term)==term)))
 		stop("Only one BEF name may be assigned to a stap term e.g. no sap(foo) + tap(foo)\n
 			 If you wish to model components this way create a different name e.g. sap(foo) + tap(foo_bar)")

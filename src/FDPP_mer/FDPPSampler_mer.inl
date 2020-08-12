@@ -58,8 +58,8 @@ void FDPPSampler_mer::calculate_b(){
 	for(int k = 0; k < K; k++){
 		temp = ( .5 * log(2 * M_PI ) - log(sigma * (1/w.array()))  -  
 			(.5  *  precision * w.array() * pow( (residual -  X  * beta.segment(start,P_two) ).array(),2))).matrix(); 
-		//need to summ across visits
-		b.col(k)  =  log(pi(k)) - (subj_mat.transpose() * temp   ).array();
+		// sum across measurements 
+		b.col(k)  =  log(pi(k)) + (subj_mat.transpose() * temp   ).array();
 		start += P_two;
 	}
 
@@ -125,9 +125,11 @@ void FDPPSampler_mer::adjust_zero_clusters(std::mt19937 &rng){
 	X_K.setZero(N,P_two*num_nonzero);
 
 	int k_ = 0;
+	Eigen::MatrixXd temp;
 	for(int k = 0; k < K; k++){
 		if(cluster_count(k)!=0){
-			X_K.block(0,k_*P_two,n,P_two) = cluster_matrix.col(k).asDiagonal() * X;
+			temp = (subj_mat * cluster_matrix.col(k).asDiagonal() * subj_mat.transpose() );
+			X_K.block(0,k_*P_two,N,P_two) = temp.diagonal().asDiagonal() * X;
 			nonzero_ics.block(P+k*P_two,P+k_*P_two,P_two,P_two) = Eigen::MatrixXd::Identity(P_two,P_two);
 			k_ ++;
 		}
@@ -150,7 +152,7 @@ void FDPPSampler_mer::draw_var(std::mt19937 &rng){
 
 	s = (residual.transpose() * w.asDiagonal()).dot(residual) * .5;
 	s += .5 * (beta_temp.transpose() * nonzero_ics.transpose() * PenaltyMat * nonzero_ics).dot(beta_temp) ;
-	std::gamma_distribution<double> rgamma(sigma_a + n/2 + P_two, 1/( (1 / sigma_b) + s) );
+	std::gamma_distribution<double> rgamma(sigma_a + N/2 + P_two, 1/( (1 / sigma_b) + s) );
 	precision = rgamma(rng);
 	sigma = sqrt(1 / precision);
 	double temp_scale;
@@ -203,7 +205,7 @@ void FDPPSampler_mer::store_samples(Eigen::ArrayXXd &beta_samples,
 	alpha_samples(sample_ix) = alpha;
 	cluster_assignment.row(sample_ix) = iter_cluster_assignment;
 	for(int i = 0 ; i < W.cols() ; i ++)
-		subj_b_samples.block(sample_ix,n*i,1,n) = subj_b_samples.col(i);
+		subj_b_samples.block(sample_ix,n*i,1,n) = subj_b.col(i);
 	Eigen::Map<Eigen::RowVectorXd> subj_D_row(subj_D.data(),subj_D.size());
 	subj_D_samples.row(sample_ix) = subj_D_row;
 	for(int pen_ix = 0; pen_ix < num_penalties; pen_ix ++)
@@ -284,7 +286,7 @@ void FDPPSampler_mer::draw_subj_b(std::mt19937 &rng){
 	int row_ix = 0;
 	int num_cols = W.cols();
 	Eigen::MatrixXd temp;
-	Eigen::MatrixXd temp_res;
+	Eigen::VectorXd temp_res;
 	for(int i =0 ; i < n ; i++){
 		draw_zb(rng);
 		temp = W.block(row_ix,0,subj_n(i),num_cols);
@@ -303,7 +305,7 @@ void FDPPSampler_mer::draw_subj_D(std::mt19937 &rng){
 	for(int i = 0;i < n ; i++)
 		V = V + subj_b.row(i).transpose() * subj_b.row(i);
 
-	subj_D = draw_wishart(V,subj_D_df,rng);
+	subj_D = draw_wishart(V.inverse(),subj_D_df,rng);
 }
 
 void FDPPSampler_mer::check_initialization(){

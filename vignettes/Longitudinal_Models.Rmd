@@ -46,15 +46,30 @@ bef_summary(bdf)
 # Longitudinal STAP-DP Model
 
 $$
-E[BMI_{ij}] = \alpha + (sex_i)\delta_1 + (year_{ij})\delta_2 + f_i(\mathcal{D}_{ij}) + b_{i1} + b_{i2}(year_{ij})\\
+E[BMI_{ij}] = \alpha + (sex_i)\delta_1 + (year_{ij})\delta_2 + f_i(\mathcal{D}_{ij}) + b_{i1} \\
 f_i(\mathcal{D}_i) = \sum_{l=1}^L\sum_{d \in \mathcal{D}}\beta_l\phi_l(d)
 $$
 
 ```{r model_fitting}
-fit <- fdp_staplmer(BMI ~ sex + year +  sap(FFR) + (year|ID),benvo=bdf)
+fit <- fdp_staplmer(BMI ~ sex + year +  sap(FFR) + (1|ID),
+                    benvo=bdf,iter_max = 3E3,burn_in = 1.5E3)
+```
+
+```{r ppc}
+ppc(fit)
+```
+
+
+```{r pairs}
+plot_pairs(fit,sort=T,sample=500)
 ```
 
 
 
+
+
+```{r effects}
+plot(fit,switch='facet')
+```
 
 

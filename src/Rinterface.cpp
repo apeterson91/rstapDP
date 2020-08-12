@@ -192,8 +192,6 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 							sigma_a,sigma_b,K,
 							num_penalties,fix_alpha,rng);
 
-	sampler.iteration_sample(rng);
-
 	for(int iter_ix = 1; iter_ix <= iter_max; iter_ix ++){
 
 		print_progress(iter_ix,burn_in,iter_max,chain);
@@ -220,3 +218,5 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 							  Rcpp::Named("cluster_assignment") = cluster_assignment,
 							  Rcpp::Named("PairwiseProbabilityMat") = sampler.P_matrix / num_posterior_samples );
 }
+
+
