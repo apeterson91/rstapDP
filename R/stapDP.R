@@ -105,8 +105,9 @@ reformat_D <- function(subj_D,glmod){
 		colnames(out) <- create_nm(grp,trms)
 	}
 	else if(ncol(subj_D) == 4){
-	  out <- lapply(1:nrow(out),function(x) as.vector(t(solve(matrix(out[x,],2,2)))))
+	  out <- t(sapply(1:nrow(out),function(x) as.vector(t(solve(matrix(out[x,],2,2))))))
 		trms <- c(paste0(trms[1],", ",trms[1]),
+				  paste0(trms[1],", ",trms[2]),
 				  paste0(trms[1],", ",trms[2]),
 				  paste0(trms[2],", ",trms[2]))
 		colnames(out) <- create_nm(grp,trms)
@@ -118,7 +119,8 @@ reformat_D <- function(subj_D,glmod){
 reformat_b <- function(subj_b,glmod){
 
 	grp <- names(glmod$reTrms$cnms)
-	trms <- paste0(glmod$reTrms$cnms,",", unique(glmod$reTrms$flist[[1]]))
+	trms <- sapply(glmod$reTrms$cnms[[1]],function(x) paste0(x,",", unique(glmod$reTrms$flist[[1]])))
+	trms <- as.vector(trms)
 	colnames(subj_b) <- paste0("b[",grp,":", trms ,"]")
 	return(subj_b)
 }

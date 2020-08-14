@@ -54,7 +54,7 @@ VarCorr.stapDP <- function(x){
 	nc <- vapply(cnms, FUN = length, FUN.VALUE = 1L)
 	nms <- names(cnms)
 	ncseq <- seq_along(nc)
-	Sigma <- matrix(Sigma_,1,1)
+	Sigma <- matrix(Sigma_,nc,nc)
 	stddev <- sqrt(diag(Sigma))
 	corr <- cov2cor(Sigma)
 	ans <- list(structure(Sigma , stddev = stddev,correlation = corr))
