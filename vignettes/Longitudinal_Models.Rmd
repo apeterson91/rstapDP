@@ -52,7 +52,7 @@ $$
 
 ```{r model_fitting}
 fit <- fdp_staplmer(BMI ~ sex + year +  sap(FFR) + (1|ID),
-                    benvo=bdf,iter_max = 3E3,burn_in = 1.5E3)
+                    benvo=bdf,iter_max = 3E3,burn_in = 2E3)
 ```
 
 ```{r ppc}
@@ -63,9 +63,6 @@ ppc(fit)
 ```{r pairs}
 plot_pairs(fit,sort=T,sample=500)
 ```
-
-
-
 
 
 ```{r effects}

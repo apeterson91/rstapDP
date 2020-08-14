@@ -68,3 +68,10 @@ get_subjmat <- function(glmod){
 
 	Matrix::fac2sparse(glmod$reTrms$flist[[1]])
 }
+
+is.mer <- function(x){
+	if(!is.null(x$subj_b))
+		return(TRUE)
+	else
+		return(FALSE)
+}

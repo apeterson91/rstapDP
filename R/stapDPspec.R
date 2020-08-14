@@ -167,9 +167,10 @@ stapDPspec <- function(stapless_formula,fake_formula,stap_mat,K,benvo){
 			              jdi$pregam$term.names)
 						})
 
-	S <- purrr::pmap(list(1:length(jd),between_within),function(ix,bw_){create_S(K,jd[[ix]],bw_,
-	                                                                             ncol(attr(terms(stapless_formula),
-	                                                                                       "factors")))})
+	f_ <-  lme4::nobars(stapless_formula)
+	num_fixed <- ncol(attr(terms(f_),"factors")) + attr(terms(f_),"intercept")
+	
+	S <- purrr::pmap(list(1:length(jd),between_within),function(ix,bw_){create_S(K,jd[[ix]],bw_,num_fixed)})
 
 	combine_list_entries <- function(l){
 		if(any(sapply(l,is.list)))

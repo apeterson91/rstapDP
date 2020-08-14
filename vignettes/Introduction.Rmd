@@ -106,8 +106,8 @@ size of the data.
 fit <- fdp_staplm(BMI ~ sex + sap(FFR),
                   benvo = FFR_benvo,
                   K = 5, ## for speed
-                  iter_max = 7E3,
-                  burn_in = 5E3,
+                  iter_max = 3E3,
+                  burn_in = 2E3,
                   thin = 1,
                   seed = 43431)
 ```

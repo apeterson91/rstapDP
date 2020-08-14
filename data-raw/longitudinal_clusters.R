@@ -4,7 +4,7 @@ set.seed(3431)
 num_subj <- 1.5E3
 riskcat <- sapply(1:num_subj,function(x) sample(1:2,size=1,replace=F))
 riskmat <- Matrix::fac2sparse(riskcat)
-num_visits <- rpois(num_subj,.9)+1
+num_visits <- sample(1:5,size=num_subj,replace=T)
 visit_num <- purrr::map_dfr(1:num_subj,function(x) dplyr::tibble(id = x,measurement = 1:num_visits[x]))
 num_obs <- sum(num_visits)
 Z <- rbinom(num_subj,1,.5)

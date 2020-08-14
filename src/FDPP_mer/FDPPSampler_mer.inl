@@ -205,7 +205,7 @@ void FDPPSampler_mer::store_samples(Eigen::ArrayXXd &beta_samples,
 	alpha_samples(sample_ix) = alpha;
 	cluster_assignment.row(sample_ix) = iter_cluster_assignment;
 	for(int i = 0 ; i < W.cols() ; i ++)
-		subj_b_samples.block(sample_ix,n*i,1,n) = subj_b.col(i);
+		subj_b_samples.block(sample_ix,n*i,1,n) = subj_b.col(i).transpose();
 	Eigen::Map<Eigen::RowVectorXd> subj_D_row(subj_D.data(),subj_D.size());
 	subj_D_samples.row(sample_ix) = subj_D_row;
 	for(int pen_ix = 0; pen_ix < num_penalties; pen_ix ++)
@@ -291,21 +291,23 @@ void FDPPSampler_mer::draw_subj_b(std::mt19937 &rng){
 		draw_zb(rng);
 		temp = W.block(row_ix,0,subj_n(i),num_cols);
 		temp_res = residual.segment(row_ix,subj_n(i));
-		b.row(i) = (temp.transpose() * temp + sigma*subj_D).inverse() * temp.transpose() * temp_res + 
-			(temp.transpose() * temp + sigma * subj_D).inverse().llt().matrixL().toDenseMatrix() * z_b;
-		row_ix += subj_n(i);
+		subj_b.row(i) = ((temp.transpose() * temp + sigma*subj_D).inverse() * temp.transpose() * temp_res + 
+			(temp.transpose() * temp + sigma * subj_D).inverse().llt().matrixL().toDenseMatrix() * z_b).transpose();
+		if((row_ix+1)<n)
+			row_ix += subj_n(i);
 	}
 }
 
 void FDPPSampler_mer::draw_subj_D(std::mt19937 &rng){
 
 	Eigen::MatrixXd V;
-	V.setZero(subj_b.cols(),subj_b.cols());
 
-	for(int i = 0;i < n ; i++)
-		V = V + subj_b.row(i).transpose() * subj_b.row(i);
+	V = subj_b.transpose() * subj_b;
 
-	subj_D = draw_wishart(V.inverse(),subj_D_df,rng);
+	V = V +  Eigen::MatrixXd::Identity(V.cols(),V.cols());
+
+	subj_D = draw_wishart(V,subj_D_df,rng);
+
 }
 
 void FDPPSampler_mer::check_initialization(){

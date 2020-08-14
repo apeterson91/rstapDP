@@ -94,7 +94,9 @@ class FDPPSampler_mer
 			  ): 
 			y(y), Z(Z), X(X),
 			W(W), subj_mat(subj_mat),
-			S(S),  w(w),subj_n(subj_n),
+			S(S),  w(w),
+			subj_D_df(subj_mat.cols()-W.cols()+3+1),
+			subj_n(subj_n),
 			alpha_b(alpha_b),sigma_a(sigma_a),
 			sigma_b(sigma_b),
 			tau_a(tau_a), tau_b(tau_b),
@@ -104,7 +106,6 @@ class FDPPSampler_mer
 			K(K),
 			Q(Z.cols() + X.cols()*K), 
 			num_penalties(num_penalties),
-			subj_D_df(n-W.cols()+1),
 			fix_alpha(fix_alpha),
 			log_factor(log(pow(10,-16)) - log(N))
 	{
@@ -115,7 +116,7 @@ class FDPPSampler_mer
 		unique_taus.setZero(K,num_penalties);
 		b.setZero(n,K);
 		z.setZero(temp_Q); 
-		z_b.setZero(n,W.cols()); 
+		z_b.setZero(W.cols()); 
 		beta.setZero(Q); 
 		subj_D = Eigen::MatrixXd::Identity(W.cols(),W.cols());
 		subj_b.setZero(n,W.cols());

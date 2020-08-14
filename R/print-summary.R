@@ -47,6 +47,11 @@ print.stapDP <- function(x,digits=1,...){
 		as.matrix()
 
 	.printfr(.median_and_madsd(mat),digits)
+
+	if(is.mer(x)){
+      cat("\nError terms:\n")
+
+	}
 	
 
 }
@@ -66,49 +71,3 @@ formula_string <- function(formula, break_and_indent = TRUE) {
   gsub("--MARK--", "\n\t  ", char, fixed = TRUE)
 }
 
-#' Diagnostics
-#'
-#' Reports the Geweke diagnostic statistic for the concentration parameter alpha,
-#' residual standard deviation sigma and cluster specific probabilities \eqn{\pi_k}.
-#' @export
-#' @param x a stapDP object
-#'
-diagnostics <- function(x)
-	UseMethod("diagnostics")
-
-#'
-#' 
-#' @export
-#' @describeIn diagnostics
-#' 
-diagnostics.stapDP <- function(x){
-
-	Parameter <- Samples<- iteration_ix <- NULL
-	alphasamps <- x$pardf %>% dplyr::filter(Parameter == 'alpha' ) %>% dplyr::pull() 
-	alpha <- coda::as.mcmc(alphasamps)
-
-	sigma <- coda::as.mcmc(x$pardf %>% dplyr::filter(Parameter == 'sigma' ) %>% dplyr::pull())
-
-	K <- max(as.integer(x$probs$K))
-
-	lbls <- paste0("pi_",1:K)
-	pis <- coda::as.mcmc(x$probs %>% tidyr::spread(Parameter,Samples)  %>%
-						 dplyr::mutate_at(lbls,function(x) tidyr::replace_na(x,0)) %>%
-						 dplyr::group_by(iteration_ix) %>% 
-						 dplyr::summarise_at(lbls,sum) %>% 
-						   dplyr::select(lbls) %>% as.matrix())
-
-	matone <- c(coda::geweke.diag(alpha)[1]$z,coda::geweke.diag(sigma)[1]$z)
-	names(matone) <- c("alpha","sigma")
-	mattwo <- coda::geweke.diag(pis)[1]$z
-
-	cat("Diagnostics: \n ")
-	if(all(alphasamps==0)){
-		cat("Alpha has collapsed at zero. Expect to see NaN values for pis~=zero ")
-		cat("\n")
-	}
-	print(matone)
-	cat("\n")
-	print(mattwo)
-	return(invisible(list(alpha_sigma = matone,pis = mattwo)))
-}
