@@ -20,6 +20,7 @@
 #' Get stapDPspec object which details the various components of the stapDP model specification
 #'
 #' @param f formula from \code{\link{fdp_staplm}}, \code{\link{fdp_staplmer}}
+#' @param K DP truncation integer
 #' @param benvo Built Environment object - \code{\link[rbenvo]{Benvo}} - containing data for model 
 #' @return \code{\link{sstapspec}} object
 #'

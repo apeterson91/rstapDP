@@ -24,7 +24,9 @@ Imports:
     lme4,
     RcppProgress,
     rsstap,
-    abind
+    abind,
+    rstantools,
+    nlme
 LinkingTo: Rcpp, RcppEigen
 Suggests: 
     knitr,

@@ -21,6 +21,7 @@
 #' @aliases get_k get_terms_ix get_component has_bw get_smooth_obj 
 #'
 #' @param x stapDPspec object
+#' @template args-term
 #' @details Methods for stapDPspec objects. Function names are typically self-explanatory.
 
 

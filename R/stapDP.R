@@ -75,14 +75,50 @@ stapDP <- function(object){
 							 y=object$mf$y,
 							 alpha_a = object$alpha_a,
 							 alpha_b = object$alpha_b),
-				spec = object$spec
+				spec = object$spec,
+				glmod = object$mf$glmod
 				)
 	if(!is.null(object$pars$subj_b)){
-		## Do better post processing here
-		out$subj_b <- object$pars$subj_b
-		out$subj_D <- object$pars$subj_D
+	  glmod <- object$mf$glmod
+	  b <- object$pars$subj_b
+	  D <- object$pars$subj_D
+		out$subj_b <- reformat_b(b,glmod)
+		out$subj_D <- reformat_D(D,glmod)
 	}
 
     structure(out, class = c("stapDP"))
 }
 
+## ----------- internal reformatting functions
+reformat_D <- function(subj_D,glmod){
+
+	grp <- names(glmod$reTrms$cnms)
+	trms <- glmod$reTrms$cnms
+	out <- subj_D
+
+	create_nm <-function(grp,trms){
+		paste0("Sigma[", grp, ": ",trms ,"]")
+	}
+
+	if(ncol(subj_D)==1){
+		out <- (1/out) ## convert to var 
+		colnames(out) <- create_nm(grp,trms)
+	}
+	else if(ncol(subj_D) == 4){
+	  out <- lapply(1:nrow(out),function(x) as.vector(t(solve(matrix(out[x,],2,2)))))
+		trms <- c(paste0(trms[1],", ",trms[1]),
+				  paste0(trms[1],", ",trms[2]),
+				  paste0(trms[2],", ",trms[2]))
+		colnames(out) <- create_nm(grp,trms)
+	}
+	return(out)
+}
+
+
+reformat_b <- function(subj_b,glmod){
+
+	grp <- names(glmod$reTrms$cnms)
+	trms <- paste0(glmod$reTrms$cnms,",", unique(glmod$reTrms$flist[[1]]))
+	colnames(subj_b) <- paste0("b[",grp,":", trms ,"]")
+	return(subj_b)
+}

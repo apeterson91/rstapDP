@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{stappDP_fit}
 \alias{stappDP_fit}
-\title{Penalized Functional Dirichlet Process Linear Regression}
+\title{Penalized Functional Dirichlet Process Linear Regression with N observations}
 \usage{
 stappDP_fit(
   y,
@@ -66,5 +66,5 @@ stappDP_fit(
 \item{fix_alpha}{boolean value that determines whether or not to fix alpha in sampler}
 }
 \description{
-Penalized Functional Dirichlet Process Linear Regression
+Penalized Functional Dirichlet Process Linear Regression with N observations
 }

@@ -9,6 +9,8 @@ get_stapDPspec(f, K, benvo)
 \arguments{
 \item{f}{formula from \code{\link{fdp_staplm}}, \code{\link{fdp_staplmer}}}
 
+\item{K}{DP truncation integer}
+
 \item{benvo}{Built Environment object - \code{\link[rbenvo]{Benvo}} - containing data for model}
 }
 \value{

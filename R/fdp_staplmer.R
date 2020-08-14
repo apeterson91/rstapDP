@@ -62,6 +62,9 @@ fdp_staplmer <- function(formula,
 	if(length(spec$term)>1)
 		stop("Only one stap/sap/tap term allowed")
 
+	if(vapply(list(mf$glmod$reTrms$flist),nlevels,1)>1)
+		stop("Estimation of only 1 group term currently implimented")
+
 	if(is.null(weights))
 	  weights <- rep(1,length(mf$y))
 	

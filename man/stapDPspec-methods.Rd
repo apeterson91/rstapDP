@@ -21,6 +21,9 @@ get_smooth_obj(x, term = NULL)
 }
 \arguments{
 \item{x}{stapDPspec object}
+
+\item{term}{string of the BEF  used in the model fitting. 
+Defaults to NULL which will retrieve the first stap term specified.}
 }
 \description{
 \code{stapDPspec} Methods

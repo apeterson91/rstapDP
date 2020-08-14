@@ -42,6 +42,10 @@ stappDP_mer_fit(
 
 \item{w}{a vector of weights for weighted regression}
 
+\item{subj_mat_}{N x n sparse matrix used to aggregate subject observations}
+
+\item{subj_n}{n x 1 vector of integers representing how many observations correspond to each subject}
+
 \item{alpha_a}{alpha gamma prior shape hyperparameter}
 
 \item{alpha_b}{alpha gamma prior scale hyperparameter}
@@ -71,5 +75,6 @@ stappDP_mer_fit(
 \item{fix_alpha}{boolean value that determines whether or not to fix alpha in sampler}
 }
 \description{
-Penalized Functional Dirichlet Process Linear Mixed Effects Regression
+fits a functional dirichlet process linear mixed effects regression model
+with N observations and n subjects
 }

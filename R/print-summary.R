@@ -50,9 +50,12 @@ print.stapDP <- function(x,digits=1,...){
 
 	if(is.mer(x)){
       cat("\nError terms:\n")
-
+	  foo <- VarCorr(x)
+	  print(foo)
+	  cat("Num. levels:",
+          paste(names(ngrps(x)), unname(ngrps(x)), collapse = ", "), "\n")
 	}
-	
+
 
 }
 

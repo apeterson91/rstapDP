@@ -10,7 +10,7 @@
 
 // [[Rcpp::depends(RcppEigen)]]
 
-//' Penalized Functional Dirichlet Process Linear Regression
+//' Penalized Functional Dirichlet Process Linear Regression with N observations
 //'
 //' @param y a vector of continuous outcomes
 //' @param Z a matrix of population level confounders
@@ -109,12 +109,17 @@ typedef Eigen::SparseMatrix<double> SpMat;
 
 //' Penalized Functional Dirichlet Process Linear Mixed Effects Regression
 //'
+//' fits a functional dirichlet process linear mixed effects regression model
+//' with N observations and n subjects
+//'
 //' @param y a vector of continuous outcomes
 //' @param Z a matrix of population level confounders
 //' @param X a matrix of spatial temporal aggregated predictors
 //' @param W a design matrix for group specific terms
 //' @param S penalty matrix for stap parameters
 //' @param w a vector of weights for weighted regression
+//' @param subj_mat_ N x n sparse matrix used to aggregate subject observations
+//' @param subj_n n x 1 vector of integers representing how many observations correspond to each subject
 //' @param alpha_a alpha gamma prior shape hyperparameter
 //' @param alpha_b alpha gamma prior scale hyperparameter
 //' @param sigma_a precision gamma prior shape hyperparameter

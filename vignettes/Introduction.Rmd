@@ -113,11 +113,8 @@ fit <- fdp_staplm(BMI ~ sex + sap(FFR),
 ```
 
 
-With our model fitting complete, our first check will be to look at convergence diagnostics on the residual variance and concentration parameter as well as the posterior predictive checks via the `ppc` function.
+With our model fitting complete, our first check will be to look the posterior predictive checks via the `ppc` function.
 
-```{r diagnostics}
-diagnostics(fit)
-```
 
 ```{r ppcs}
 ppc(fit)
