@@ -80,13 +80,13 @@ plot_pairs.stapDP <- function(x,sort = FALSE,sample = 0){
 #' @export
 #' @param x stapDP object
 #' @param p probability contained in credible interval
-#' @param switch one of "color" or "facet" for different plotting options
+#' @param style one of "color" or "facet" for different plotting options
 #' @param  prob_filter all mixture components with median probability < prob_filter are excluded from the plot
 #' @param ... ignored
 #' @return plot with cluster effect across space
 #' 
 plot.stapDP <- function(x,p = 0.95, 
-						switch = "color",
+						style = "color",
 						prob_filter = 0.1,
 						...){
 
@@ -123,7 +123,7 @@ plot.stapDP <- function(x,p = 0.95,
 	  ggplot2::ggplot(ggplot2::aes(x=Distance,y=Median,linetype=K)) + 
 	  ggplot2::geom_hline(aes(yintercept = 0),linetype=2,color='red')-> p   
 
-	if (switch=="color"){
+	if (style=="color"){
 		p + ggplot2::geom_line(ggplot2::aes(color=K)) + ggplot2::theme_bw() + 
 		  ggplot2::geom_ribbon(ggplot2::aes(ymin=Lower,ymax=Upper),alpha=0.3) + 
 		  ggplot2::labs(y="Exposure Effect") -> pl

@@ -150,6 +150,7 @@ void FDPPSampler_mer::update_weights(std::mt19937 &rng){
 
 void FDPPSampler_mer::draw_var(std::mt19937 &rng){
 
+	residual = y - X_fit * beta_temp - Wb;
 	s = (residual.transpose() * w.asDiagonal()).dot(residual) * .5;
 	s += .5 * (beta_temp.transpose() * nonzero_ics.transpose() * PenaltyMat * nonzero_ics).dot(beta_temp) ;
 	std::gamma_distribution<double> rgamma(sigma_a + N/2 + P_two, 1/( (1 / sigma_b) + s) );
@@ -282,7 +283,7 @@ void FDPPSampler_mer::adjust_beta(std::mt19937 &rng){
 
 void FDPPSampler_mer::draw_subj_b(std::mt19937 &rng){
 
-	residual = y - X_fit * beta_temp + Wb;
+	residual = y - X_fit * beta_temp;
 	int row_ix = 0;
 	int num_cols = W.cols();
 	Eigen::MatrixXd temp;
@@ -293,9 +294,10 @@ void FDPPSampler_mer::draw_subj_b(std::mt19937 &rng){
 		temp_res = residual.segment(row_ix,subj_n(i));
 		subj_b.row(i) = ((temp.transpose() * temp + sigma*subj_D).inverse() * temp.transpose() * temp_res + 
 			(temp.transpose() * temp + sigma * subj_D).inverse().llt().matrixL().toDenseMatrix() * z_b).transpose();
-		if((row_ix+1)<n)
+		if((i+1)< n)
 			row_ix += subj_n(i);
 	}
+
 }
 
 void FDPPSampler_mer::draw_subj_D(std::mt19937 &rng){
@@ -303,8 +305,6 @@ void FDPPSampler_mer::draw_subj_D(std::mt19937 &rng){
 	Eigen::MatrixXd V;
 
 	V = subj_b.transpose() * subj_b;
-
-	V = V +  Eigen::MatrixXd::Identity(V.cols(),V.cols());
 
 	subj_D = draw_wishart(V,subj_D_df,rng);
 

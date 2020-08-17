@@ -95,7 +95,7 @@ class FDPPSampler_mer
 			y(y), Z(Z), X(X),
 			W(W), subj_mat(subj_mat),
 			S(S),  w(w),
-			subj_D_df(subj_mat.cols()-W.cols()+3+1),
+			subj_D_df(subj_mat.cols()-W.cols()+1),
 			subj_n(subj_n),
 			alpha_b(alpha_b),sigma_a(sigma_a),
 			sigma_b(sigma_b),
