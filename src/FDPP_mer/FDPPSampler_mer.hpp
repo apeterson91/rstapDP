@@ -144,6 +144,7 @@ class FDPPSampler_mer
 		initialize_beta(rng);
 		initializing = false;
 		check_initialization();
+		calculate_Wb();
 	}
 
 		void iteration_sample(std::mt19937 &rng);

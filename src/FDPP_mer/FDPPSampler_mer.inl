@@ -1,6 +1,5 @@
 void FDPPSampler_mer::iteration_sample(std::mt19937 &rng){
 
-	calculate_Wb();
 	// update cluster labels
 	calculate_b();
 	sample_cluster_labels(rng);
@@ -24,10 +23,6 @@ void FDPPSampler_mer::iteration_sample(std::mt19937 &rng){
 
 	adjust_beta(rng);
 
-	draw_subj_D(rng);
-
-	draw_subj_b(rng);
-
 	// check for errors
 	if(std::isnan(beta(0)) & flag ){
 		Rcpp::Rcout << "things are NaN" << std::endl;
@@ -35,6 +30,12 @@ void FDPPSampler_mer::iteration_sample(std::mt19937 &rng){
 		Rcpp::Rcout << "new V" << std::endl;
 		flag = false;
 	}
+
+	// update subject terms
+	draw_subj_D(rng);
+
+	draw_subj_b(rng);
+
 	// draw variance terms
 	draw_var(rng);
 
@@ -207,7 +208,8 @@ void FDPPSampler_mer::store_samples(Eigen::ArrayXXd &beta_samples,
 	cluster_assignment.row(sample_ix) = iter_cluster_assignment;
 	for(int i = 0 ; i < W.cols() ; i ++)
 		subj_b_samples.block(sample_ix,n*i,1,n) = subj_b.col(i).transpose();
-	Eigen::Map<Eigen::RowVectorXd> subj_D_row(subj_D.data(),subj_D.size());
+	Eigen::MatrixXd temp = subj_D.inverse();
+	Eigen::Map<Eigen::RowVectorXd> subj_D_row(temp.data(),temp.size());
 	subj_D_samples.row(sample_ix) = subj_D_row;
 	for(int pen_ix = 0; pen_ix < num_penalties; pen_ix ++)
 		tau_samples.block(sample_ix,K*pen_ix,1,K) = unique_taus.col(pen_ix);

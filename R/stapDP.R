@@ -93,7 +93,7 @@ stapDP <- function(object){
 reformat_D <- function(subj_D,glmod){
 
 	grp <- names(glmod$reTrms$cnms)
-	trms <- glmod$reTrms$cnms
+	trms <- glmod$reTrms$cnms[[1]]
 	out <- subj_D
 
 	create_nm <-function(grp,trms){
@@ -101,15 +101,15 @@ reformat_D <- function(subj_D,glmod){
 	}
 
 	if(ncol(subj_D)==1){
-		out <- (1/out) ## convert to var 
 		colnames(out) <- create_nm(grp,trms)
 	}
 	else if(ncol(subj_D) == 4){
-	  out <- t(sapply(1:nrow(out),function(x) as.vector(t(solve(matrix(out[x,],2,2))))))
-		trms <- c(paste0(trms[1],", ",trms[1]),
-				  paste0(trms[1],", ",trms[2]),
-				  paste0(trms[1],", ",trms[2]),
-				  paste0(trms[2],", ",trms[2]))
+		trms <- c(
+		  paste0(trms[1],", ",trms[1]),
+		  paste0(trms[1],", ",trms[2]),
+		  paste0(trms[2],", ",trms[1]),
+		  paste0(trms[2],", ",trms[2])
+		  )
 		colnames(out) <- create_nm(grp,trms)
 	}
 	return(out)

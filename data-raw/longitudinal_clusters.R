@@ -1,10 +1,10 @@
 ## code to prepare `longitudinal_clusters` dataset goes here
 
 set.seed(3431)
-num_subj <- 5E2
+num_subj <- 2.5E3
 riskcat <- sapply(1:num_subj,function(x) sample(1:3,size=1,replace=F,prob = c(.7,.2,.1)))
 riskmat <- Matrix::fac2sparse(riskcat)
-num_visits <- sample(1:5,size=num_subj,replace=T)
+num_visits <- sample(6:10,size=num_subj,replace=T,prob=c(.1,.2,.2,.4,.1))
 visit_num <- purrr::map_dfr(1:num_subj,function(x) dplyr::tibble(id = x,measurement = 1:num_visits[x]))
 num_obs <- sum(num_visits)
 Z <- rbinom(num_subj,1,.5)

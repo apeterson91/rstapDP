@@ -29,6 +29,7 @@ Eigen::MatrixXd draw_wishart(const Eigen::MatrixXd &V,const int &df,std::mt19937
 			}
 		}
 	}
+
 	
 	Eigen::MatrixXd out(V.rows(),V.cols());
 
