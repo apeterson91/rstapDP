@@ -59,13 +59,15 @@ fdp_staplmer <- function(formula,
 	W <- get_W(mf$glmod)
 	subj_mat <- get_subjmat(mf$glmod)
 
+	if(length(spec$term)>1)
+		stop("Only one stap/sap/tap term allowed")
 
 	if(vapply(list(mf$glmod$reTrms$flist),nlevels,1)>1)
 		stop("Estimation of only 1 group term currently implimented")
 
 	if(is.null(weights))
 	  weights <- rep(1,length(mf$y))
-
+	
 	
 	fit <- fdp_staplmer.fit(y = mf$y,
 							Z = mf$X,
@@ -82,8 +84,7 @@ fdp_staplmer <- function(formula,
 							tau_a,tau_b,
 							K,iter_max,
 							burn_in,thin,
-							fix_alpha,
-							seed)
+							fix_alpha,seed)
 	
     fit <- list(pars = list(beta = fit$beta,
 							pi = fit$pi,
@@ -113,7 +114,7 @@ fdp_staplmer <- function(formula,
 #' 
 #' @param y vector of outcomes
 #' @param Z design matrix
-#' @param X list of stap design matrix or matrices. Only multiple in case of using between_within decomposition.
+#' @param X stap design matrix
 #' @param W group terms design matrix from \code{\link[lme4]{glFormula}}
 #' @param S list of penalty matrices from \code{\link[mgcv]{jagam}} 
 #' @param subj_mat matrix indexing subject-measurement locations in (Z,X,W)
@@ -129,7 +130,7 @@ fdp_staplmer <- function(formula,
 #' @param iter_max maximum number of iterations
 #' @param burn_in number of iterations to burn-in
 #' @param thin number by which to thin samples
-#' @param fix_alpha boolean value  indicating whether or not concentration parameter is fixed
+#' @param fix_alpha boolean value 
 #' @param seed random number generator seed will be set to default value if not by user
 #' @export
 #' 
@@ -151,6 +152,7 @@ fdp_staplmer.fit <- function(y,Z,X,W,S,
 							 seed = NULL){
 
 	stopifnot(c(sigma_a,sigma_b,tau_a,tau_b,alpha_a,alpha_b)>0)
+	stopifnot(nrow(S) == ncol(Z) + ncol(X)*K)
 	stopifnot(length(weights) == length(y))
   if(is.null(seed)){
     seed <- 3413
@@ -158,24 +160,15 @@ fdp_staplmer.fit <- function(y,Z,X,W,S,
 
   num_posterior_samples <- sum((seq(from=burn_in+1,to=iter_max,by=1) %%thin)==0)
   stopifnot(num_posterior_samples>0)
-  
-  P_two <- sapply(X,ncol)
-  num_penalties <- c(length(S),if(length(P_two)>1) length(P_two) else NULL)
+
+  num_penalties <- length(S) ## default for smoothing
   S <- do.call(cbind,S)
   X <- do.call(cbind,X)
-  stopifnot(nrow(S) == ncol(Z) + ncol(X)*K)
-  stopifnot(ncol(S) == (K*ncol(X) + ncol(Z))*(if(length(P_two>1)) length(P_two) else 1)   )
-  fit <- stappDP_mer_fit(y = y,Z = Z,X = X,W = W,S = S,w = weights,
-                         subj_mat = subj_mat, subj_n =subj_n,
-                         num_penalties = num_penalties,
-                         alpha_a = alpha_a, alpha_b = alpha_b,
-                         sigma_a = sigma_a,sigma_b = sigma_b,
-                         tau_a = tau_a, tau_b = tau_b,
-                         K = K,iter_max = iter_max , burn_in = burn_in,
-            						 thin = thin, seed = seed,
-            						 num_posterior_samples = num_posterior_samples,
-            						 P_two = sum(P_two), P_twoi = P_two, 
-            						 fix_alpha = fix_alpha)
+  fit <- stappDP_mer_fit(y,Z,X,W,S,weights,subj_mat,
+					 subj_n,alpha_a,alpha_b,
+					 sigma_a,sigma_b,tau_a,tau_b,
+					 K,num_penalties,iter_max,burn_in,
+					 thin,seed,num_posterior_samples,fix_alpha)
 
 
   return(fit)

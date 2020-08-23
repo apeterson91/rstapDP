@@ -55,6 +55,9 @@ fdp_staplm <- function(formula,
 	mf <- rbenvo::subject_design(benvo,foo)
 	subj_mat <- get_subjmat(mf$glmod)
 
+	if(length(spec$term)>1)
+		stop("Only one stap/sap/tap term allowed")
+
 	if(is.null(weights))
 	  weights <- rep(1,length(mf$y))
 

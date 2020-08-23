@@ -24,7 +24,7 @@ stapDP <- function(object){
 	probs <- object$pars$pi
 	num_penalties <- length(object$spec$S)
 	clnms <- Reduce(c,
-	                lapply(1:K,function(x) paste0("K: " , x," ",Reduce(c,lapply(object$spec$X,colnames)) ))
+	                lapply(1:K,function(x) paste0("K: " , x," ",colnames(object$spec$X[[1]]) ))
 	                )
 
 	beta <- object$pars$beta
@@ -40,7 +40,7 @@ stapDP <- function(object){
 
 
 	scales <- object$pars$scales
-	colnames(scales) <- paste0("tau_",1:(K*sum(num_penalties)))
+	colnames(scales) <- paste0("tau_",1:(K*num_penalties))
 	colnames(probs) <- paste0("pi","_",1:K)
 
 	ys <- object$pars$yhat
