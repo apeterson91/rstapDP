@@ -1,6 +1,10 @@
 create_S <- function(K,jg,bw,ncol_Z){
 
-	S <- lapply(jg$pregam$S,function(x) kronecker(diag(K),x))
+	if(bw)
+		S <- lapply(jg$pregam$S,function(x) kronecker(diag(K),kronecker(diag(2),x)))
+	else
+		S <- lapply(jg$pregam$S,function(x) kronecker(diag(K),x))
+
 	S <- lapply(S,function(m) rbind(matrix(0,
 										   ncol = ncol(m) + ncol_Z,
 										   nrow = ncol_Z),
@@ -9,8 +13,6 @@ create_S <- function(K,jg,bw,ncol_Z){
 							ncol=ncol_Z),
 					 m))
 				)
-	if(bw)
-		return(list(S,S))
 
 	return(S)
 }

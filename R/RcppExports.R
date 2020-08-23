@@ -3,6 +3,7 @@
 
 #' Penalized Functional Dirichlet Process Linear Regression with N observations
 #'
+#'
 #' @param y a vector of continuous outcomes
 #' @param Z a matrix of population level confounders
 #' @param X a matrix of spatial temporal aggregated predictors
@@ -15,7 +16,7 @@
 #' @param tau_a penalty gamma prior shape hyperparameter
 #' @param tau_b penalty gamma prior scale hyperparameter
 #' @param K truncation number
-#' @param num_penalties number of penalty matrices accounted for in S
+#' @param num_penalties number of penalty matrices accounted for in S 
 #' @param iter_max maximum number of iterations
 #' @param burn_in number of burn in iterations
 #' @param thin number by which to thin samples
@@ -53,7 +54,7 @@ stappDP_fit <- function(y, Z, X, S, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a
 #' @param seed rng initializer
 #' @param num_posterior_samples total number of posterior samples
 #' @param fix_alpha  boolean value that determines whether or not to fix alpha in sampler
-stappDP_mer_fit <- function(y, Z, X, W, S, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, fix_alpha) {
-    .Call(`_rstapDP_stappDP_mer_fit`, y, Z, X, W, S, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, fix_alpha)
+stappDP_mer_fit <- function(y, Z, X, W, S, w, subj_mat_, subj_n, num_penalties, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, iter_max, burn_in, thin, seed, num_posterior_samples, fix_alpha, P_two, P_twoi) {
+    .Call(`_rstapDP_stappDP_mer_fit`, y, Z, X, W, S, w, subj_mat_, subj_n, num_penalties, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, iter_max, burn_in, thin, seed, num_posterior_samples, fix_alpha, P_two, P_twoi)
 }
 

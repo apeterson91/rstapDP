@@ -12,6 +12,7 @@
 
 //' Penalized Functional Dirichlet Process Linear Regression with N observations
 //'
+//'
 //' @param y a vector of continuous outcomes
 //' @param Z a matrix of population level confounders
 //' @param X a matrix of spatial temporal aggregated predictors
@@ -24,7 +25,7 @@
 //' @param tau_a penalty gamma prior shape hyperparameter
 //' @param tau_b penalty gamma prior scale hyperparameter
 //' @param K truncation number
-//' @param num_penalties number of penalty matrices accounted for in S
+//' @param num_penalties number of penalty matrices accounted for in S 
 //' @param iter_max maximum number of iterations
 //' @param burn_in number of burn in iterations
 //' @param thin number by which to thin samples
@@ -143,6 +144,7 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 						   const Eigen::VectorXd &w,
 						   const SEXP &subj_mat_,
 						   const Eigen::ArrayXi &subj_n,
+						   const Eigen::ArrayXi &num_penalties,
 						   const double &alpha_a,
 						   const double &alpha_b,
 						   const double &sigma_a,
@@ -150,13 +152,14 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 						   const double &tau_a,
 						   const double &tau_b,
 						   const int &K,
-						   const int &num_penalties,
 						   const int &iter_max,
 						   const int &burn_in,
 						   const int &thin,
 						   const int &seed,
 						   const int &num_posterior_samples,
-						   const bool &fix_alpha
+						   const bool &fix_alpha,
+						   const int &P_two,
+						   const Eigen::ArrayXi &P_twoi
 							)
 {
 
@@ -182,7 +185,7 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 	beta_samples.setZero(num_posterior_samples,Z.cols() + X.cols()*K);
 	sigma_samples.setZero(num_posterior_samples);
 	pi_samples.setZero(num_posterior_samples,K);
-	tau_samples.setZero(num_posterior_samples,K*num_penalties);
+	tau_samples.setZero(num_posterior_samples,K*num_penalties.sum());
 	yhat_samples.setZero(num_posterior_samples,y.rows());
 	b_samples.setZero(num_posterior_samples,W.cols()*subj_mat.cols());
 	D_samples.setZero(num_posterior_samples,W.cols()*W.cols());
@@ -192,11 +195,13 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 
 	FDPPSampler_mer sampler(y,Z,X,W,S,w,
 							subj_mat,subj_n,
-							alpha_a,
-							alpha_b,tau_a,tau_b,
-							sigma_a,sigma_b,K,
-							num_penalties,fix_alpha,rng);
+							alpha_a,alpha_b,
+							sigma_a,sigma_b,
+							tau_a,tau_b,K,
+							num_penalties,P_two,
+							P_twoi,fix_alpha,rng);
 
+	/*
 	for(int iter_ix = 1; iter_ix <= iter_max; iter_ix ++){
 
 		print_progress(iter_ix,burn_in,iter_max,chain);
@@ -209,6 +214,7 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 								  b_samples,D_samples);
 		}
 	}
+	*/
 
 
 

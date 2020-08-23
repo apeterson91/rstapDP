@@ -41,11 +41,11 @@ class FDPPSampler_mer
 		const int subj_D_df;
 		const Eigen::ArrayXi subj_n;
 		Eigen::ArrayXXd unique_taus;
-		const double alpha_b;
-		const double sigma_a; 
-		const double sigma_b; 
-		const double tau_a; 
-		const double tau_b;
+		const double &alpha_b;
+		const double &sigma_a; 
+		const double &sigma_b; 
+		const double &tau_a; 
+		const double &tau_b;
 		Eigen::ArrayXd u_posterior_beta_alpha;
 		Eigen::ArrayXd u_posterior_beta_beta;
 		double sigma;
@@ -55,19 +55,20 @@ class FDPPSampler_mer
 		double posterior_a_alpha;
 		double posterior_b_alpha;
 		const int P;
-		const int P_two;
+		const int &P_two;
+		const Eigen::ArrayXi &P_twoi;
 		const int N;
 		const int n;
-		const int K;
+		const int &K;
 		const int Q;
-		const int num_penalties;
+		const Eigen::ArrayXi &num_penalties;
 		int sample_ix = 0;
 		int num_nonzero;
 		int temp_Q;
 		Eigen::MatrixXd nonzero_ics;
 		bool initializing = true;
 		bool flag = true;
-		const bool fix_alpha;
+		const bool &fix_alpha;
 		const double log_factor;
 
 	public:
@@ -88,7 +89,9 @@ class FDPPSampler_mer
 				const double &tau_a,
 				const double &tau_b,
 				const int &K,
-				const int &num_penalties,
+				const Eigen::ArrayXi &num_penalties,
+				const int &P_two,
+				const Eigen::ArrayXi &P_twoi,
 				const bool &fix_alpha,
 				std::mt19937 &rng
 			  ): 
@@ -101,7 +104,7 @@ class FDPPSampler_mer
 			sigma_b(sigma_b),
 			tau_a(tau_a), tau_b(tau_b),
 			P(Z.cols()), 
-			P_two(X.cols()),
+			P_two(P_two), P_twoi(P_twoi),
 			N(y.rows()), n(subj_mat.cols()),
 			K(K),
 			Q(Z.cols() + X.cols()*K), 
@@ -109,29 +112,6 @@ class FDPPSampler_mer
 			fix_alpha(fix_alpha),
 			log_factor(log(pow(10,-16)) - log(N))
 	{
-		num_nonzero = K;
-		temp_Q = P + P_two * num_nonzero;
-		PenaltyMat.setZero(Q,Q); 
-		P_matrix.setZero(n,n);
-		unique_taus.setZero(K,num_penalties);
-		b.setZero(n,K);
-		z.setZero(temp_Q); 
-		z_b.setZero(W.cols()); 
-		beta.setZero(Q); 
-		subj_D = Eigen::MatrixXd::Identity(W.cols(),W.cols());
-		subj_b.setZero(n,W.cols());
-		nonzero_ics = Eigen::MatrixXd::Identity(temp_Q,temp_Q);
-		beta_temp.setZero(P + P_two*num_nonzero);
-		X_K.setZero(N,P_two*num_nonzero);
-		u.setZero(K);
-		pi.setZero(K);
-		u_posterior_beta_alpha.setZero(K);
-		u_posterior_beta_beta.setZero(K);
-		cluster_count.setZero(K);
-		iter_cluster_assignment.setZero(n);
-		probs.setZero(K);
-		sigma = 1;
-		precision = 1;
 		std::gamma_distribution<double> rgamma(alpha_a,alpha_b);
 		if(fix_alpha)
 			alpha = alpha_a;
@@ -139,12 +119,7 @@ class FDPPSampler_mer
 			alpha = rgamma(rng);
 			posterior_a_alpha = alpha_a + K - 1;
 		}
-		stick_break(rng);
-		cluster_matrix.setZero(n,K);
-		initialize_beta(rng);
-		initializing = false;
-		check_initialization();
-		calculate_Wb();
+		initialization(rng);
 	}
 
 		void iteration_sample(std::mt19937 &rng);
@@ -184,11 +159,11 @@ class FDPPSampler_mer
 
 		void initialize_beta(std::mt19937 &rng);
 
-		void update_penaltymat(const int &k, const int &pen_ix);
+		void update_penaltymat(const int &k, const int &vex_ix, const int &pen_ix);
 
 		void adjust_zero_clusters(std::mt19937 &rng);
 
-		double calculate_penalty_scale(const int &k, const int &pen_ix);
+		double calculate_penalty_scale(const int &k,const int &vec_ix, const int &pen_ix);
 
 		void adjust_beta(std::mt19937 &rng);
 
@@ -198,7 +173,9 @@ class FDPPSampler_mer
 
 		void calculate_Wb();
 
-		void check_initialization();
+		void initialization(std::mt19937 &rng);
+
+		int get_tau_ix(const int &vec_ix, const int &pen_ix);
 
 };
 

@@ -67,4 +67,9 @@ plot_pairs(fit,sort=T,sample=500)
 plot(fit,style='facet')
 ```
 
+```{r bwfit}
+fit <- fdp_staplmer(BMI ~ sex + year +  sap_bw(FFR) + (year|ID),
+                    benvo=bdf,iter_max = 3E3,burn_in = 2E3)
+```
+
 
