@@ -118,7 +118,7 @@ plot.stapDP <- function(x,p = 0.95,
 													  Model = "Within",
 													  Lower = apply(gd_eta$eta_w[,,x],1,function(y) quantile(y,l)),
 													  Median = apply(gd_eta$eta_w[,,x],1,median),
-													  Upper = apply(gd_eta$eta_b[,,x],1,function(y) quantile(y,u)))
+													  Upper = apply(gd_eta$eta_w[,,x],1,function(y) quantile(y,u)))
 								  )
 		) 
 		mid <- median(gd_eta$grid$Distance)
