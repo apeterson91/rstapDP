@@ -194,6 +194,14 @@ get_stap.stapDPspec <- function(x,term,component,beta){
 
 	mat <- mgcv::Predict.matrix(sob,gd)
 
+	if(has_bw(x)){
+		nms <- grep(x=colnames(beta),pattern="_bw",value=T)
+		eta_b <- abind::abind(lapply(1:dim(beta)[3], function(x) tcrossprod(mat,beta[,nms,x])),along=3)
+		nms <- grep(x=colnames(beta),pattern="_wi",value=T)
+		eta_w <- abind::abind(lapply(1:dim(beta)[3], function(x) tcrossprod(mat,beta[,nms,x])),along=3)
+		return(list(grid=gd,eta_w=eta_w,eta_b=eta_b))
+	}
+
 	eta <- abind::abind(lapply(1:dim(beta)[3], function(x) tcrossprod(mat,beta[,,x])),along=3)
 
 	return(list(grid=gd,

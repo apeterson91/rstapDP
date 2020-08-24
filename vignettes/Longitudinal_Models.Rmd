@@ -68,3 +68,7 @@ plot(fit,style='facet')
 ```
 
 
+```{r}
+fit <- fdp_staplmer(BMI ~ sex + year +  sap_bw(FFR) + (year|ID),
+                    benvo=bdf)
+```

@@ -1,7 +1,7 @@
 
 #' Create a stapDP object
 #'
-#' @param object A list provided by the fdp_staplm.fit function
+#' @param object A list provided by the fdp_staplm(er) functions
 #' @return A stapDP object
 #'
 stapDP <- function(object){
@@ -11,21 +11,35 @@ stapDP <- function(object){
 	
 
 	K <- object$K
+	spec <- object$spec
 	pardf <- rbind(dplyr::tibble(iteration_ix = 1:length(object$pars$alpha),
-	                             Parameter = "alpha",
-	                             Samples = object$pars$alpha), 
+								 Parameter = "alpha",
+								 Samples = object$pars$alpha), 
 			dplyr::tibble(iteration_ix = 1:length(object$pars$sigma),
-			              Parameter = "sigma",
-			              Samples = object$pars$sigma)) 
-
-
-
-	P <- ncol(object$spec$X[[1]])
+						  Parameter = "sigma",
+						  Samples = object$pars$sigma)) 
 	probs <- object$pars$pi
-	num_penalties <- length(object$spec$S)
+
+	if(has_bw(spec)){
+		num_penalties <- length(spec$S[[1]])
+		tau_b <- object$pars$tau_b
+		tau_w <- object$pars$tau_w
+		colnames(tau_b) <- paste0("tau_b_",1:(K*num_penalties))
+		colnames(tau_w) <- paste0("tau_w_",1:(K*num_penalties))
+		scales <- cbind(tau_b,tau_w)
+
+	}else{
+		num_penalties <- length(object$spec$S)
+		scales <- object$pars$scales
+		colnames(scales) <- paste0("tau_",1:(K*num_penalties))
+	}
+
+	colnames(probs) <- paste0("pi","_",1:K)
+
+	nms <- Reduce(c,lapply(spec$X,colnames))
 	clnms <- Reduce(c,
-	                lapply(1:K,function(x) paste0("K: " , x," ",colnames(object$spec$X[[1]]) ))
-	                )
+					lapply(1:K,function(x) paste0("K: " , x," ",nms ))
+					)
 
 	beta <- object$pars$beta
 	colnames(beta) <- c(colnames(object$mf$X),
@@ -39,9 +53,6 @@ stapDP <- function(object){
 	beta <- abind::abind(beta,along=3)
 
 
-	scales <- object$pars$scales
-	colnames(scales) <- paste0("tau_",1:(K*num_penalties))
-	colnames(probs) <- paste0("pi","_",1:K)
 
 	ys <- object$pars$yhat
 	gd <- expand.grid(id =paste("V_",1:ncol(object$pars$yhat)),

@@ -93,6 +93,9 @@ plot.stapDP <- function(x,p = 0.95,
 	K <- Samples <- Parameter <- Lower <- Upper <- medp <- iteration_ix <- 
 		. <- Distance <- Median <- P <- y <- RSS <- mnRSS <- NULL
 
+	stopifnot(p>=0 && p<=1)
+	l <-  .5 - p/2
+	u <- .5 + p/2
 	spec <- x$spec
 	term <- x$spec$term[1]
 	comp <- x$spec$component[1]
@@ -101,14 +104,46 @@ plot.stapDP <- function(x,p = 0.95,
 	kprob <- apply(x$probs,2,median)
 	ks_to_keep <- which(kprob>prob_filter)
 
+	if(has_bw(spec)){
+		pltdf <- purrr::map_dfr(ks_to_keep,function(x)
+								  dplyr::tibble(Distance = gd_eta$grid$Distance,
+												K = x,
+												Model = "Between",
+												Lower = apply(gd_eta$eta_b[,,x],1,function(y) quantile(y,l)),
+												Median = apply(gd_eta$eta_b[,,x],1,median),
+												Upper = apply(gd_eta$eta_b[,,x],1,function(y) quantile(y,u))) %>%
+								  rbind(.,
+										dplyr::tibble(Distance = gd_eta$grid$Distance,
+													  K = x,
+													  Model = "Within",
+													  Lower = apply(gd_eta$eta_w[,,x],1,function(y) quantile(y,l)),
+													  Median = apply(gd_eta$eta_w[,,x],1,median),
+													  Upper = apply(gd_eta$eta_b[,,x],1,function(y) quantile(y,u)))
+								  )
+		) 
+		mid <- median(gd_eta$grid$Distance)
+		max_eta <- quantile(gd_eta$eta_b[,,ks_to_keep],0.99)
+		kprob <- dplyr::tibble(x = mid, 
+		                       y = max_eta,
+		                       K = factor(ks_to_keep),
+		                       Model = factor("Between"),
+		                       Prob = paste("P(.) = ",round(100*kprob[ks_to_keep],2)))
+		p <- pltdf %>% dplyr::mutate(K = factor(K),
+									 Model=factor(Model)) %>%
+		ggplot2::ggplot(ggplot2::aes(x=Distance,y=Median,linetype=K)) + 
+		  ggplot2::geom_line() +
+		  ggplot2::geom_ribbon(ggplot2::aes(ymin = Lower,ymax=Upper),alpha=0.3)+
+		ggplot2::geom_hline(ggplot2::aes(yintercept=0),linetype=2,color='red') + 
+		ggplot2::facet_wrap(~Model + K,nrow = 2,ncol=length(ks_to_keep)) +  
+		  ggplot2::geom_label(ggplot2::aes(x=x,y=y,label=Prob),data=kprob) + 
+		  ggplot2::theme(strip.background = ggplot2::element_blank()) + 
+		  ggplot2::labs(y="Exposure Effect")
+	return(p)
+	}
 	gd <- gd_eta$grid
 
 	eta <- gd_eta$eta
-	
-	
 
-	l <-  .5 - p/2
-	u <- .5 + p/2
 
 	pltdf <- purrr::map_dfr(ks_to_keep,function(x)
 							  dplyr::tibble(Distance = gd$Distance,
@@ -119,16 +154,14 @@ plot.stapDP <- function(x,p = 0.95,
 
 
 	pltdf %>% dplyr::mutate(K = factor(K)) %>% 
-	  dplyr::group_by(Distance,K) %>% 
 	  ggplot2::ggplot(ggplot2::aes(x=Distance,y=Median,linetype=K)) + 
-	  ggplot2::geom_hline(aes(yintercept = 0),linetype=2,color='red')-> p   
+	  ggplot2::geom_hline(ggplot2::aes(yintercept = 0),linetype=2,color='red')-> p   
 
 	if (style=="color"){
 		p + ggplot2::geom_line(ggplot2::aes(color=K)) + ggplot2::theme_bw() + 
 		  ggplot2::geom_ribbon(ggplot2::aes(ymin=Lower,ymax=Upper),alpha=0.3) + 
 		  ggplot2::labs(y="Exposure Effect") -> pl
 	}else{
-	  
 	  mid <- median(gd$Distance)
 	  max_eta <- quantile(eta[,,ks_to_keep],0.99)
 	  kprob <- dplyr::tibble(x = mid, 

@@ -57,3 +57,34 @@ stappDP_mer_fit <- function(y, Z, X, W, S, w, subj_mat_, subj_n, alpha_a, alpha_
     .Call(`_rstapDP_stappDP_mer_fit`, y, Z, X, W, S, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, fix_alpha)
 }
 
+#' Penalized Functional Dirichlet Process Linear Mixed Effects Regression with Between-Within Decomposition
+#'
+#' fits a functional dirichlet process linear mixed effects regression model
+#' with N observations and n subjects using a between-within effects decomposition on the STAP-DP design matrix 
+#'
+#' @param y a vector of continuous outcomes
+#' @param Z a matrix of population level confounders
+#' @param X a matrix of spatial temporal aggregated predictors
+#' @param W a design matrix for group specific terms
+#' @param S penalty matrix for stap parameters
+#' @param w a vector of weights for weighted regression
+#' @param subj_mat_ N x n sparse matrix used to aggregate subject observations
+#' @param subj_n n x 1 vector of integers representing how many observations correspond to each subject
+#' @param alpha_a alpha gamma prior shape hyperparameter
+#' @param alpha_b alpha gamma prior scale hyperparameter
+#' @param sigma_a precision gamma prior shape hyperparameter
+#' @param sigma_b precision gamma prior scale hyperparameter
+#' @param tau_a penalty gamma prior shape hyperparameter
+#' @param tau_b penalty gamma prior scale hyperparameter
+#' @param K truncation number
+#' @param num_penalties number of penalty matrices accounted for in S
+#' @param iter_max maximum number of iterations
+#' @param burn_in number of burn in iterations
+#' @param thin number by which to thin samples
+#' @param seed rng initializer
+#' @param num_posterior_samples total number of posterior samples
+#' @param fix_alpha  boolean value that determines whether or not to fix alpha in sampler
+stappDP_merdecomp <- function(y, Z, X_b, X_w, W, S_b, S_w, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, fix_alpha) {
+    .Call(`_rstapDP_stappDP_merdecomp`, y, Z, X_b, X_w, W, S_b, S_w, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, fix_alpha)
+}
+
