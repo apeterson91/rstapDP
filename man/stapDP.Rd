@@ -7,7 +7,7 @@
 stapDP(object)
 }
 \arguments{
-\item{object}{A list provided by the fdp_staplm.fit function}
+\item{object}{A list provided by the fdp_staplm(er) functions}
 }
 \value{
 A stapDP object

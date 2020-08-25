@@ -41,12 +41,10 @@ print.stapDP <- function(x,digits=1,...){
 
 
 	cat("\n ----------------------- \n ")
-	cat("\n Auxiliary Variables \n ")
+	cat("\n Concentration Parameter \n ")
 	
-	mat <- x$pardf %>% tidyr::spread(Parameter,Samples) %>% dplyr::select(-iteration_ix) %>% 
-		as.matrix()
 
-	.printfr(.median_and_madsd(mat),digits)
+	.printfr(.median_and_madsd(x$alpha),digits)
 
 	if(is.mer(x)){
       cat("\nError terms:\n")
@@ -54,6 +52,9 @@ print.stapDP <- function(x,digits=1,...){
 	  print(foo)
 	  cat("Num. levels:",
           paste(names(ngrps(x)), unname(ngrps(x)), collapse = ", "), "\n")
+	}else{
+      cat("\nResidual sd:\n")
+		.printfr(.median_and_madsd(x$sigma),digits)
 	}
 
 

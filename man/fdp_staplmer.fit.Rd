@@ -24,6 +24,7 @@ fdp_staplmer.fit(
   burn_in,
   thin = 1,
   fix_alpha = FALSE,
+  bw = FALSE,
   seed = NULL
 )
 }
@@ -65,6 +66,8 @@ fdp_staplmer.fit(
 \item{thin}{number by which to thin samples}
 
 \item{fix_alpha}{boolean value}
+
+\item{bw}{boolean value indicating whether or not subject decomposition is used}
 
 \item{seed}{random number generator seed will be set to default value if not by user}
 }

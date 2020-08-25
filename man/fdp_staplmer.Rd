@@ -60,13 +60,13 @@ a stapDP model object
 Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Mixed Effects Regression Model
 }
 \details{
-This function fits a linear mixed effects regression model in a bayesian paradigm with
+This function fits a linear mixed effects regression model in a Bayesian paradigm with
 improper priors assigned to the "standard" regression covariates designated 
 in the formula argument and a Dirichlet process prior with normal-gamma base measure 
 assigned to the stap basis function expansion using penalized splines via \code{\link[mgcv]{jagam}}.
 normal priors are placed on the latent group variables and an improper prior is placed on the 
 correlation matrix leading to a Wishart posterior.
 
-The concentration parameter is assigned gamma prior with  hyperparameters shape alpha_a and scale alpha_b.
+The concentration parameter is assigned a gamma prior with  hyperparameters shape alpha_a and scale alpha_b.
  Precision parameters sigma_a,sigma_b, tau_a,tau_b are similar for the residual and penalties' precision, respectively.
 }

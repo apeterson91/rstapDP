@@ -49,7 +49,7 @@ nobs.stapDP <- function(object, ...){
 VarCorr.stapDP <- function(x){
 
 	cnms <- .cnms(x)
-	sc <- x$pardf %>% dplyr::filter(Parameter == 'sigma') %>% dplyr::pull(Samples)
+	sc <- x$sigma
 	Sigma_ <- colMeans(x$subj_D[,grepl("^Sigma\\[", colnames(x$subj_D)), drop = FALSE])
 	nc <- vapply(cnms, FUN = length, FUN.VALUE = 1L)
 	nms <- names(cnms)

@@ -59,7 +59,7 @@ plot_pairs.stapDP <- function(x,sort = FALSE,sample = 0){
 	}
 
 
-	p <- dplyr::as_tibble(P[A,A]) %>% dplyr::mutate(Group_1 = 1:dplyr::n()) %>%
+	p <- suppressMessages(dplyr::as_tibble(P[A,A])) %>% dplyr::mutate(Group_1 = 1:dplyr::n()) %>%
 	  tidyr::gather(dplyr::contains("V"), key = "Group_2", value = "Probability") %>%
 	  dplyr::mutate("Group_2" = as.numeric(stringr::str_replace(Group_2,"V",""))) %>%
 	  ggplot(aes(x=Group_1,y=Group_2,fill=Probability)) +
@@ -186,10 +186,9 @@ plot.stapDP <- function(x,p = 0.95,
 #' @export
 #' @param x a stapDP object
 #' @param par string of parameter to use
-#' @param prob_filter median probability of cluster components to include in plot
 #' default is .1
 #' 
-traceplots <- function(x,par=c("probs"),prob_filter = .1){
+traceplots <- function(x,par = NULL){
 	UseMethod("traceplots")
 }
 
@@ -198,21 +197,14 @@ traceplots <- function(x,par=c("probs"),prob_filter = .1){
 #' @export
 #' @describeIn traceplots
 #' 
-traceplots.stapDP <- function(x,par=c("probs"),prob_filter = .1){
-	stopifnot(par %in% c("probs","fixef","ranef","alpha","sigma"))
+traceplots.stapDP <- function(x,par = NULL){
 
-	K <- Samples <- Parameter <- Lower <- Upper <- medp <- iteration_ix <- NULL
-
-
-	if(par %in% c("alpha","sigma"))
-		p <- x$pardf %>% dplyr::filter(Parameter == !!par) %>% ggplot2::ggplot(ggplot2::aes(x=iteration_ix,y=Samples,color=Parameter)) + ggplot2::geom_line() + ggplot2::theme_bw()
-	else{
-		if(par == "fixef")
-			p <- x[[par]] %>% ggplot2::ggplot(ggplot2::aes(x = iteration_ix ,y = Samples,color = Parameter)) + ggplot2::geom_line() + ggplot2::theme_bw() + ggplot2::facet_wrap(~Parameter, scales = "free") + ggplot2::theme(strip.background=ggplot2::element_blank()) else p <- x[[par]] %>% dplyr::filter(K %in% ks) %>% 
-				ggplot2::ggplot(ggplot2::aes(x = iteration_ix,y = Samples,color=Parameter)) + 
-				ggplot2::geom_line() + 
-				ggplot2::theme_bw() + ggplot2::facet_wrap(~Parameter + K,scales="free") + ggplot2::theme(strip.background = ggplot2::element_blank())
+	mat <- as.matrix(x)
+	if(!is.null(par)){
+		stopifnot(par %in% colnames(mat))
 	}
+	
+	p <- bayesplot::mcmc_trace(list(as.matrix(x)[,par,drop=F]))
 	return(p)
 }
 

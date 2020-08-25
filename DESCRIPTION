@@ -25,7 +25,8 @@ Imports:
     RcppProgress,
     abind,
     rstantools,
-    nlme
+    nlme,
+    bayesplot
 LinkingTo: Rcpp, RcppEigen
 Suggests: 
     knitr,

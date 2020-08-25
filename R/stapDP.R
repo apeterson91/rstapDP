@@ -9,16 +9,17 @@ stapDP <- function(object){
 	 Samples <- Parameter <- Lower <- Upper <- medp <- iteration_ix <- 
 		. <- Distance <- Median <- P <-  id <- NULL
 	
+	if(!is.null(object$pars$subj_b)){
+		glmod <- object$mf$glmod
+		b <- reformat_b(object$pars$subj_b,glmod)
+		D <- reformat_D(object$pars$subj_D,glmod)
+		mer <- TRUE
+	}else{
+		mer <- FALSE
+	}
 
 	K <- object$K
 	spec <- object$spec
-	pardf <- rbind(dplyr::tibble(iteration_ix = 1:length(object$pars$alpha),
-								 Parameter = "alpha",
-								 Samples = object$pars$alpha), 
-			dplyr::tibble(iteration_ix = 1:length(object$pars$sigma),
-						  Parameter = "sigma",
-						  Samples = object$pars$sigma)) 
-	probs <- object$pars$pi
 
 	if(has_bw(spec)){
 		num_penalties <- length(spec$S[[1]])
@@ -34,7 +35,6 @@ stapDP <- function(object){
 		colnames(scales) <- paste0("tau_",1:(K*num_penalties))
 	}
 
-	colnames(probs) <- paste0("pi","_",1:K)
 
 	nms <- Reduce(c,lapply(spec$X,colnames))
 	clnms <- Reduce(c,
@@ -45,13 +45,26 @@ stapDP <- function(object){
 	colnames(beta) <- c(colnames(object$mf$X),
 						clnms)
 	delta <- beta[,colnames(object$mf$X)]
-
-	beta <- beta[,clnms]
+	betamat <- beta[,clnms]
 	clnm_k <- lapply(1:K,function(x) grep(x=clnms,pattern = paste0("K: ",x),value=T))
-
-	beta <- lapply(clnm_k,function(k) beta[,k])
+	beta <- lapply(clnm_k,function(k) betamat[,k])
 	beta <- abind::abind(beta,along=3)
+	dimnames(beta)[[2]] <- nms
+	dimnames(beta)[[3]] <- paste0("K: ",1:K)
 
+	alpha <- matrix(object$pars$alpha,ncol=1,nrow=length(object$pars$alpha))
+	colnames(alpha) <- "alpha"
+	sigma <- matrix(object$pars$sigma,ncol=1,nrow=nrow(alpha))
+	colnames(sigma) <- "sigma"
+
+	probs <- object$pars$pi
+	colnames(probs) <- paste0("pi","_",1:K)
+
+	parmat <- cbind(delta,betamat,alpha,sigma,probs,scales)
+	if(mer){
+		parmat <- cbind(parmat,b,D)
+	}
+	parameter_summary <- get_summary(parmat)
 
 
 	ys <- object$pars$yhat
@@ -73,9 +86,11 @@ stapDP <- function(object){
 	yhat <- rbind(yhat,dplyr::tibble(iteration_ix = rep(0,length(object$mf$y)),Parameter=rep("yobs",length(object$mf$y)), id = 1:length(object$mf$y),Samples = object$mf$y))
 
 
-	out <- list(pardf = pardf,
+	out <- list(beta = beta,
+				summary = parameter_summary,
 				delta = delta,
-				beta = beta,
+				alpha = alpha,
+				sigma = sigma,
 				probs = probs,
 				yhat = yhat,
 				scales = scales,
@@ -86,17 +101,13 @@ stapDP <- function(object){
 							 y=object$mf$y,
 							 alpha_a = object$alpha_a,
 							 alpha_b = object$alpha_b),
-				spec = object$spec,
-				glmod = object$mf$glmod
-				)
-	if(!is.null(object$pars$subj_b)){
-	  glmod <- object$mf$glmod
-	  b <- object$pars$subj_b
-	  D <- object$pars$subj_D
-		out$subj_b <- reformat_b(b,glmod)
-		out$subj_D <- reformat_D(D,glmod)
-	}
+				spec = object$spec)
 
+	if(!is.null(object$mf$glmod)){
+		out$glmod <- glmod
+		out$subj_b <- b
+		out$subj_D <- D
+	}
     structure(out, class = c("stapDP"))
 }
 
@@ -134,4 +145,15 @@ reformat_b <- function(subj_b,glmod){
 	trms <- as.vector(trms)
 	colnames(subj_b) <- paste0("b[",grp,":", trms ,"]")
 	return(subj_b)
+}
+
+
+get_summary <- function(parmat){
+	nms <- colnames(parmat)
+	mean <- colMeans(parmat)
+	sd <- apply(parmat,2,sd)
+	qs <- t(apply(parmat,2,function(x) quantile(x,c(0.1,.25,.5,.75,.9))))
+	neff <- apply(parmat,2,rstan::ess_tail)
+	Rhat <- apply(parmat,2,rstan::Rhat)
+	out <- cbind(mean,sd,qs,neff,Rhat)
 }
