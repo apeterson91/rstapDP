@@ -39,7 +39,7 @@
 #' 
 "FFR_benvo"
 
-#' Complex Longitudinal Clustering Benvo for use in \pkg{rstapDP} vignettes.
+#' Longitudinal Clustering Benvo for use in \pkg{rstapDP} vignettes.
 #'
 #' @name longitudinal_clusters
 #' @format A \code{\link[rbenvo]{Benvo}} consisting of a subject and subject-distance dataframes
@@ -48,3 +48,14 @@
 #' @seealso the generating \href{https://github.com/apeterson91/rstapDP/tree/master/data-raw}{code} on Github.
 #'
 "longitudinal_clusters"
+
+
+#' Complex Longitudinal Clustering Benvo for use in \pkg{rstapDP} vignettes.
+#'
+#' @name complex_longitudinal_clusters
+#' @format A \code{\link[rbenvo]{Benvo}} consisting of a subject and subject-distance dataframes
+#' @details The outcome in the subject dataframe is simulated using a cluster specific effect as follows:
+#' \deqn{E[Y_{ij}|b_{i1},b_{i2}] = 33  - 2.2 \text{sex}_i + .1*(year_{ij}) +  \bar{f}_k(FFR_i) +  \Delta f_k(FFR_{ij}) +b_{i1} + b_{i2}(year_{ij})  } Where \eqn{k= 1,2,3} with varying probabilities.
+#' @seealso the generating \href{https://github.com/apeterson91/rstapDP/tree/master/data-raw}{code} on Github, as well as the Longitudinal vignette.
+#'
+"complex_longitudinal_clusters"

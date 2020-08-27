@@ -91,7 +91,7 @@ plot.stapDP <- function(x,p = 0.95,
 						...){
 
 	K <- Samples <- Parameter <- Lower <- Upper <- medp <- iteration_ix <- 
-		. <- Distance <- Median <- P <- y <- RSS <- mnRSS <- NULL
+		Model <- Prob <- . <- Distance <- Median <- P <- y <- RSS <- mnRSS <- NULL
 
 	stopifnot(p>=0 && p<=1)
 	l <-  .5 - p/2

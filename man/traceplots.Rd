@@ -5,16 +5,14 @@
 \alias{traceplots.stapDP}
 \title{Diagnostic Traceplots}
 \usage{
-traceplots(x, par = c("probs"), prob_filter = 0.1)
+traceplots(x, par = NULL)
 
-\method{traceplots}{stapDP}(x, par = c("probs"), prob_filter = 0.1)
+\method{traceplots}{stapDP}(x, par = NULL)
 }
 \arguments{
 \item{x}{a stapDP object}
 
-\item{par}{string of parameter to use}
-
-\item{prob_filter}{median probability of cluster components to include in plot
+\item{par}{string of parameter to use
 default is .1}
 }
 \description{

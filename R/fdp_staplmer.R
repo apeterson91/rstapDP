@@ -102,6 +102,7 @@ fdp_staplmer <- function(formula,
 							formula = formula,
 							alpha_a = alpha_a,
 							alpha_b = alpha_b,
+							benvo = benvo,
 							K = K
 							)
 	if(has_bw(spec)){

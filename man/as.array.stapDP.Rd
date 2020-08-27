@@ -6,6 +6,14 @@
 \usage{
 \method{as.array}{stapDP}(x, ...)
 }
+\arguments{
+\item{x}{a stapDP object}
+
+\item{...}{ignored}
+}
 \description{
 Retrieve DP parameter samples in Array Form
+}
+\seealso{
+as.matrix.stapDP for a matrix container of *all* parameters
 }

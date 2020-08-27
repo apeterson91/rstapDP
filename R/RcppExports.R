@@ -64,9 +64,11 @@ stappDP_mer_fit <- function(y, Z, X, W, S, w, subj_mat_, subj_n, alpha_a, alpha_
 #'
 #' @param y a vector of continuous outcomes
 #' @param Z a matrix of population level confounders
-#' @param X a matrix of spatial temporal aggregated predictors
+#' @param X_b Matrix of between subject spatial temporal aggregated predictor covariates
+#' @param X_w Matrix of within subject spatial temporal aggregated predictor covariates
 #' @param W a design matrix for group specific terms
-#' @param S penalty matrix for stap parameters
+#' @param S_b penalty matrix corresponding to between subject covariate matrix
+#' @param S_w penalty matrix corresponding to within subject covariate matrix
 #' @param w a vector of weights for weighted regression
 #' @param subj_mat_ N x n sparse matrix used to aggregate subject observations
 #' @param subj_n n x 1 vector of integers representing how many observations correspond to each subject

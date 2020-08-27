@@ -60,6 +60,103 @@ print.stapDP <- function(x,digits=1,...){
 
 }
 
+
+#' Summary method for stapDP objects
+#' 
+#' Summaries of parameter estimates and MCMC convergence diagnostics 
+#' (effective sample size, Rhat).
+#'
+#' @export
+#' @method summary stapDP
+#'
+#' @param object stapDP object
+#' @param ... ignored
+#' @param digits Number of digits to use for formatting numbers when printing. 
+#'   When calling \code{summary}, the value of digits is stored as the 
+#'   \code{"print.digits"} attribute of the returned object.
+#' @return The \code{summary} method returns an object of class 
+#'   \code{"summary.staDP"}  which is a matrix of 
+#'   summary statistics and diagnostics, with attributes storing information for use by the
+#'   \code{print} method. 
+#'
+summary.stapDP <- function(object,...,digits=1){
+
+
+	out <- object$summary
+    stats <- colnames(out)
+    if ("n_eff" %in% stats) {
+      out[, "n_eff"] <- round(out[, "n_eff"])
+    }
+
+	structure(
+	out,
+	call = object$call,
+	family = "gaussian[identity]",
+	formula = formula(object),
+    posterior_sample_size = nsamples(object),
+    nobs = nobs(object),
+	ngrps = if(is.mer(object)) ngrps(object) else NULL,
+	print.digits = digits,
+	class = "summary.stapDP"
+	)
+}
+
+#' @rdname summary.stapDP
+#' @export
+#' @method print summary.stapDP
+#'
+#' @param x An object of class \code{"summary.stapDP"}.
+print.summary.stapDP <-
+  function(x, digits = max(1, attr(x, "print.digits")),
+           ...) {
+
+    atts <- attributes(x)
+    cat("\nModel Info:")
+    cat("\n family:      ", atts$family)
+    cat("\n formula:     ", formula_string(atts$formula))
+	cat("\n sample:      ", atts$posterior_sample_size, 
+	  "(posterior sample size)")
+    
+    cat("\n observations:", atts$nobs)
+    if (!is.null(atts$ngrps)) {
+      cat("\n groups:      ", paste0(names(atts$ngrps), " (", 
+                                     unname(atts$ngrps), ")", 
+                                     collapse = ", "))
+    }
+	cat("\n")
+    
+	hat <- "Rhat"
+	str_diag <- "MCMC diagnostics"
+	str1 <- "and Rhat is the potential scale reduction factor on split chains"
+	str2 <- " (at convergence Rhat=1).\n"
+    sel <- which(colnames(x) %in% c("mcse", "n_eff", hat))
+    has_mc_diagnostic <- length(sel) > 0
+    if (has_mc_diagnostic) {
+      xtemp <- x[, -sel, drop = FALSE]
+      colnames(xtemp) <- paste(" ", colnames(xtemp))
+    } else {
+      xtemp <- x
+    }
+    
+    # print table of parameter stats
+    .printfr(xtemp, digits)
+    
+    if (has_mc_diagnostic) {
+      cat("\n", str_diag, "\n", sep = '')
+      mcse_hat <- format(round(x[, c(hat), drop = FALSE], digits), 
+                          nsmall = digits)
+      n_eff <- format(x[, "n_eff", drop = FALSE], drop0trailing = TRUE)
+      print(cbind(mcse_hat, n_eff), quote = FALSE)
+      cat("\n n_eff is a crude measure of effective sample size, ", 
+          str1, 
+          str2, sep = '')
+    }
+    
+    invisible(x)
+  }
+
+# internal use -------------------------------------------------------------------------------------
+
 .printfr <- function(x, digits, ...) {
   print(format(round(x, digits), nsmall = digits), quote = FALSE, ...)
 }

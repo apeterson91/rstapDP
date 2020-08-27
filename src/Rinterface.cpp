@@ -79,6 +79,7 @@ Rcpp::List stappDP_fit(const Eigen::VectorXd &y,
 						sigma_a,sigma_b,K,num_penalties,fix_alpha,rng);
 
 
+	Rcpp::Rcout << " Hello World ! " << std::endl;
 	for(int iter_ix = 1; iter_ix <= iter_max; iter_ix ++){
 
 		print_progress(iter_ix,burn_in,iter_max,chain);
@@ -233,9 +234,11 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 //'
 //' @param y a vector of continuous outcomes
 //' @param Z a matrix of population level confounders
-//' @param X a matrix of spatial temporal aggregated predictors
+//' @param X_b Matrix of between subject spatial temporal aggregated predictor covariates
+//' @param X_w Matrix of within subject spatial temporal aggregated predictor covariates
 //' @param W a design matrix for group specific terms
-//' @param S penalty matrix for stap parameters
+//' @param S_b penalty matrix corresponding to between subject covariate matrix
+//' @param S_w penalty matrix corresponding to within subject covariate matrix
 //' @param w a vector of weights for weighted regression
 //' @param subj_mat_ N x n sparse matrix used to aggregate subject observations
 //' @param subj_n n x 1 vector of integers representing how many observations correspond to each subject

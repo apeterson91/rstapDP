@@ -3,7 +3,7 @@
 \docType{data}
 \name{longitudinal_clusters}
 \alias{longitudinal_clusters}
-\title{Complex Longitudinal Clustering Benvo for use in \pkg{rstapDP} vignettes.}
+\title{Longitudinal Clustering Benvo for use in \pkg{rstapDP} vignettes.}
 \format{
 A \code{\link[rbenvo]{Benvo}} consisting of a subject and subject-distance dataframes
 }
@@ -11,7 +11,7 @@ A \code{\link[rbenvo]{Benvo}} consisting of a subject and subject-distance dataf
 longitudinal_clusters
 }
 \description{
-Complex Longitudinal Clustering Benvo for use in \pkg{rstapDP} vignettes.
+Longitudinal Clustering Benvo for use in \pkg{rstapDP} vignettes.
 }
 \details{
 The outcome in the subject dataframe is simulated using a cluster specific effect as follows:

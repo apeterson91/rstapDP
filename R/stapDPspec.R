@@ -22,7 +22,7 @@
 #' @param f formula from \code{\link{fdp_staplm}}, \code{\link{fdp_staplmer}}
 #' @param K DP truncation integer
 #' @param benvo Built Environment object - \code{\link[rbenvo]{Benvo}} - containing data for model 
-#' @return \code{\link{sstapspec}} object
+#' @return \code{\link{stapDPspec}} object
 #'
 get_stapDPspec <- function(f,K,benvo){
 
@@ -116,9 +116,8 @@ get_stapDPspec <- function(f,K,benvo){
 
 #' Create STAP-DP data structure
 #' 
-#' @export
-#' @param stapless_formula from \code{\link{get_sstapspec}}
-#' @param fake_formula list of ``fake'' formulas from \code{\link{get_sstapspec}}
+#' @param stapless_formula from \code{\link{get_stapDPspec}}
+#' @param fake_formula list of ``fake'' formulas from \code{\link{get_stapDPspec}}
 #' @param stap_mat matrix of stap specification properties 
 #' @param K DP truncation
 #' @param benvo Built Environment object - \code{\link[rbenvo]{Benvo}} - containing data for model 

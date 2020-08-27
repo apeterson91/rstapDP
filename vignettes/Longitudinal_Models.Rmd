@@ -27,8 +27,7 @@ theme_set(theme_bw())
 ```
 
 ```{r datasetup,echo=F}
-data("longitudinal_clusters")
-bdf <- longitudinal_clusters
+bdf <- complex_longitudinal_clusters
 ```
 
 ```{r bdf_descriptive}

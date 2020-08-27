@@ -22,7 +22,11 @@ as.matrix.stapDP <- function(x,...){
 
 #' Retrieve DP parameter samples in Array Form
 #'
-#'@export
+#' @param x a stapDP object
+#' @param ... ignored
+#' @export
+#' @seealso as.matrix.stapDP for a matrix container of *all* parameters
+#' 
 as.array.stapDP <- function(x,...){
 	return(x$beta)
 }

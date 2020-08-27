@@ -84,6 +84,7 @@ fdp_staplm <- function(formula,
 							clabels = fit$cluster_assignment
 							),
 				mf = mf,
+				benvo = benvo,
 				spec = spec,
 				formula = formula,
 				alpha_a = alpha_a,

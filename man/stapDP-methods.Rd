@@ -13,6 +13,7 @@
 \alias{VarCorr.stapDP}
 \alias{ngrps.stapDP}
 \alias{nsamples.stapDP}
+\alias{ranef.stapDP}
 \title{Methods for stapDP objects}
 \usage{
 \method{coef}{stapDP}(object, ...)
@@ -28,14 +29,24 @@
 \method{ngrps}{stapDP}(object, ...)
 
 \method{nsamples}{stapDP}(object, ...)
+
+\method{ranef}{stapDP}(object, ...)
 }
 \arguments{
-\item{object}{stapDP object}
+\item{object, }{x A fitted model object returned by one of the 
+\pkg{rstapDP} modeling functions.}
 
-\item{...}{Ignored}
+\item{...}{Currently ignored.}
 
 \item{x}{stapDP object}
 }
 \description{
+Methods for stapDP objects that are similar to
+their counterparts in the \pkg{stats} or \pkg{lme4} packages.
+}
+\details{
 Methods for stapDP objects
+
+Almost all methods behave intuitively as one familiar with the \pkg{stats} or \pkg{lme4} 
+packages would expect.
 }

@@ -7,9 +7,9 @@
 stapDPspec(stapless_formula, fake_formula, stap_mat, K, benvo)
 }
 \arguments{
-\item{stapless_formula}{from \code{\link{get_sstapspec}}}
+\item{stapless_formula}{from \code{\link{get_stapDPspec}}}
 
-\item{fake_formula}{list of ``fake'' formulas from \code{\link{get_sstapspec}}}
+\item{fake_formula}{list of ``fake'' formulas from \code{\link{get_stapDPspec}}}
 
 \item{stap_mat}{matrix of stap specification properties}
 

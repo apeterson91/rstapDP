@@ -14,7 +14,7 @@ get_stapDPspec(f, K, benvo)
 \item{benvo}{Built Environment object - \code{\link[rbenvo]{Benvo}} - containing data for model}
 }
 \value{
-\code{\link{sstapspec}} object
+\code{\link{stapDPspec}} object
 }
 \description{
 Get stapDPspec object which details the various components of the stapDP model specification

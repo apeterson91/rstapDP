@@ -26,7 +26,8 @@ Imports:
     abind,
     rstantools,
     nlme,
-    bayesplot
+    bayesplot,
+    rstan
 LinkingTo: Rcpp, RcppEigen
 Suggests: 
     knitr,

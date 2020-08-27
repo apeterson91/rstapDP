@@ -99,6 +99,7 @@ stapDP <- function(object){
 				model = list(formula = object$formula,
 							 K=(object$K),
 							 y=object$mf$y,
+							 benvo=object$benvo,
 							 alpha_a = object$alpha_a,
 							 alpha_b = object$alpha_b),
 				spec = object$spec)
@@ -152,8 +153,8 @@ get_summary <- function(parmat){
 	nms <- colnames(parmat)
 	mean <- colMeans(parmat)
 	sd <- apply(parmat,2,sd)
-	qs <- t(apply(parmat,2,function(x) quantile(x,c(0.1,.25,.5,.75,.9))))
-	neff <- apply(parmat,2,rstan::ess_tail)
+	qs <- t(apply(parmat,2,function(x) quantile(x,c(0.1,.25,.5,.75,.9),na.rm=T)))
+	n_eff <- apply(parmat,2,rstan::ess_tail)
 	Rhat <- apply(parmat,2,rstan::Rhat)
-	out <- cbind(mean,sd,qs,neff,Rhat)
+	out <- cbind(mean,sd,qs,n_eff,Rhat)
 }

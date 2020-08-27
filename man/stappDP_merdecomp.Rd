@@ -36,7 +36,15 @@ stappDP_merdecomp(
 
 \item{Z}{a matrix of population level confounders}
 
+\item{X_b}{Matrix of between subject spatial temporal aggregated predictor covariates}
+
+\item{X_w}{Matrix of within subject spatial temporal aggregated predictor covariates}
+
 \item{W}{a design matrix for group specific terms}
+
+\item{S_b}{penalty matrix corresponding to between subject covariate matrix}
+
+\item{S_w}{penalty matrix corresponding to within subject covariate matrix}
 
 \item{w}{a vector of weights for weighted regression}
 
@@ -71,10 +79,6 @@ stappDP_merdecomp(
 \item{num_posterior_samples}{total number of posterior samples}
 
 \item{fix_alpha}{boolean value that determines whether or not to fix alpha in sampler}
-
-\item{X}{a matrix of spatial temporal aggregated predictors}
-
-\item{S}{penalty matrix for stap parameters}
 }
 \description{
 fits a functional dirichlet process linear mixed effects regression model
