@@ -5,7 +5,7 @@
 \alias{FFR_benvo}
 \title{Samll benvo for use in \pkg{rstapDP} examples and vignettes.}
 \format{
-A benvo consisting of the \code{FFR_subjects} and \code{FFR_distances} dataframes
+A \code{\link[rbenvo]{benvo}} consisting of the \code{FFR_subjects} and \code{FFR_distances} dataframes
 }
 \usage{
 FFR_benvo
@@ -14,7 +14,10 @@ FFR_benvo
 Samll benvo for use in \pkg{rstapDP} examples and vignettes.
 }
 \details{
-see \code{\link[rstapDP]{FFR_subjects}} and \code{\link[rstapDP]{FFR_distances}}
-For information on the dataframes. See \code{\link[rbenvo]{Benvo}} for information on benvos.
+see \code{\link{FFR_subjects}} and \code{\link{FFR_distances}}
+For information on the dataframes.
+}
+\seealso{
+\code{\link[rbenvo]{Benvo}} for information on benvos.
 }
 \keyword{datasets}

@@ -1,4 +1,3 @@
-
 #' Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model
 #' 
 #' @details This function fits a linear model in a bayesian paradigm with
@@ -51,69 +50,48 @@ fdp_staplm <- function(formula,
 	stopifnot(thin>0)
 	## 
 	
-	foo <- get_stapless_formula(formula)
-	f <- foo$stapless_formula
-	mf <- rbenvo::subject_design(benvo,f)
-	Z <- mf$X
-	call <- match.call(expand.dots = TRUE)
-	if(nrow(foo$stap_mat)>1)
-		stop("Only one stap/sap/tap term allowed")
-	stap_term <- foo$stap_mat[,1]
-	stap_component <- foo$stap_mat[,2]
-	bw <- as.integer(foo$stap_mat[,3])
-	stap_formula <- foo$fake_formula[[1]]
-	if(!all(stap_term %in% benvo@bef_names))
-		stop("sap,tap, or stap term must be applied to a BEF in the included benvo")
-	bvo_lookup <- sapply(stap_term, function(x) paste0(rbenvo::component_lookup(benvo,x),collapse="-"))
-	if(!all(bvo_lookup == stap_component )){
-		ics <- which(bvo_lookup!=stap_term)
-		stop(paste0(stap_term[ics]," do not have the ", stap_component[ics], " data in the included benvo needed for the sap/tap/stap term that you included in the formula"))
-	}
+	spec <- get_stapDPspec(formula,K,benvo)
+	foo <- spec$stapless_formula
+	mf <- rbenvo::subject_design(benvo,foo)
+	subj_mat <- get_subjmat(mf$glmod)
 
-
-	
-	## Handle Zero exposure in dt_data
-	jd <- mgcv::jagam(formula = stap_formula,family = gaussian(),
-					  data = rbenvo::joinvo(benvo,
-											stap_term,
-											stap_component,
-											NA_to_zero = TRUE),
-					  file = tempfile(fileext=".jags"),
-					  weights = NULL,
-					  offset = NULL,
-					  centred = FALSE,
-					  diagonalize = FALSE)
-
-	X <- rbenvo::aggrenvo(benvo,jd$jags.data$X,stap_term,stap_component)
-	S <- lapply(jd$pregam$S,function(x) kronecker(diag(K),x))
-	S <- lapply(S,function(m) rbind(matrix(0,ncol=ncol(m)+ncol(Z),nrow=ncol(Z)),
-	           cbind(matrix(0,nrow=nrow(m),ncol=ncol(Z)),m)))
-	
 	if(is.null(weights))
 	  weights <- rep(1,length(mf$y))
+
 	
+	fit <- fdp_staplm.fit(y = mf$y,
+						  Z = mf$X,
+						  X=spec$X, 
+						  S=spec$S,
+						  weights,
+						  alpha_a,
+						  alpha_b,
+						  sigma_a,
+						  sigma_b,
+	                      tau_a,tau_b,
+						  K,iter_max,
+						  burn_in,thin,
+						  fix_alpha,seed)
 	
-	fit <- fdp_staplm.fit(y = mf$y,Z,X, S,weights, alpha_a,alpha_b,sigma_a,sigma_b,
-	                      tau_a,tau_b,K,iter_max,burn_in,thin,fix_alpha,seed)
-	
-    fit <- list(beta = fit$beta,
-                probs = fit$pi,
-                sigma = fit$sigma,
-                alpha = fit$alpha, 
-                yhat = fit$yhat,
-                cluster_mat = fit$cluster_assignment,
-                scales =  fit$tau,
-				num_penalties = length(S),
-                pmat = fit$PairwiseProbabilityMat,
-                clabels = fit$cluster_assignment,
-                Znames = colnames(Z),
-                ncol_X = ncol(X),
-                formula = formula,
-                sobj = jd$pregam$smooth[[1]],
+    fit <- list(pars = list(beta = fit$beta,
+							pi = fit$pi,
+							sigma = fit$sigma,
+							alpha = fit$alpha, 
+							yhat = fit$yhat,
+							cluster_mat = fit$cluster_assignment,
+							scales =  fit$tau,
+							pmat = fit$PairwiseProbabilityMat,
+							clabels = fit$cluster_assignment
+							),
+				mf = mf,
+				benvo = benvo,
+				spec = spec,
+				formula = formula,
 				alpha_a = alpha_a,
 				alpha_b = alpha_b,
-                y = mf$y,
-                K = K)
+				K = K
+				)
+
 	return(stapDP(fit))
 }
 
@@ -155,7 +133,7 @@ fdp_staplm.fit <- function(y,Z,X,S,
 						   seed = NULL){
 
 	stopifnot(c(sigma_a,sigma_b,tau_a,tau_b,alpha_a,alpha_b)>0)
-	stopifnot(nrow(S) == ncol(Z) + ncol(X)*K)
+	stopifnot(nrow(S[[1]]) == ncol(Z) + ncol(X[[1]])*K)
 	stopifnot(length(weights) == length(y))
   if(is.null(seed)){
     seed <- 3413
@@ -166,6 +144,7 @@ fdp_staplm.fit <- function(y,Z,X,S,
 
   num_penalties <- length(S) ## default for smoothing
   S <- do.call(cbind,S)
+  X <- do.call(cbind,X)
   fit <- stappDP_fit(y,Z,X,S,weights,alpha_a,alpha_b,
 					 sigma_a,sigma_b,tau_a,tau_b,
 					 K,num_penalties,iter_max,burn_in,

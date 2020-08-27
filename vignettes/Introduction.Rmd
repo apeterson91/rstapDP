@@ -98,7 +98,7 @@ bef_summary(FFR_benvo)
 
 ## Model Fitting and Results
 
-The following syntax shows how to fit the STAP-DP model. The `rstapDP`package fits the above model using a truncated DP Gibbs Sampler via `Rcpp`. We'll use the default prior reccomendations for the DP base measure and prior precision, drawing 5000 samples with the first 3000 used for burn in. Note that more/fewer iterations may be required depending on the complexity or 
+The following syntax shows how to fit the STAP-DP model. The `rstapDP`package fits the above model using a truncated DP Gibbs Sampler via `Rcpp`. We'll use the default prior recommendations for the DP base measure and prior precision, drawing 5000 samples with the first 3000 used for burn in. Note that more/fewer iterations may be required depending on the complexity or 
 size of the data.
 
 
@@ -106,18 +106,15 @@ size of the data.
 fit <- fdp_staplm(BMI ~ sex + sap(FFR),
                   benvo = FFR_benvo,
                   K = 5, ## for speed
-                  iter_max = 7E3,
-                  burn_in = 5E3,
+                  iter_max = 3E3,
+                  burn_in = 2E3,
                   thin = 1,
                   seed = 43431)
 ```
 
 
-With our model fitting complete, our first check will be to look at convergence diagnostics on the residual variance and concentration parameter as well as the posterior predictive checks via the `ppc` function.
+With our model fitting complete, our first check will be to look the posterior predictive checks via the `ppc` function.
 
-```{r diagnostics}
-diagnostics(fit)
-```
 
 ```{r ppcs}
 ppc(fit)

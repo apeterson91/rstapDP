@@ -1,0 +1,78 @@
+---
+title: "Longitudinal Models"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Longitudinal Models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteDepends{ggplot2}
+  %\VignetteDepends{rbenvo}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = TRUE
+)
+```
+
+# Motivation
+
+```{r setup}
+library(rstapDP)
+library(rbenvo)
+library(ggplot2)
+theme_set(theme_bw())
+```
+
+```{r datasetup,echo=F}
+bdf <- complex_longitudinal_clusters
+```
+
+```{r bdf_descriptive}
+bdf
+```
+
+```{r bdf_descriptive2}
+bef_summary(bdf)
+```
+
+
+
+# Longitudinal STAP-DP Model
+
+$$
+E[BMI_{ij}] = \alpha + (sex_i)\delta_1 + (year_{ij})\delta_2 + f_i(\mathcal{D}_{ij}) + b_{i1} \\
+f_i(\mathcal{D}_i) = \sum_{l=1}^L\sum_{d \in \mathcal{D}}\beta_l\phi_l(d)
+$$
+
+```{r model_fitting}
+fit <- fdp_staplmer(BMI ~ sex + year +  sap(FFR) + (year|ID),
+                    benvo=bdf,iter_max = 3E3,burn_in = 2E3)
+```
+
+```{r ppc}
+ppc(fit)
+```
+
+
+```{r pairs}
+plot_pairs(fit,sort=T,sample=500)
+```
+
+
+```{r effects}
+plot(fit,style='facet')
+```
+
+
+```{r}
+fit <- fdp_staplmer(BMI ~ sex + year +  sap_bw(FFR) + (year|ID),
+                    benvo=bdf)
+```
+
+
+```{r plotbw}
+plot(fit)
+```
