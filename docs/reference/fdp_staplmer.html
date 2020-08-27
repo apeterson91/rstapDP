@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model — fdp_staplm • rstapDP</title>
+<title>Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Mixed Effects Regression Model — fdp_staplmer • rstapDP</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model — fdp_staplm" />
-<meta property="og:description" content="Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model" />
+<meta property="og:title" content="Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Mixed Effects Regression Model — fdp_staplmer" />
+<meta property="og:description" content="Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Mixed Effects Regression Model" />
 
 
 
@@ -123,16 +123,16 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model</h1>
-    <small class="dont-index">Source: <a href='https://github.com/apeterson91/rstapDP/blob/master/R/fdp_staplm.R'><code>R/fdp_staplm.R</code></a></small>
-    <div class="hidden name"><code>fdp_staplm.Rd</code></div>
+    <h1>Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Mixed Effects Regression Model</h1>
+    <small class="dont-index">Source: <a href='https://github.com/apeterson91/rstapDP/blob/master/R/fdp_staplmer.R'><code>R/fdp_staplmer.R</code></a></small>
+    <div class="hidden name"><code>fdp_staplmer.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Model</p>
+    <p>Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Mixed Effects Regression Model</p>
     </div>
 
-    <pre class="usage"><span class='fu'>fdp_staplm</span>(
+    <pre class="usage"><span class='fu'>fdp_staplmer</span>(
   <span class='no'>formula</span>,
   <span class='no'>benvo</span>,
   <span class='kw'>weights</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
@@ -155,11 +155,11 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>formula</th>
-      <td><p>Similar as for <code><a href='https://rdrr.io/pkg/rsstap/man/sstap_lm.html'>sstap_lm</a></code>, though fdp_staplm is currently restricted to only one stap term.</p></td>
+      <td><p>Similar as for <code><a href='https://rdrr.io/pkg/rsstap/man/sstap_lmer.html'>sstap_lmer</a></code>, though fdp_staplmer is currently restricted to only one stap term.</p></td>
     </tr>
     <tr>
       <th>benvo</th>
-      <td><p>built environment object from the rbenvo package containing the relevant data</p></td>
+      <td><p>built environment - <code><a href='https://rdrr.io/pkg/rbenvo/man/Benvo-class.html'>Benvo</a></code> - object from containing the relevant subject - Built Environment data</p></td>
     </tr>
     <tr>
       <th>weights</th>
@@ -220,11 +220,13 @@
     <p>a stapDP model object</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>This function fits a linear model in a bayesian paradigm with
+    <p>This function fits a linear mixed effects regression model in a Bayesian paradigm with
 improper priors assigned to the "standard" regression covariates designated 
 in the formula argument and a Dirichlet process prior with normal-gamma base measure 
-assigned to the stap basis function expansion using penalized splines via <code><a href='https://rdrr.io/pkg/mgcv/man/jagam.html'>jagam</a></code>.</p>
-<p>The concentration parameter is assigned gamma prior with  hyperparameters shape alpha_a and scale alpha_b.
+assigned to the stap basis function expansion using penalized splines via <code><a href='https://rdrr.io/pkg/mgcv/man/jagam.html'>jagam</a></code>.
+normal priors are placed on the latent group variables and an improper prior is placed on the 
+correlation matrix leading to a Wishart posterior.</p>
+<p>The concentration parameter is assigned a gamma prior with  hyperparameters shape alpha_a and scale alpha_b.
  Precision parameters sigma_a,sigma_b, tau_a,tau_b are similar for the residual and penalties' precision, respectively.</p>
 
   </div>

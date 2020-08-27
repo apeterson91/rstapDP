@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Articles • rstapDP</title>
+<title>Complex Longitudinal Clustering Benvo for use in <span class="pkg">rstapDP</span> vignettes. — complex_longitudinal_clusters • rstapDP</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,8 @@
 
 
 
-<meta property="og:title" content="Articles" />
+<meta property="og:title" content="Complex Longitudinal Clustering Benvo for use in <span class="pkg">rstapDP</span> vignettes. — complex_longitudinal_clusters" />
+<meta property="og:description" content="Complex Longitudinal Clustering Benvo for use in rstapDP vignettes." />
 
 
 
@@ -58,7 +59,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-article-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -122,20 +123,34 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Articles</h1>
+    <h1>Complex Longitudinal Clustering Benvo for use in <span class="pkg">rstapDP</span> vignettes.</h1>
+    <small class="dont-index">Source: <a href='https://github.com/apeterson91/rstapDP/blob/master/R/doc-datasets.R'><code>R/doc-datasets.R</code></a></small>
+    <div class="hidden name"><code>complex_longitudinal_clusters.Rd</code></div>
     </div>
 
-    <div class="section ">
-      <h3>All vignettes</h3>
-      <p class="section-desc"></p>
-
-      <dl>
-        <dt><a href="Introduction.html">Introduction</a></dt>
-        <dd></dt>
-        <dt><a href="Longitudinal_Models.html">Longitudinal Models</a></dt>
-        <dd></dt>
-      </dl>
+    <div class="ref-description">
+    <p>Complex Longitudinal Clustering Benvo for use in <span class="pkg">rstapDP</span> vignettes.</p>
     </div>
+
+    <pre class="usage"><span class='no'>complex_longitudinal_clusters</span></pre>
+
+
+    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
+
+    <p>A <code><a href='https://rdrr.io/pkg/rbenvo/man/Benvo-class.html'>Benvo</a></code> consisting of a subject and subject-distance dataframes</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>The outcome in the subject dataframe is simulated using a cluster specific effect as follows:
+$$E[Y_{ij}|b_{i1},b_{i2}] = 33  - 2.2 \text{sex}_i + .1*(year_{ij}) +  \bar{f}_k(FFR_i) +  \Delta f_k(FFR_{ij}) +b_{i1} + b_{i2}(year_{ij})  $$ Where \(k= 1,2,3\) with varying probabilities.</p>
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p>the generating <a href='https://github.com/apeterson91/rstapDP/tree/master/data-raw'>code</a> on Github, as well as the Longitudinal vignette.</p></div>
+
+  </div>
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
 

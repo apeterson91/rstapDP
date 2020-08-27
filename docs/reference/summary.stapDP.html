@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Articles • rstapDP</title>
+<title>Summary method for stapDP objects — summary.stapDP • rstapDP</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,9 @@
 
 
 
-<meta property="og:title" content="Articles" />
+<meta property="og:title" content="Summary method for stapDP objects — summary.stapDP" />
+<meta property="og:description" content="Summaries of parameter estimates and MCMC convergence diagnostics 
+(effective sample size, Rhat)." />
 
 
 
@@ -58,7 +60,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-article-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -122,20 +124,57 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Articles</h1>
+    <h1>Summary method for stapDP objects</h1>
+    <small class="dont-index">Source: <a href='https://github.com/apeterson91/rstapDP/blob/master/R/print-summary.R'><code>R/print-summary.R</code></a></small>
+    <div class="hidden name"><code>summary.stapDP.Rd</code></div>
     </div>
 
-    <div class="section ">
-      <h3>All vignettes</h3>
-      <p class="section-desc"></p>
-
-      <dl>
-        <dt><a href="Introduction.html">Introduction</a></dt>
-        <dd></dt>
-        <dt><a href="Longitudinal_Models.html">Longitudinal Models</a></dt>
-        <dd></dt>
-      </dl>
+    <div class="ref-description">
+    <p>Summaries of parameter estimates and MCMC convergence diagnostics 
+(effective sample size, Rhat).</p>
     </div>
+
+    <pre class="usage"><span class='co'># S3 method for stapDP</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>object</span>, <span class='no'>...</span>, <span class='kw'>digits</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+
+<span class='co'># S3 method for summary.stapDP</span>
+<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='no'>x</span>, <span class='kw'>digits</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span>(<span class='fl'>1</span>, <span class='fu'><a href='https://rdrr.io/r/base/attr.html'>attr</a></span>(<span class='no'>x</span>, <span class='st'>"print.digits"</span>)), <span class='no'>...</span>)</pre>
+
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>object</th>
+      <td><p>stapDP object</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>ignored</p></td>
+    </tr>
+    <tr>
+      <th>digits</th>
+      <td><p>Number of digits to use for formatting numbers when printing. 
+When calling <code>summary</code>, the value of digits is stored as the 
+<code>"print.digits"</code> attribute of the returned object.</p></td>
+    </tr>
+    <tr>
+      <th>x</th>
+      <td><p>An object of class <code>"summary.stapDP"</code>.</p></td>
+    </tr>
+    </table>
+
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>The <code>summary</code> method returns an object of class 
+  <code>"summary.staDP"</code>  which is a matrix of 
+  summary statistics and diagnostics, with attributes storing information for use by the
+  <code>print</code> method.</p>
+
+  </div>
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
 

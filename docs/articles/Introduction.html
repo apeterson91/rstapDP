@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rstapDP</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.1</span>
       </span>
     </div>
 
@@ -56,10 +56,20 @@
 <li>
       <a href="../articles/Introduction.html">Introduction</a>
     </li>
+    <li>
+      <a href="../articles/Longitudinal_Models.html">Longitudinal Models</a>
+    </li>
   </ul>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+  <a href="https://github.com/apeterson91/rstapDP/">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -69,13 +79,13 @@
 
       
 
-      </header><div class="row">
+      </header><script src="Introduction_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Introduction</h1>
             
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/apeterson91/rstapDP/blob/master/vignettes/Introduction.Rmd"><code>vignettes/Introduction.Rmd</code></a></small>
       <div class="hidden name"><code>Introduction.Rmd</code></div>
 
     </div>
@@ -137,30 +147,26 @@ G_0 \equiv MVN(0,\mathbf{I}\sigma^{-2} \mathbf{\tau}_i)\times \text{Gamma}(a_{\t
 <div id="model-fitting-and-results" class="section level2">
 <h2 class="hasAnchor">
 <a href="#model-fitting-and-results" class="anchor"></a>Model Fitting and Results</h2>
-<p>The following syntax shows how to fit the STAP-DP model. The <code>rstapDP</code>package fits the above model using a truncated DP Gibbs Sampler via <code>Rcpp</code>. We’ll use the default prior reccomendations for the DP base measure and prior precision, drawing 5000 samples with the first 3000 used for burn in. Note that more/fewer iterations may be required depending on the complexity or size of the data.</p>
+<p>The following syntax shows how to fit the STAP-DP model. The <code>rstapDP</code>package fits the above model using a truncated DP Gibbs Sampler via <code>Rcpp</code>. We’ll use the default prior recommendations for the DP base measure and prior precision, drawing 5000 samples with the first 3000 used for burn in. Note that more/fewer iterations may be required depending on the complexity or size of the data.</p>
 <div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="no">fit</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/fdp_staplm.html">fdp_staplm</a></span>(<span class="no">BMI</span> ~ <span class="no">sex</span> + <span class="fu">sap</span>(<span class="no">FFR</span>),
                   <span class="kw">benvo</span> <span class="kw">=</span> <span class="no">FFR_benvo</span>,
                   <span class="kw">K</span> <span class="kw">=</span> <span class="fl">5</span>, <span class="co">## for speed</span>
-                  <span class="kw">iter_max</span> <span class="kw">=</span> <span class="fl">7E3</span>,
-                  <span class="kw">burn_in</span> <span class="kw">=</span> <span class="fl">5E3</span>,
+                  <span class="kw">iter_max</span> <span class="kw">=</span> <span class="fl">3E3</span>,
+                  <span class="kw">burn_in</span> <span class="kw">=</span> <span class="fl">2E3</span>,
                   <span class="kw">thin</span> <span class="kw">=</span> <span class="fl">1</span>,
                   <span class="kw">seed</span> <span class="kw">=</span> <span class="fl">43431</span>)</pre></body></html></div>
-<p>With our model fitting complete, our first check will be to look at convergence diagnostics on the residual variance and concentration parameter as well as the posterior predictive checks via the <code>ppc</code> function.</p>
-<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="fu"><a href="../reference/diagnostics.html">diagnostics</a></span>(<span class="no">fit</span>)
-<span class="co">#&gt; Diagnostics: </span>
-<span class="co">#&gt;  Alpha has collapsed at zero. Expect to see NaN values for pis~=zero </span>
-<span class="co">#&gt;    alpha    sigma </span>
-<span class="co">#&gt;      NaN 4.903625 </span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt;      pi_1      pi_2      pi_3      pi_4      pi_5 </span>
-<span class="co">#&gt;  3.561222 -3.214725 -1.932097       NaN       NaN</span></pre></body></html></div>
-<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="fu"><a href="../reference/ppc.html">ppc</a></span>(<span class="no">fit</span>)</pre></body></html></div>
+<p>With our model fitting complete, our first check will be to look the posterior predictive checks via the <code>ppc</code> function.</p>
+<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="fu"><a href="../reference/ppc.html">ppc</a></span>(<span class="no">fit</span>)</pre></body></html></div>
 <p><img src="Introduction_files/figure-html/ppcs-1.png" width="700"></p>
 <p>An additional graphical check that can be used to identify clustering patterns is the pairwise probability matrix as described in <span class="citation">(Rodriguez 2012, 1136)</span></p>
-<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="../reference/plot_pairs.html">plot_pairs</a></span>(<span class="no">fit</span>,<span class="kw">sample</span><span class="kw">=</span><span class="fl">500</span>,<span class="kw">sort</span><span class="kw">=</span><span class="fl">TRUE</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="fu"><a href="../reference/plot_pairs.html">plot_pairs</a></span>(<span class="no">fit</span>,<span class="kw">sample</span><span class="kw">=</span><span class="fl">500</span>,<span class="kw">sort</span><span class="kw">=</span><span class="fl">TRUE</span>)
+<span class="co">#&gt; Warning: The `x` argument of `as_tibble.matrix()` must have unique column names if `.name_repair` is omitted as of tibble 2.0.0.</span>
+<span class="co">#&gt; Using compatibility `.name_repair`.</span>
+<span class="co">#&gt; This warning is displayed once every 8 hours.</span>
+<span class="co">#&gt; Call `lifecycle::last_warnings()` to see where this warning was generated.</span></pre></body></html></div>
 <p><img src="Introduction_files/figure-html/pairs-1.png" width="700"></p>
 <p>Finally, we’ll take at look at the estimated and true exposure curves.</p>
-<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>(<span class="no">fit</span>) + <span class="no">truth</span></pre></body></html></div>
+<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>(<span class="no">fit</span>) + <span class="no">truth</span></pre></body></html></div>
 <p><img src="Introduction_files/figure-html/effects-1.png" width="700"></p>
 <p>The curves themselves, including the distance at which the exposure effect becomes negligible, in addition to the proportion with which individuals are assigned to these curves are the typical primary objectives for those interested in this model. However, we empahsize the importance of using the posterior predictive checks and diagnostics prior to reading too much into any curve or parameter estimates.</p>
 </div>
@@ -170,7 +176,7 @@ G_0 \equiv MVN(0,\mathbf{I}\sigma^{-2} \mathbf{\tau}_i)\times \text{Gamma}(a_{\t
 <a href="#references" class="anchor"></a>References</h1>
 <div id="refs" class="references">
 <div id="ref-rodriguez">
-<p>Rodriguez, Abel. 2012. “Nested Dirichlet Process.” <em>Journal of the American Statistical Association</em> 103 (483). Taylor &amp; Francis: 1131–54. <a href="https://doi.org/10.1198/016214508000000553">https://doi.org/10.1198/016214508000000553</a>.</p>
+<p>Rodriguez, Abel. 2012. “Nested Dirichlet Process.” <em>Journal of the American Statistical Association</em> 103 (483): 1131–54. <a href="https://doi.org/10.1198/016214508000000553">https://doi.org/10.1198/016214508000000553</a>.</p>
 </div>
 </div>
 </div>

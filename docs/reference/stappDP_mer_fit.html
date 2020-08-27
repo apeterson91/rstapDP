@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Articles • rstapDP</title>
+<title>Penalized Functional Dirichlet Process Linear Mixed Effects Regression — stappDP_mer_fit • rstapDP</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,9 @@
 
 
 
-<meta property="og:title" content="Articles" />
+<meta property="og:title" content="Penalized Functional Dirichlet Process Linear Mixed Effects Regression — stappDP_mer_fit" />
+<meta property="og:description" content="fits a functional dirichlet process linear mixed effects regression model
+with N observations and n subjects" />
 
 
 
@@ -58,7 +60,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-article-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -122,20 +124,140 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Articles</h1>
+    <h1>Penalized Functional Dirichlet Process Linear Mixed Effects Regression</h1>
+    <small class="dont-index">Source: <a href='https://github.com/apeterson91/rstapDP/blob/master/R/RcppExports.R'><code>R/RcppExports.R</code></a></small>
+    <div class="hidden name"><code>stappDP_mer_fit.Rd</code></div>
     </div>
 
-    <div class="section ">
-      <h3>All vignettes</h3>
-      <p class="section-desc"></p>
-
-      <dl>
-        <dt><a href="Introduction.html">Introduction</a></dt>
-        <dd></dt>
-        <dt><a href="Longitudinal_Models.html">Longitudinal Models</a></dt>
-        <dd></dt>
-      </dl>
+    <div class="ref-description">
+    <p>fits a functional dirichlet process linear mixed effects regression model
+with N observations and n subjects</p>
     </div>
+
+    <pre class="usage"><span class='fu'>stappDP_mer_fit</span>(
+  <span class='no'>y</span>,
+  <span class='no'>Z</span>,
+  <span class='no'>X</span>,
+  <span class='no'>W</span>,
+  <span class='no'>S</span>,
+  <span class='no'>w</span>,
+  <span class='no'>subj_mat_</span>,
+  <span class='no'>subj_n</span>,
+  <span class='no'>alpha_a</span>,
+  <span class='no'>alpha_b</span>,
+  <span class='no'>sigma_a</span>,
+  <span class='no'>sigma_b</span>,
+  <span class='no'>tau_a</span>,
+  <span class='no'>tau_b</span>,
+  <span class='no'>K</span>,
+  <span class='no'>num_penalties</span>,
+  <span class='no'>iter_max</span>,
+  <span class='no'>burn_in</span>,
+  <span class='no'>thin</span>,
+  <span class='no'>seed</span>,
+  <span class='no'>num_posterior_samples</span>,
+  <span class='no'>fix_alpha</span>
+)</pre>
+
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>y</th>
+      <td><p>a vector of continuous outcomes</p></td>
+    </tr>
+    <tr>
+      <th>Z</th>
+      <td><p>a matrix of population level confounders</p></td>
+    </tr>
+    <tr>
+      <th>X</th>
+      <td><p>a matrix of spatial temporal aggregated predictors</p></td>
+    </tr>
+    <tr>
+      <th>W</th>
+      <td><p>a design matrix for group specific terms</p></td>
+    </tr>
+    <tr>
+      <th>S</th>
+      <td><p>penalty matrix for stap parameters</p></td>
+    </tr>
+    <tr>
+      <th>w</th>
+      <td><p>a vector of weights for weighted regression</p></td>
+    </tr>
+    <tr>
+      <th>subj_mat_</th>
+      <td><p>N x n sparse matrix used to aggregate subject observations</p></td>
+    </tr>
+    <tr>
+      <th>subj_n</th>
+      <td><p>n x 1 vector of integers representing how many observations correspond to each subject</p></td>
+    </tr>
+    <tr>
+      <th>alpha_a</th>
+      <td><p>alpha gamma prior shape hyperparameter</p></td>
+    </tr>
+    <tr>
+      <th>alpha_b</th>
+      <td><p>alpha gamma prior scale hyperparameter</p></td>
+    </tr>
+    <tr>
+      <th>sigma_a</th>
+      <td><p>precision gamma prior shape hyperparameter</p></td>
+    </tr>
+    <tr>
+      <th>sigma_b</th>
+      <td><p>precision gamma prior scale hyperparameter</p></td>
+    </tr>
+    <tr>
+      <th>tau_a</th>
+      <td><p>penalty gamma prior shape hyperparameter</p></td>
+    </tr>
+    <tr>
+      <th>tau_b</th>
+      <td><p>penalty gamma prior scale hyperparameter</p></td>
+    </tr>
+    <tr>
+      <th>K</th>
+      <td><p>truncation number</p></td>
+    </tr>
+    <tr>
+      <th>num_penalties</th>
+      <td><p>number of penalty matrices accounted for in S</p></td>
+    </tr>
+    <tr>
+      <th>iter_max</th>
+      <td><p>maximum number of iterations</p></td>
+    </tr>
+    <tr>
+      <th>burn_in</th>
+      <td><p>number of burn in iterations</p></td>
+    </tr>
+    <tr>
+      <th>thin</th>
+      <td><p>number by which to thin samples</p></td>
+    </tr>
+    <tr>
+      <th>seed</th>
+      <td><p>rng initializer</p></td>
+    </tr>
+    <tr>
+      <th>num_posterior_samples</th>
+      <td><p>total number of posterior samples</p></td>
+    </tr>
+    <tr>
+      <th>fix_alpha</th>
+      <td><p>boolean value that determines whether or not to fix alpha in sampler</p></td>
+    </tr>
+    </table>
+
+
+  </div>
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
 

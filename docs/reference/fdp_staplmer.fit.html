@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Small dataset for use in <span class="pkg">rstapDP</span> examples and vignettes. — FFR_distances • rstapDP</title>
+<title>Functional Dirichlet Process Spatial Temporal Aggregated Predictor Linear Mixed Effects Regression Model Fit — fdp_staplmer.fit • rstapDP</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Small dataset for use in <span class="pkg">rstapDP</span> examples and vignettes. — FFR_distances" />
-<meta property="og:description" content="Small dataset for use in rstapDP examples and vignettes." />
+<meta property="og:title" content="Functional Dirichlet Process Spatial Temporal Aggregated Predictor Linear Mixed Effects Regression Model Fit — fdp_staplmer.fit" />
+<meta property="og:description" content="Functional Dirichlet Process Spatial Temporal Aggregated Predictor Linear Mixed Effects Regression Model Fit" />
 
 
 
@@ -123,25 +123,127 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Small dataset for use in <span class="pkg">rstapDP</span> examples and vignettes.</h1>
-    <small class="dont-index">Source: <a href='https://github.com/apeterson91/rstapDP/blob/master/R/doc-datasets.R'><code>R/doc-datasets.R</code></a></small>
-    <div class="hidden name"><code>FFR_distances.Rd</code></div>
+    <h1>Functional Dirichlet Process Spatial Temporal Aggregated Predictor Linear Mixed Effects Regression Model Fit</h1>
+    <small class="dont-index">Source: <a href='https://github.com/apeterson91/rstapDP/blob/master/R/fdp_staplmer.R'><code>R/fdp_staplmer.R</code></a></small>
+    <div class="hidden name"><code>fdp_staplmer.fit.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Small dataset for use in <span class="pkg">rstapDP</span> examples and vignettes.</p>
+    <p>Functional Dirichlet Process Spatial Temporal Aggregated Predictor Linear Mixed Effects Regression Model Fit</p>
     </div>
 
-    <pre class="usage"><span class='no'>FFR_distances</span></pre>
+    <pre class="usage"><span class='fu'>fdp_staplmer.fit</span>(
+  <span class='no'>y</span>,
+  <span class='no'>Z</span>,
+  <span class='no'>X</span>,
+  <span class='no'>W</span>,
+  <span class='no'>S</span>,
+  <span class='no'>subj_mat</span>,
+  <span class='no'>subj_n</span>,
+  <span class='kw'>weights</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='fl'>1</span>, <span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span>(<span class='no'>y</span>)),
+  <span class='kw'>alpha_a</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>alpha_b</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>sigma_a</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>sigma_b</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>tau_a</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>tau_b</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>K</span> <span class='kw'>=</span> <span class='fl'>5</span>,
+  <span class='no'>iter_max</span>,
+  <span class='no'>burn_in</span>,
+  <span class='kw'>thin</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>fix_alpha</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>bw</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>seed</span> <span class='kw'>=</span> <span class='kw'>NULL</span>
+)</pre>
 
-
-    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
-
-    <p>A data frame with 9501 rows and 2 columns</p><dl'>
-<dt> <code>id</code></dt><dd><p>The subject unique identifier</p></dd>
-<dt><code>Distance</code></dt><dd><p>The simulated distance between a hypothetical subject and fast food restaurant.</p></dd>
-
-</dl>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>y</th>
+      <td><p>vector of outcomes</p></td>
+    </tr>
+    <tr>
+      <th>Z</th>
+      <td><p>design matrix</p></td>
+    </tr>
+    <tr>
+      <th>X</th>
+      <td><p>stap design matrix</p></td>
+    </tr>
+    <tr>
+      <th>W</th>
+      <td><p>group terms design matrix from <code><a href='https://rdrr.io/pkg/lme4/man/modular.html'>glFormula</a></code></p></td>
+    </tr>
+    <tr>
+      <th>S</th>
+      <td><p>list of penalty matrices from <code><a href='https://rdrr.io/pkg/mgcv/man/jagam.html'>jagam</a></code></p></td>
+    </tr>
+    <tr>
+      <th>subj_mat</th>
+      <td><p>matrix indexing subject-measurement locations in (Z,X,W)</p></td>
+    </tr>
+    <tr>
+      <th>subj_n</th>
+      <td><p>vector of number of subject measurements</p></td>
+    </tr>
+    <tr>
+      <th>weights</th>
+      <td><p>weights for weighted regression - default is vector of ones</p></td>
+    </tr>
+    <tr>
+      <th>alpha_a</th>
+      <td><p>alpha gamma prior hyperparameter</p></td>
+    </tr>
+    <tr>
+      <th>alpha_b</th>
+      <td><p>alpha gamma prior hyperparameter</p></td>
+    </tr>
+    <tr>
+      <th>sigma_a</th>
+      <td><p>precision gamma prior hyperparameter</p></td>
+    </tr>
+    <tr>
+      <th>sigma_b</th>
+      <td><p>precision gamma prior hyperparameter</p></td>
+    </tr>
+    <tr>
+      <th>tau_a</th>
+      <td><p>penalty parameters gamma prior hyperparameter</p></td>
+    </tr>
+    <tr>
+      <th>tau_b</th>
+      <td><p>penalty parameters gamma prior hyperparameter</p></td>
+    </tr>
+    <tr>
+      <th>K</th>
+      <td><p>truncation number for DP mixture components</p></td>
+    </tr>
+    <tr>
+      <th>iter_max</th>
+      <td><p>maximum number of iterations</p></td>
+    </tr>
+    <tr>
+      <th>burn_in</th>
+      <td><p>number of iterations to burn-in</p></td>
+    </tr>
+    <tr>
+      <th>thin</th>
+      <td><p>number by which to thin samples</p></td>
+    </tr>
+    <tr>
+      <th>fix_alpha</th>
+      <td><p>boolean value</p></td>
+    </tr>
+    <tr>
+      <th>bw</th>
+      <td><p>boolean value indicating whether or not subject decomposition is used</p></td>
+    </tr>
+    <tr>
+      <th>seed</th>
+      <td><p>random number generator seed will be set to default value if not by user</p></td>
+    </tr>
+    </table>
 
 
   </div>

@@ -4,7 +4,6 @@
 set.seed(3431)
 num_subj <- 7E2
 riskcat <- sapply(1:num_subj,function(x) sample(1:3,size=1,replace=F,prob = c(.6,.2,.2)))
-riskmat <- Matrix::fac2sparse(riskcat)
 num_visits <- sample(4:6,size=num_subj,replace=T)
 visit_num <- purrr::map_dfr(1:num_subj,function(x) dplyr::tibble(id = x,measurement = 1:num_visits[x]))
 num_obs <- sum(num_visits)

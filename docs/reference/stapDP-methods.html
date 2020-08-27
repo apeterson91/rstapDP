@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Articles • rstapDP</title>
+<title>Methods for stapDP objects — stapDP-methods • rstapDP</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,9 @@
 
 
 
-<meta property="og:title" content="Articles" />
+<meta property="og:title" content="Methods for stapDP objects — stapDP-methods" />
+<meta property="og:description" content="Methods for stapDP objects that are similar to
+their counterparts in the stats or lme4 packages." />
 
 
 
@@ -58,7 +60,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-article-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -122,20 +124,65 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Articles</h1>
+    <h1>Methods for stapDP objects</h1>
+    <small class="dont-index">Source: <a href='https://github.com/apeterson91/rstapDP/blob/master/R/stapDP-methods.R'><code>R/stapDP-methods.R</code></a></small>
+    <div class="hidden name"><code>stapDP-methods.Rd</code></div>
     </div>
 
-    <div class="section ">
-      <h3>All vignettes</h3>
-      <p class="section-desc"></p>
-
-      <dl>
-        <dt><a href="Introduction.html">Introduction</a></dt>
-        <dd></dt>
-        <dt><a href="Longitudinal_Models.html">Longitudinal Models</a></dt>
-        <dd></dt>
-      </dl>
+    <div class="ref-description">
+    <p>Methods for stapDP objects that are similar to
+their counterparts in the <span class="pkg">stats</span> or <span class="pkg">lme4</span> packages.</p>
     </div>
+
+    <pre class="usage"><span class='co'># S3 method for stapDP</span>
+<span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span>(<span class='no'>object</span>, <span class='no'>...</span>)
+
+<span class='co'># S3 method for stapDP</span>
+<span class='fu'><a href='https://rdrr.io/r/stats/confint.html'>confint</a></span>(<span class='no'>object</span>, <span class='no'>...</span>)
+
+<span class='co'># S3 method for stapDP</span>
+<span class='fu'><a href='https://rdrr.io/r/stats/fitted.values.html'>fitted</a></span>(<span class='no'>object</span>, <span class='no'>...</span>)
+
+<span class='co'># S3 method for stapDP</span>
+<span class='fu'><a href='https://rdrr.io/r/stats/nobs.html'>nobs</a></span>(<span class='no'>object</span>, <span class='no'>...</span>)
+
+<span class='co'># S3 method for stapDP</span>
+<span class='fu'>VarCorr</span>(<span class='no'>x</span>)
+
+<span class='co'># S3 method for stapDP</span>
+<span class='fu'>ngrps</span>(<span class='no'>object</span>, <span class='no'>...</span>)
+
+<span class='co'># S3 method for stapDP</span>
+<span class='fu'>nsamples</span>(<span class='no'>object</span>, <span class='no'>...</span>)
+
+<span class='co'># S3 method for stapDP</span>
+<span class='fu'>ranef</span>(<span class='no'>object</span>, <span class='no'>...</span>)</pre>
+
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>object, x</th>
+      <td><p>A fitted model object returned by one of the 
+<span class="pkg">rstapDP</span> modeling functions.</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>Currently ignored.</p></td>
+    </tr>
+    </table>
+
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>Methods for stapDP objects</p>
+<p>Almost all methods behave intuitively as one familiar with the <span class="pkg">stats</span> or <span class="pkg">lme4</span> 
+packages would expect. The exception being confint, which returns an error message, redirecting users to <code><a href='posterior_interval.stapDP.html'>posterior_interval()</a></code>.</p>
+
+  </div>
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
 

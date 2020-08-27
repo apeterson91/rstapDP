@@ -71,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rstapDP</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.1</span>
       </span>
     </div>
 
@@ -96,11 +96,19 @@
     <li>
       <a href="../articles/Introduction.html">Introduction</a>
     </li>
+    <li>
+      <a href="../articles/Longitudinal_Models.html">Longitudinal Models</a>
+    </li>
   </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/apeterson91/rstapDP/">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -158,9 +166,21 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="diagnostics.html">diagnostics()</a></code> </p>
+          <p><code><a href="as.array.stapDP.html">as.array(<i>&lt;stapDP&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Diagnostics</p></td>
+        <td><p>Retrieve DP parameter samples in Array Form</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="as.matrix.stapDP.html">as.matrix(<i>&lt;stapDP&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Retrieve Parameter Samples in Matrix Form</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="complex_longitudinal_clusters.html">complex_longitudinal_clusters</a></code> </p>
+        </td>
+        <td><p>Complex Longitudinal Clustering Benvo for use in <span class="pkg">rstapDP</span> vignettes.</p></td>
       </tr><tr>
         
         <td>
@@ -173,6 +193,30 @@
           <p><code><a href="fdp_staplm.fit.html">fdp_staplm.fit()</a></code> </p>
         </td>
         <td><p>Functional Dirichlet Process Spatial Temporal Aggregated Predictor Linear Model Fit</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="fdp_staplmer.html">fdp_staplmer()</a></code> </p>
+        </td>
+        <td><p>Functional Dirichlet Process Spatial Temporal Aggregated Predictor in a Linear Mixed Effects Regression Model</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="fdp_staplmer.fit.html">fdp_staplmer.fit()</a></code> </p>
+        </td>
+        <td><p>Functional Dirichlet Process Spatial Temporal Aggregated Predictor Linear Mixed Effects Regression Model Fit</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="get_stapDPspec.html">get_stapDPspec()</a></code> </p>
+        </td>
+        <td><p>Retrieve STAP-DP model specification from STAP model formula</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="longitudinal_clusters.html">longitudinal_clusters</a></code> </p>
+        </td>
+        <td><p>Longitudinal Clustering Benvo for use in <span class="pkg">rstapDP</span> vignettes.</p></td>
       </tr><tr>
         
         <td>
@@ -189,9 +233,9 @@ Plots pairwise probability clustering plot</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="plotpars.html">plotpars()</a></code> </p>
+          <p><code><a href="posterior_interval.stapDP.html">posterior_interval(<i>&lt;stapDP&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Parameter Histograms</p></td>
+        <td><p>Posterior uncertainty intervals</p></td>
       </tr><tr>
         
         <td>
@@ -213,15 +257,51 @@ Plots pairwise probability clustering plot</p></td>
       </tr><tr>
         
         <td>
+          <p><code><a href="stapDP-methods.html">coef(<i>&lt;stapDP&gt;</i>)</a></code> <code><a href="stapDP-methods.html">confint(<i>&lt;stapDP&gt;</i>)</a></code> <code><a href="stapDP-methods.html">fitted(<i>&lt;stapDP&gt;</i>)</a></code> <code><a href="stapDP-methods.html">nobs(<i>&lt;stapDP&gt;</i>)</a></code> <code><a href="stapDP-methods.html">VarCorr(<i>&lt;stapDP&gt;</i>)</a></code> <code><a href="stapDP-methods.html">ngrps(<i>&lt;stapDP&gt;</i>)</a></code> <code><a href="stapDP-methods.html">nsamples(<i>&lt;stapDP&gt;</i>)</a></code> <code><a href="stapDP-methods.html">ranef(<i>&lt;stapDP&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Methods for stapDP objects</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="stapDP.html">stapDP()</a></code> </p>
         </td>
         <td><p>Create a stapDP object</p></td>
       </tr><tr>
         
         <td>
+          <p><code><a href="stapDPspec-methods.html">get_k()</a></code> <code><a href="stapDPspec-methods.html">get_terms_ix()</a></code> <code><a href="stapDPspec-methods.html">get_component()</a></code> <code><a href="stapDPspec-methods.html">has_bw()</a></code> <code><a href="stapDPspec-methods.html">get_smooth_obj()</a></code> </p>
+        </td>
+        <td><p><code>stapDPspec</code> Methods</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="stapDPspec.html">stapDPspec()</a></code> </p>
+        </td>
+        <td><p>Create STAP-DP data structure</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="stappDP_fit.html">stappDP_fit()</a></code> </p>
         </td>
-        <td><p>Penalized Functional Dirichlet Process Logistic Regression</p></td>
+        <td><p>Penalized Functional Dirichlet Process Linear Regression with N observations</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="stappDP_mer_fit.html">stappDP_mer_fit()</a></code> </p>
+        </td>
+        <td><p>Penalized Functional Dirichlet Process Linear Mixed Effects Regression</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="stappDP_merdecomp.html">stappDP_merdecomp()</a></code> </p>
+        </td>
+        <td><p>Penalized Functional Dirichlet Process Linear Mixed Effects Regression with Between-Within Decomposition</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="summary.stapDP.html">summary(<i>&lt;stapDP&gt;</i>)</a></code> <code><a href="summary.stapDP.html">print(<i>&lt;summary.stapDP&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Summary method for stapDP objects</p></td>
       </tr><tr>
         
         <td>

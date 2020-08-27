@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Articles • rstapDP</title>
+<title>Posterior uncertainty intervals — posterior_interval.stapDP • rstapDP</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,10 @@
 
 
 
-<meta property="og:title" content="Articles" />
+<meta property="og:title" content="Posterior uncertainty intervals — posterior_interval.stapDP" />
+<meta property="og:description" content="The posterior_interval function computes Bayesian posterior uncertainty
+intervals. These intervals are often referred to as credible
+intervals. This documentation is largely inspired and adapted from the same function documentation from rstanarm." />
 
 
 
@@ -58,7 +61,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-article-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -122,20 +125,79 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Articles</h1>
+    <h1>Posterior uncertainty intervals</h1>
+    <small class="dont-index">Source: <a href='https://github.com/apeterson91/rstapDP/blob/master/R/posterior_interval.R'><code>R/posterior_interval.R</code></a></small>
+    <div class="hidden name"><code>posterior_interval.stapDP.Rd</code></div>
     </div>
 
-    <div class="section ">
-      <h3>All vignettes</h3>
-      <p class="section-desc"></p>
-
-      <dl>
-        <dt><a href="Introduction.html">Introduction</a></dt>
-        <dd></dt>
-        <dt><a href="Longitudinal_Models.html">Longitudinal Models</a></dt>
-        <dd></dt>
-      </dl>
+    <div class="ref-description">
+    <p>The <code>posterior_interval</code> function computes Bayesian posterior uncertainty
+intervals. These intervals are often referred to as <em>credible</em>
+intervals. This documentation is largely inspired and adapted from the same function documentation from <span class="pkg">rstanarm</span>.</p>
     </div>
+
+    <pre class="usage"><span class='co'># S3 method for stapDP</span>
+<span class='fu'>posterior_interval</span>(<span class='no'>object</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='fl'>0.95</span>, <span class='kw'>pars</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)</pre>
+
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>object</th>
+      <td><p>stapDP object</p></td>
+    </tr>
+    <tr>
+      <th>prob</th>
+      <td><p>A number \(p \in (0,1)\) indicating the desired
+probability mass to include in the intervals. The default is to report
+\(95\)% intervals (<code>prob=0.95</code>).</p></td>
+    </tr>
+    <tr>
+      <th>pars</th>
+      <td><p>vector of parameter names</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>ignored</p></td>
+    </tr>
+    </table>
+
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>A matrix with two columns and as many rows as model parameters (or
+  the subset of parameters specified by <code>pars</code>. 
+  For a given value of <code>prob</code>, \(p\), the columns
+  correspond to the lower and upper \(100p\)% interval limits and have the
+  names \(100\alpha/2\)% and \(100(1 - \alpha/2)\)%, where \(\alpha
+  = 1-p\). For example, if <code>prob=0.95</code> is specified (a \(95\)%
+  interval), then the column names will be <code>"2.5%"</code> and <code>"97.5%"</code>,
+  respectively.</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    
+<h3>Interpretation</h3>
+<p>Unlike for a frenquentist confidence interval, it is valid to say that,
+conditional on the data and model, we believe that with probability \(p\)
+the value of a parameter is in its \(100p\)% posterior interval. This
+intuitive interpretation of Bayesian intervals is often erroneously applied
+to frequentist confidence intervals. See Morey et al. (2015) for more details
+on this issue and the advantages of using Bayesian posterior uncertainty
+intervals (also known as credible intervals).</p>
+
+    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
+
+    <p>Gelman, A. and Carlin, J. (2014). Beyond power calculations:
+assessing Type S (sign) and Type M (magnitude) errors. <em>Perspectives on
+Psychological Science</em>. 9(6), 641--51.</p>
+<p>Morey, R. D., Hoekstra, R., Rouder, J., Lee, M. D., and Wagenmakers, E. 
+(2016). The fallacy of placing confidence in confidence intervals. 
+<em>Psychonomic Bulletin &amp; Review</em>. 23(1), 103--123.</p>
+
+  </div>
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
 

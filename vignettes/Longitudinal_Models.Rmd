@@ -7,6 +7,22 @@ vignette: >
   %\VignetteEncoding{UTF-8}
   %\VignetteDepends{ggplot2}
   %\VignetteDepends{rbenvo}
+references:
+- id: kalbfleisch
+  title: Between-and within-cluster covariate effects in the analysis of clustered data
+  author:
+  - family: Nehaus
+    given: John
+  - family: Kalbfleisch
+    given: Jack
+  container-title: Biometrics
+  DOI: 10.2307/3109770
+  publisher: JSTOR
+  page: 638--645
+  type: article-journal
+  issued:
+    year: 1998
+    month: 6
 ---
 
 ```{r, include = FALSE}
@@ -18,6 +34,10 @@ knitr::opts_chunk$set(
 ```
 
 # Motivation
+
+The Introductory vignette demonstrated how to fit Spatial Temporal Aggregated Predictors with Dirichlet Process Priors or STAP-DP models, to data with independent observations. In this vignette we'll demonstrate how to fit a similar model that now takes into account correlation within subjects, the motivating experimental data structure having subjects followed across time alongside built environment features (BEFs), where changes in exposure correspond to changes in the outcome of interest.
+
+We'll first introduce this modeling framework in mathematical notation that corresponds to `rstapDP` syntax. Then, we'll highlight the importance of decomposing time-varying covariates into between and within subject effects so that they can be estimated separately. Our data for these vignette, `complex_longitudinal_cluster` but assigned the shorter variable name `bdf`, is simulated with a hypothetical 700 subjects near FFR's and 3 varying patterns of FFR effects **high risk** **low risk** and **majority effect** on BMI. These labels should be come clear shortly, if not already. We'll begin by loading the appropriate libraries and data. 
 
 ```{r setup}
 library(rstapDP)
@@ -34,45 +54,69 @@ bdf <- complex_longitudinal_clusters
 bdf
 ```
 
-```{r bdf_descriptive2}
-bef_summary(bdf)
-```
-
-
 
 # Longitudinal STAP-DP Model
 
+The first class of Longitudinal STAP-DP model's in the `rstapDP` package take the following form for a simple spatial aggregated predictor:
+
+$$
+E[Y_{ij}|\mathbf{b}_i]  = \mathbf{X}_{ij}^{T}\mathbf{\delta} + f(\mathcal{D}_{ij}) + \mathbf{Z}_{ij}^T\mathbf{b}_i\\
+\quad i = 1,...,N ; j= 1,...,n_i\\
+\mathbf{b}_i \sim N(0,\Sigma)\\
+p(\delta) \propto 1\\
+p(\Sigma) \propto 1\\
+f_i(\mathcal{D}_i) = \sum_{l=1}^L\sum_{d \in \mathcal{D}}\beta_{il}\phi_l(d)\\
+(\beta,\tau) \sim P\\
+P \sim DP(\alpha,P_0)\\
+P_0 \equiv MVN_L\left(\mathbf{0},\left(\sum_{m=1}^{2}\tau_mS_m \right)^{-1} \right)\prod_{m=1}^{2}Gamma(a,b).
+$$
+To model the hypothetical simulated FFR data, we'll fit the following model, where the priors are equivalent to the above expression and consequently omitted.
 $$
 E[BMI_{ij}] = \alpha + (sex_i)\delta_1 + (year_{ij})\delta_2 + f_i(\mathcal{D}_{ij}) + b_{i1} \\
-f_i(\mathcal{D}_i) = \sum_{l=1}^L\sum_{d \in \mathcal{D}}\beta_l\phi_l(d)
 $$
 
-```{r model_fitting}
-fit <- fdp_staplmer(BMI ~ sex + year +  sap(FFR) + (year|ID),
-                    benvo=bdf,iter_max = 3E3,burn_in = 2E3)
+The model syntax should be familiar to those who have used the `rsstap` package before. The `sap()` keyword denotes that a spatial aggregated predictor will be modeled using the distances in the `bdf` benvo associated with the `FFR` BEF-subject data. We'll sample a few thousand iterations from the gibbs sampler `rstapDP`, fixing the concentration parameter $\alpha=1$ and take a look at the estimates.
+
+```{r model_fitting,results='hide'}
+fit <- fdp_staplmer(BMI ~ sex + year +  sap(FFR) + (1|ID),
+                    benvo=bdf,fix_alpha = TRUE)
 ```
 
-```{r ppc}
-ppc(fit)
-```
 
-
-```{r pairs}
-plot_pairs(fit,sort=T,sample=500)
-```
-
+As can be seen from below, the effects look a little weird. 
 
 ```{r effects}
-plot(fit,style='facet')
+plot(fit,style='facet',prob_filter=0.05)
 ```
 
+## The Missing Piece
+ As alluded to earlier, with time-varying covariates, such as age, income, etc. It is important to *decompose* the measure into the baseline or between-subject effect and the change, or within-subject effect as these each represent two different effects. Failing to decompose these time-varying measures can result in invalid inference![@kalbfleisch]
 
-```{r}
-fit <- fdp_staplmer(BMI ~ sex + year +  sap_bw(FFR) + (year|ID),
-                    benvo=bdf)
+# Between-Within Decomposition, Interpretation
+
+There are a number of ways this decomposition could be be obtained. In the `rstapDP` model the decomposition takes the following form (keeping all other components the same as in the previous model):
+
+$$
+E[BMI_{ij}|b_{i1}] = \alpha + I(Female_i)\delta_1 + (\text{year}_{ij})\delta_2 + \Delta f_i(\text{FFR Exposure}_{ij}) + \bar{f}_i(\text{FFR Exposure}_{i}) + b_{i1} \\\quad i = 1,...,N ; j= 1,...,n_i.
+$$
+
+Note that both the between-subject effect $\bar{f}_i(\cdot)$ and the within-subject effect $\Delta f_i(\cdot)$ are **clustered together**. 
+
+In order to fit this model, we use a similar syntax as before now using `sap_bw()` as our keyword to denote that a between-within decomposition will be performed on the design matrix associated with the FFR spatial exposure function.
+
+```{r fit_bw,message=F,results='hide'}
+fit <- fdp_staplmer(BMI ~ sex + year +  sap_bw(FFR) + (1|ID),
+                    benvo=bdf,fix_alpha = TRUE)
 ```
 
 
 ```{r plotbw}
-plot(fit)
+plot(fit,prob_filter=0.05)
 ```
+
+Plotting this model, we can now see that there **are** in fact, different effects both between and within subjects. These estimates also make a lot more sense visually compared to the previous plots that assumed the between-within effects were the same.
+## Summary
+
+In closing this vignette demonstrated how to use the `rstapDP` package to model heterogeneous effects of built environment features with longitudinal data, taking into account differences in between-within subject effects. 
+
+## References

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Small dataset for use in <span class="pkg">rstapDP</span> examples and vignettes. — FFR_distances • rstapDP</title>
+<title>Penalized Functional Dirichlet Process Linear Mixed Effects Regression with Between-Within Decomposition — stappDP_merdecomp • rstapDP</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,9 @@
 
 
 
-<meta property="og:title" content="Small dataset for use in <span class="pkg">rstapDP</span> examples and vignettes. — FFR_distances" />
-<meta property="og:description" content="Small dataset for use in rstapDP examples and vignettes." />
+<meta property="og:title" content="Penalized Functional Dirichlet Process Linear Mixed Effects Regression with Between-Within Decomposition — stappDP_merdecomp" />
+<meta property="og:description" content="fits a functional dirichlet process linear mixed effects regression model
+with N observations and n subjects using a between-within effects decomposition on the STAP-DP design matrix" />
 
 
 
@@ -123,25 +124,143 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Small dataset for use in <span class="pkg">rstapDP</span> examples and vignettes.</h1>
-    <small class="dont-index">Source: <a href='https://github.com/apeterson91/rstapDP/blob/master/R/doc-datasets.R'><code>R/doc-datasets.R</code></a></small>
-    <div class="hidden name"><code>FFR_distances.Rd</code></div>
+    <h1>Penalized Functional Dirichlet Process Linear Mixed Effects Regression with Between-Within Decomposition</h1>
+    <small class="dont-index">Source: <a href='https://github.com/apeterson91/rstapDP/blob/master/R/RcppExports.R'><code>R/RcppExports.R</code></a></small>
+    <div class="hidden name"><code>stappDP_merdecomp.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Small dataset for use in <span class="pkg">rstapDP</span> examples and vignettes.</p>
+    <p>fits a functional dirichlet process linear mixed effects regression model
+with N observations and n subjects using a between-within effects decomposition on the STAP-DP design matrix</p>
     </div>
 
-    <pre class="usage"><span class='no'>FFR_distances</span></pre>
+    <pre class="usage"><span class='fu'>stappDP_merdecomp</span>(
+  <span class='no'>y</span>,
+  <span class='no'>Z</span>,
+  <span class='no'>X_b</span>,
+  <span class='no'>X_w</span>,
+  <span class='no'>W</span>,
+  <span class='no'>S_b</span>,
+  <span class='no'>S_w</span>,
+  <span class='no'>w</span>,
+  <span class='no'>subj_mat_</span>,
+  <span class='no'>subj_n</span>,
+  <span class='no'>alpha_a</span>,
+  <span class='no'>alpha_b</span>,
+  <span class='no'>sigma_a</span>,
+  <span class='no'>sigma_b</span>,
+  <span class='no'>tau_a</span>,
+  <span class='no'>tau_b</span>,
+  <span class='no'>K</span>,
+  <span class='no'>num_penalties</span>,
+  <span class='no'>iter_max</span>,
+  <span class='no'>burn_in</span>,
+  <span class='no'>thin</span>,
+  <span class='no'>seed</span>,
+  <span class='no'>num_posterior_samples</span>,
+  <span class='no'>fix_alpha</span>
+)</pre>
 
-
-    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
-
-    <p>A data frame with 9501 rows and 2 columns</p><dl'>
-<dt> <code>id</code></dt><dd><p>The subject unique identifier</p></dd>
-<dt><code>Distance</code></dt><dd><p>The simulated distance between a hypothetical subject and fast food restaurant.</p></dd>
-
-</dl>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>y</th>
+      <td><p>a vector of continuous outcomes</p></td>
+    </tr>
+    <tr>
+      <th>Z</th>
+      <td><p>a matrix of population level confounders</p></td>
+    </tr>
+    <tr>
+      <th>X_b</th>
+      <td><p>Matrix of between subject spatial temporal aggregated predictor covariates</p></td>
+    </tr>
+    <tr>
+      <th>X_w</th>
+      <td><p>Matrix of within subject spatial temporal aggregated predictor covariates</p></td>
+    </tr>
+    <tr>
+      <th>W</th>
+      <td><p>a design matrix for group specific terms</p></td>
+    </tr>
+    <tr>
+      <th>S_b</th>
+      <td><p>penalty matrix corresponding to between subject covariate matrix</p></td>
+    </tr>
+    <tr>
+      <th>S_w</th>
+      <td><p>penalty matrix corresponding to within subject covariate matrix</p></td>
+    </tr>
+    <tr>
+      <th>w</th>
+      <td><p>a vector of weights for weighted regression</p></td>
+    </tr>
+    <tr>
+      <th>subj_mat_</th>
+      <td><p>N x n sparse matrix used to aggregate subject observations</p></td>
+    </tr>
+    <tr>
+      <th>subj_n</th>
+      <td><p>n x 1 vector of integers representing how many observations correspond to each subject</p></td>
+    </tr>
+    <tr>
+      <th>alpha_a</th>
+      <td><p>alpha gamma prior shape hyperparameter</p></td>
+    </tr>
+    <tr>
+      <th>alpha_b</th>
+      <td><p>alpha gamma prior scale hyperparameter</p></td>
+    </tr>
+    <tr>
+      <th>sigma_a</th>
+      <td><p>precision gamma prior shape hyperparameter</p></td>
+    </tr>
+    <tr>
+      <th>sigma_b</th>
+      <td><p>precision gamma prior scale hyperparameter</p></td>
+    </tr>
+    <tr>
+      <th>tau_a</th>
+      <td><p>penalty gamma prior shape hyperparameter</p></td>
+    </tr>
+    <tr>
+      <th>tau_b</th>
+      <td><p>penalty gamma prior scale hyperparameter</p></td>
+    </tr>
+    <tr>
+      <th>K</th>
+      <td><p>truncation number</p></td>
+    </tr>
+    <tr>
+      <th>num_penalties</th>
+      <td><p>number of penalty matrices accounted for in S</p></td>
+    </tr>
+    <tr>
+      <th>iter_max</th>
+      <td><p>maximum number of iterations</p></td>
+    </tr>
+    <tr>
+      <th>burn_in</th>
+      <td><p>number of burn in iterations</p></td>
+    </tr>
+    <tr>
+      <th>thin</th>
+      <td><p>number by which to thin samples</p></td>
+    </tr>
+    <tr>
+      <th>seed</th>
+      <td><p>rng initializer</p></td>
+    </tr>
+    <tr>
+      <th>num_posterior_samples</th>
+      <td><p>total number of posterior samples</p></td>
+    </tr>
+    <tr>
+      <th>fix_alpha</th>
+      <td><p>boolean value that determines whether or not to fix alpha in sampler</p></td>
+    </tr>
+    </table>
 
 
   </div>
