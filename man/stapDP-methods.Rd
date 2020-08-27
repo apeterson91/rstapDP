@@ -6,6 +6,7 @@
 \alias{ngrps}
 \alias{sigma}
 \alias{nsamples}
+\alias{ranef}
 \alias{coef.stapDP}
 \alias{confint.stapDP}
 \alias{fitted.stapDP}
@@ -33,12 +34,10 @@
 \method{ranef}{stapDP}(object, ...)
 }
 \arguments{
-\item{object, }{x A fitted model object returned by one of the 
+\item{object, x}{A fitted model object returned by one of the 
 \pkg{rstapDP} modeling functions.}
 
 \item{...}{Currently ignored.}
-
-\item{x}{stapDP object}
 }
 \description{
 Methods for stapDP objects that are similar to
@@ -48,5 +47,5 @@ their counterparts in the \pkg{stats} or \pkg{lme4} packages.
 Methods for stapDP objects
 
 Almost all methods behave intuitively as one familiar with the \pkg{stats} or \pkg{lme4} 
-packages would expect.
+packages would expect. The exception being confint, which returns an error message, redirecting users to \code{posterior_interval()}.
 }

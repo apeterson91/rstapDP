@@ -17,7 +17,7 @@
 #'
 #' The \code{posterior_interval} function computes Bayesian posterior uncertainty
 #' intervals. These intervals are often referred to as \emph{credible}
-#' intervals. This text is inspired by the same function documentation from \pkg{rstanarm}.
+#' intervals. This documentation is largely inspired and adapted from the same function documentation from \pkg{rstanarm}.
 #'
 #' @aliases posterior_interval
 #' @export

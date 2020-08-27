@@ -31,7 +31,7 @@ A matrix with two columns and as many rows as model parameters (or
 \description{
 The \code{posterior_interval} function computes Bayesian posterior uncertainty
 intervals. These intervals are often referred to as \emph{credible}
-intervals. This text is inspired by the same function documentation from \pkg{rstanarm}.
+intervals. This documentation is largely inspired and adapted from the same function documentation from \pkg{rstanarm}.
 }
 \details{
 \subsection{Interpretation}{

@@ -1,6 +1,6 @@
 #' Methods for stapDP objects
 #'
-#' @templateVar stapDPregArg object, x 
+#' @templateVar stapDPregArg object,x 
 #' @template args-stapDP-object
 #' @template args-dots-ignored 
 #'
@@ -8,9 +8,9 @@
 #' @description Methods for stapDP objects that are similar to
 #' their counterparts in the \pkg{stats} or \pkg{lme4} packages.
 #' @details Almost all methods behave intuitively as one familiar with the \pkg{stats} or \pkg{lme4} 
-#' packages would expect. 
+#' packages would expect. The exception being confint, which returns an error message, redirecting users to \code{posterior_interval()}.
 #' @name stapDP-methods
-#' @aliases VarCorr ngrps sigma nsamples
+#' @aliases VarCorr ngrps sigma nsamples ranef
 #'
 #'
 #' @importFrom stats coef nobs formula
@@ -47,7 +47,6 @@ nobs.stapDP <- function(object, ...){
 
 #' @rdname stapDP-methods
 #'
-#' @param x stapDP object
 #' @export
 #' @importFrom nlme VarCorr
 #' @importFrom stats cov2cor
@@ -74,7 +73,6 @@ VarCorr.stapDP <- function(x){
 #'
 #' @keywords internal
 #' @export
-#' @param x a stapDP object
 #' @param ... ignored currently
 formula.stapDP <- function(x,...){
 	x$formula

@@ -7,8 +7,6 @@
 \method{formula}{stapDP}(x, ...)
 }
 \arguments{
-\item{x}{a stapDP object}
-
 \item{...}{ignored currently}
 }
 \description{
