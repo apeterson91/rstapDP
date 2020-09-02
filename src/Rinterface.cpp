@@ -79,7 +79,6 @@ Rcpp::List stappDP_fit(const Eigen::VectorXd &y,
 						sigma_a,sigma_b,K,num_penalties,fix_alpha,rng);
 
 
-	Rcpp::Rcout << " Hello World ! " << std::endl;
 	for(int iter_ix = 1; iter_ix <= iter_max; iter_ix ++){
 
 		print_progress(iter_ix,burn_in,iter_max,chain);

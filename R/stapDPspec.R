@@ -164,6 +164,7 @@ stapDPspec <- function(stapless_formula,fake_formula,stap_mat,K,benvo){
 	                    return(out)
 	                    })
 
+	mf <- rbenvo::subject_design(benvo,lme4::nobars(stapless_formula))
 
 	X <- purrr::pmap(list(term,component,between_within,jd),function(x,y,z,jdi){
 			X <- create_X(x,y,z,
@@ -172,7 +173,7 @@ stapDPspec <- function(stapless_formula,fake_formula,stap_mat,K,benvo){
 						})
 
 	f_ <-  lme4::nobars(stapless_formula)
-	num_fixed <- ncol(attr(terms(f_),"factors")) + attr(terms(f_),"intercept")
+	num_fixed <- ncol(mf$X)
 	
 	S <- purrr::pmap(list(1:length(jd),between_within),function(ix,bw_){create_S(K,jd[[ix]],bw_,num_fixed)})
 
@@ -197,6 +198,7 @@ stapDPspec <- function(stapless_formula,fake_formula,stap_mat,K,benvo){
 				ranges = lapply(jd,function(x) x$ranges),
 				X = X,
 				S = S,
+				mf = mf,
 				smooth_objs = Reduce(c,lapply(jd,function(x) x$pregam$smooth))
 				)
 

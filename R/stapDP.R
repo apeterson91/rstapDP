@@ -37,17 +37,15 @@ stapDP <- function(object){
 
 
 	nms <- Reduce(c,lapply(spec$X,colnames))
-	clnms <- Reduce(c,
-					lapply(1:K,function(x) paste0("K: " , x," ",nms ))
-					)
+	clnms_k <- lapply(1:K,function(x) paste0("K: " , x," ",nms ))
+	clnms <- Reduce(c,clnms_k)
 
 	beta <- object$pars$beta
-	colnames(beta) <- c(colnames(object$mf$X),
+	colnames(beta) <- c(colnames(spec$mf$X),
 						clnms)
-	delta <- beta[,colnames(object$mf$X)]
+	delta <- beta[,colnames(spec$mf$X)]
 	betamat <- beta[,clnms]
-	clnm_k <- lapply(1:K,function(x) grep(x=clnms,pattern = paste0("K: ",x),value=T))
-	beta <- lapply(clnm_k,function(k) betamat[,k])
+	beta <- lapply(clnms_k,function(k) betamat[,k])
 	beta <- abind::abind(beta,along=3)
 	dimnames(beta)[[2]] <- nms
 	dimnames(beta)[[3]] <- paste0("K: ",1:K)
@@ -83,7 +81,8 @@ stapDP <- function(object){
 						  id = as.integer(gd$id))
 
 	yhat <- suppressMessages(yhat %>% dplyr::right_join(ys))
-	yhat <- rbind(yhat,dplyr::tibble(iteration_ix = rep(0,length(object$mf$y)),Parameter=rep("yobs",length(object$mf$y)), id = 1:length(object$mf$y),Samples = object$mf$y))
+	yhat <- rbind(yhat,dplyr::tibble(iteration_ix = rep(0,length(spec$mf$y)),Parameter=rep("yobs",length(spec$mf$y)), 
+									 id = 1:length(spec$mf$y),Samples = spec$mf$y))
 
 
 	out <- list(beta = beta,
@@ -98,7 +97,7 @@ stapDP <- function(object){
 				cmat = object$pars$clabels,
 				model = list(formula = object$formula,
 							 K=(object$K),
-							 y=object$mf$y,
+							 y=spec$mf$y,
 							 benvo=object$benvo,
 							 alpha_a = object$alpha_a,
 							 alpha_b = object$alpha_b),
