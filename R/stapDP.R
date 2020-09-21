@@ -96,9 +96,8 @@ stapDP <- function(object){
 				pmat = object$pars$pmat,
 				cmat = object$pars$clabels,
 				model = list(formula = object$formula,
-							 K=(object$K),
+							 K=object$K,
 							 y=spec$mf$y,
-							 benvo=object$benvo,
 							 alpha_a = object$alpha_a,
 							 alpha_b = object$alpha_b),
 				spec = object$spec)

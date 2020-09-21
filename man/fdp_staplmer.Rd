@@ -25,7 +25,7 @@ fdp_staplmer(
 \arguments{
 \item{formula}{Similar as for \code{\link[rsstap]{sstap_lmer}}, though fdp_staplmer is currently restricted to only one stap term.}
 
-\item{benvo}{built environment - \code{\link[rbenvo]{Benvo}} - object from containing the relevant subject - Built Environment data}
+\item{benvo}{built environment - \code{\link[rbenvo]{benvo}} - object from containing the relevant subject - Built Environment data}
 
 \item{weights}{weights for weighted regression - default is vector of ones}
 

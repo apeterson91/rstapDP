@@ -23,5 +23,5 @@ FFR_distances <- purrr::map2_dfr(1:length(ldists),ldists,function(x,y) dplyr::ti
 
 usethis::use_data(FFR_subjects, overwrite = TRUE)
 usethis::use_data(FFR_distances, overwrite = TRUE)
-FFR_benvo <- rbenvo::benvo(FFR_subjects,list(FFR_distances),"FFR","id","Distance")
+FFR_benvo <- rbenvo::benvo(FFR_subjects,list(FFR=FFR_distances))
 usethis::use_data(FFR_benvo,overwrite=TRUE)

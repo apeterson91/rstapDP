@@ -31,13 +31,15 @@
 
 \method{nsamples}{stapDP}(object, ...)
 
-\method{ranef}{stapDP}(object, ...)
+\method{ranef}{stapDP}(object, benvo, ...)
 }
 \arguments{
 \item{object, x}{A fitted model object returned by one of the 
 \pkg{rstapDP} modeling functions.}
 
 \item{...}{Currently ignored.}
+
+\item{benvo}{benvo used to fit the model}
 }
 \description{
 Methods for stapDP objects that are similar to

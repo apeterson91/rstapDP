@@ -55,9 +55,6 @@ sjdf$BMI <- 33 +  sjdf$sex* -2.2 + .1*sjdf$year + sjdf$exposure +
 
 
 longitudinal_clusters <- benvo(subject_data = sjdf,
-                              bef_data = list(FFR_distances),
-                              bef_names = "FFR",
-                              distance_col = "Distance",
-                              joining_id = c("id","measurement"))
+                              bef_data = list(FFR=FFR_distances))
 
 usethis::use_data(longitudinal_clusters, overwrite = TRUE)

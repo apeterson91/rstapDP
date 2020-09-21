@@ -3,15 +3,15 @@
 \docType{data}
 \name{complex_longitudinal_clusters}
 \alias{complex_longitudinal_clusters}
-\title{Complex Longitudinal Clustering Benvo for use in \pkg{rstapDP} vignettes.}
+\title{Complex Longitudinal Clustering benvo for use in \pkg{rstapDP} vignettes.}
 \format{
-A \code{\link[rbenvo]{Benvo}} consisting of a subject and subject-distance dataframes
+A \code{\link[rbenvo]{benvo}} consisting of a subject and subject-distance dataframes
 }
 \usage{
 complex_longitudinal_clusters
 }
 \description{
-Complex Longitudinal Clustering Benvo for use in \pkg{rstapDP} vignettes.
+Complex Longitudinal Clustering benvo for use in \pkg{rstapDP} vignettes.
 }
 \details{
 The outcome in the subject dataframe is simulated using a cluster specific effect as follows:

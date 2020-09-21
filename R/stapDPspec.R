@@ -21,7 +21,7 @@
 #'
 #' @param f formula from \code{\link{fdp_staplm}}, \code{\link{fdp_staplmer}}
 #' @param K DP truncation integer
-#' @param benvo Built Environment object - \code{\link[rbenvo]{Benvo}} - containing data for model 
+#' @param benvo Built Environment object - \code{\link[rbenvo]{benvo}} - containing data for model 
 #' @return \code{\link{stapDPspec}} object
 #'
 get_stapDPspec <- function(f,K,benvo){
@@ -101,7 +101,7 @@ get_stapDPspec <- function(f,K,benvo){
 	         )
 	  })
 
-	fake_formula <- purrr::map(str,function(x) as.formula(paste0("ID~ -1 + ",paste0(x,collapse="+"))))
+	fake_formula <- purrr::map(str,function(x) as.formula(paste0("temp_ix_ ~ -1 + ",paste0(x,collapse="+"))))
 
     return(
 		   stapDPspec(stapless_formula = as.formula(new_f, env = environment(f)),
@@ -120,7 +120,7 @@ get_stapDPspec <- function(f,K,benvo){
 #' @param fake_formula list of ``fake'' formulas from \code{\link{get_stapDPspec}}
 #' @param stap_mat matrix of stap specification properties 
 #' @param K DP truncation
-#' @param benvo Built Environment object - \code{\link[rbenvo]{Benvo}} - containing data for model 
+#' @param benvo Built Environment object - \code{\link[rbenvo]{benvo}} - containing data for model 
 #'
 stapDPspec <- function(stapless_formula,fake_formula,stap_mat,K,benvo){
 
@@ -139,13 +139,15 @@ stapDPspec <- function(stapless_formula,fake_formula,stap_mat,K,benvo){
 	if(!(all(unique(term)==term)))
 		stop("Only one BEF name may be assigned to a stap term e.g. no sap(foo) + tap(foo)\n
 			 If you wish to model components this way create a different name e.g. sap(foo) + tap(foo_bar)")
-	if(!all(term %in% benvo@bef_names))
+	if(!all(term %in% benvo$bef_names))
 		stop("All stap terms must have data with corresponding name in benvo")
 	if(length(term)>1)
 		stop("Only one stap/sap/tap term allowed")
 
 	jd <- purrr::pmap(list(term,component,fake_formula),
 	                  function(x,y,z) {
+						temp_df <- rbenvo::joinvo(benvo,x,y,NA_to_zero = TRUE)
+						temp_df$temp_ix_ <- 1:nrow(temp_df)
 	                    out <- mgcv::jagam(formula = z, family = gaussian(), 
 	                                       data = rbenvo::joinvo(benvo,x,y,
 	                                                             NA_to_zero = TRUE), 
@@ -154,12 +156,12 @@ stapDPspec <- function(stapless_formula,fake_formula,stap_mat,K,benvo){
 	                                       centred = FALSE,
 	                                       diagonalize = FALSE)
 	                    out$name <- x
-						ix <- which(benvo@bef_names==x)
+						ix <- which(benvo$bef_names==x)
 						ranges <- list()
 						if(y=="Distance"|y=="Distance-Time")
-							ranges$Distance <- range(benvo@bef_data[[ix]]$Distance,na.rm=T)
+							ranges$Distance <- range(benvo$bef_data[[ix]]$Distance,na.rm=T)
 						if(y=="Time"|y=="Distance-Time")
-							ranges$Time = range(benvo@bef_data[[ix]]$Time,na.rm=T)
+							ranges$Time = range(benvo$bef_data[[ix]]$Time,na.rm=T)
 						out$ranges <- ranges
 	                    return(out)
 	                    })

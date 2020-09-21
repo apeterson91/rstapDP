@@ -18,6 +18,6 @@ see \code{\link{FFR_subjects}} and \code{\link{FFR_distances}}
 For information on the dataframes.
 }
 \seealso{
-\code{\link[rbenvo]{Benvo}} for information on benvos.
+\code{\link[rbenvo]{benvo}} for information on benvos.
 }
 \keyword{datasets}

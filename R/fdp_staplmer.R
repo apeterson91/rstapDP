@@ -11,7 +11,7 @@
 #'  Precision parameters sigma_a,sigma_b, tau_a,tau_b are similar for the residual and penalties' precision, respectively.
 #' 
 #' @param formula Similar as for \code{\link[rsstap]{sstap_lmer}}, though fdp_staplmer is currently restricted to only one stap term.
-#' @param benvo built environment - \code{\link[rbenvo]{Benvo}} - object from containing the relevant subject - Built Environment data
+#' @param benvo built environment - \code{\link[rbenvo]{benvo}} - object from containing the relevant subject - Built Environment data
 #' @param weights weights for weighted regression - default is vector of ones 
 #' @param alpha_a alpha gamma prior hyperparameter or alpha if fix_alpha = TRUE
 #' @param alpha_b alpha gamma prior hyperparameter

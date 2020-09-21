@@ -1,7 +1,7 @@
 Package: rstapDP
 Type: Package
 Title: Functional Dirichlet Process Spatial Temporal Aggregated Predictors in R
-Version: 0.1.2
+Version: 0.1.3
 Date: 2020-08-27
 Authors@R: person("Adam", "Peterson", , "atpvyc@umich.edu", c("aut", "cre"))
 BugReports: https://github.com/apeterson91/rstapDP/issues
@@ -29,7 +29,8 @@ Imports:
     nlme,
     bayesplot,
     rstan,
-    parallel
+    parallel,
+    bendr
 LinkingTo: Rcpp, RcppEigen
 Suggests: 
     knitr,

@@ -101,13 +101,14 @@ nsamples.stapDP <- function(object, ...) {
 #' @export
 #' @importFrom lme4 ranef
 #' @export ranef
+#' @param benvo benvo used to fit the model
 #'
-ranef.stapDP <- function(object,...){
+ranef.stapDP <- function(object,benvo,...){
 
 	.glmer_check(object)
 	b_nms <- colnames(object$subj_b)
 	point_estimates <- summary(object)[b_nms,"50%"]
-	out <- ranef_template(object)
+	out <- ranef_template(object,benvo)
 	group_vars <- names(out)
 	for (j in seq_along(out)) {
 		tmp <- out[[j]]
@@ -125,7 +126,7 @@ ranef.stapDP <- function(object,...){
 
 # Call lme4 to get the right structure for ranef objects
 #' @importFrom lme4 lmerControl glmerControl lmer glmer 
-ranef_template <- function(object) {
+ranef_template <- function(object,benvo) {
   
     new_formula <- object$spec$stapless_formula 
 	lme4_fun <- "lmer"
@@ -143,7 +144,7 @@ ranef_template <- function(object) {
   
 	fit_args <- list(
 	formula = new_formula,
-	data = object$model$benvo@subject_data,
+	data = benvo$subject_data,
 	control = cntrl
 	)
   

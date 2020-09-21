@@ -11,7 +11,7 @@ get_stapDPspec(f, K, benvo)
 
 \item{K}{DP truncation integer}
 
-\item{benvo}{Built Environment object - \code{\link[rbenvo]{Benvo}} - containing data for model}
+\item{benvo}{Built Environment object - \code{\link[rbenvo]{benvo}} - containing data for model}
 }
 \value{
 \code{\link{stapDPspec}} object

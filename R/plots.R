@@ -52,6 +52,7 @@ plot_pairs.stapDP <- function(x,sort = FALSE,sample = 0){
 		  j <- A_c[which.max(probs)]
 		  A <- c(A,j)
 		  A_c <- setdiff(Omega,A)
+
 		}
 	}
 	else{
@@ -59,15 +60,16 @@ plot_pairs.stapDP <- function(x,sort = FALSE,sample = 0){
 	}
 
 
-	p <- suppressMessages(dplyr::as_tibble(P[A,A])) %>% dplyr::mutate(Group_1 = 1:dplyr::n()) %>%
-	  tidyr::gather(dplyr::contains("V"), key = "Group_2", value = "Probability") %>%
-	  dplyr::mutate("Group_2" = as.numeric(stringr::str_replace(Group_2,"V",""))) %>%
-	  ggplot(aes(x=Group_1,y=Group_2,fill=Probability)) +
-	  geom_tile() + scale_fill_gradientn(colours=c("white","grey","black"),limits=c(0,1)) +
-	  ggplot2::theme_bw() + ggplot2::labs(title = "Pairwise Probability of Function Clustering",
+	p <- suppressMessages(dplyr::as_tibble(P[A,A])) %>% 
+		dplyr::mutate(Group_1 = 1:dplyr::n()) %>%
+		tidyr::gather(dplyr::contains("V"), key = "Group_2", value = "Probability") %>%
+		dplyr::mutate("Group_2" = as.numeric(stringr::str_replace(Group_2,"V",""))) %>%
+		ggplot(aes(x=Group_1,y=Group_2,fill=Probability)) +
+		geom_tile() + scale_fill_gradientn(colours=c("white","grey","black"),limits=c(0,1)) +
+		ggplot2::theme_bw() + ggplot2::labs(title = "Pairwise Probability of Function Clustering",
 										  x="Subject 1", y = "Subject 2") +
-	  ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
-			panel.grid.minor = ggplot2::element_blank())
+		ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+					   panel.grid.minor = ggplot2::element_blank())
 
 
     return(p)
@@ -204,7 +206,7 @@ traceplots.stapDP <- function(x,par = NULL){
 		stopifnot(par %in% colnames(mat))
 	}
 	
-	p <- bayesplot::mcmc_trace(list(as.matrix(x)[,par,drop=F]))
+	p <- bayesplot::mcmc_trace(list(mat[,par,drop=F]))
 	return(p)
 }
 
