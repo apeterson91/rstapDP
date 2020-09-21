@@ -4,10 +4,10 @@
 \alias{assign_mode.stapDP}
 \title{Estimates Posterior Mode Cluster Assignment}
 \usage{
-assign_mode.stapDP(x, loss = "green", ...)
+\method{assign_mode}{stapDP}(x, loss = "green", ...)
 }
 \arguments{
-\item{x}{ndp object}
+\item{x}{stapDP object}
 
 \item{loss}{one of c("green","square") denoting which loss function should be used. Defaults to "green".}
 
