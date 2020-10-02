@@ -14,7 +14,7 @@ fdp_staplm(
   sigma_b = 1,
   tau_a = 1,
   tau_b = 1,
-  K = 5,
+  K = 5L,
   iter_max = 1000,
   burn_in = 500,
   thin = 1,

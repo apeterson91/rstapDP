@@ -14,10 +14,10 @@ fdp_staplmer(
   sigma_b = 1,
   tau_a = 1,
   tau_b = 1,
-  K = 5,
-  iter_max = 1000,
-  burn_in = 500,
-  thin = 1,
+  K = 5L,
+  iter_max = 1000L,
+  burn_in = floor(iter_max/2),
+  thin = 1L,
   fix_alpha = FALSE,
   seed = NULL
 )
