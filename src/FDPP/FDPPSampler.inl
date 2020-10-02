@@ -27,9 +27,7 @@ void FDPPSampler::iteration_sample(std::mt19937 &rng){
 
 	// check for errors
 	if(std::isnan(beta(0)) & flag ){
-		Rcpp::Rcout << "things are NaN" << std::endl;
-		Rcpp::Rcout << " V block: \n" << V.block(0,0,5,5) << std::endl;
-		Rcpp::Rcout << "new V" << std::endl;
+		Rcpp::Rcout << "There was an error inverting the design matrix" << std::endl;
 		flag = false;
 	}
 

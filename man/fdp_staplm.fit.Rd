@@ -20,7 +20,6 @@ fdp_staplm.fit(
   iter_max,
   burn_in,
   thin = 1,
-  chains = 1,
   fix_alpha = FALSE,
   seed = NULL
 )
@@ -55,8 +54,6 @@ fdp_staplm.fit(
 \item{burn_in}{number of iterations to burn-in}
 
 \item{thin}{number by which to thin samples}
-
-\item{chains}{number of MCMC chains to run via `parallel::mclapply`}
 
 \item{fix_alpha}{boolean value}
 

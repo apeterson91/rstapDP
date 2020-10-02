@@ -21,7 +21,6 @@
 #' @param iter_max maximum number of iterations
 #' @param burn_in number of burn in iterations
 #' @param thin number by which to thin samples
-#' @param chains number of chains to run via `parallel::mclapply`
 #' @param fix_alpha boolean value indicating whether or not to fix the concentration parameter
 #' @param seed random number generator seed will be set to default value if not by user
 #' 
@@ -38,17 +37,16 @@ fdp_staplm <- function(formula,
 					   sigma_b = 1,
 					   tau_a = 1,
 					   tau_b = 1,
-					   K = 5,
+					   K = 5L,
 					   iter_max = 1E3,
 					   burn_in = 5E2,
 					   thin = 1,
-					   chains = 1,
 					   fix_alpha = FALSE,
 					   seed = NULL){
 
 	## Parameter check
 	stopifnot(burn_in<iter_max && burn_in > 0)
-	stopifnot(any(c(alpha_a,alpha_b,sigma_a,sigma_b,tau_a,tau_b)>0))
+	stopifnot(all(c(alpha_a,alpha_b,sigma_a,sigma_b,tau_a,tau_b)>0))
 	stopifnot(thin>0)
 	## 
 	
@@ -68,9 +66,10 @@ fdp_staplm <- function(formula,
 						  alpha_b,
 						  sigma_a,
 						  sigma_b,
-	                      tau_a,tau_b,
+						  tau_a,
+						  tau_b,
 						  K,iter_max,
-						  burn_in,thin,chains,
+						  burn_in,thin,
 						  fix_alpha,seed)
 	
     fit <- list(pars = list(beta = fit$beta,
@@ -112,7 +111,6 @@ fdp_staplm <- function(formula,
 #' @param iter_max maximum number of iterations
 #' @param burn_in number of iterations to burn-in
 #' @param thin number by which to thin samples
-#' @param chains number of MCMC chains to run via `parallel::mclapply`
 #' @param fix_alpha boolean value 
 #' @param seed random number generator seed will be set to default value if not by user
 #' @export
@@ -129,11 +127,10 @@ fdp_staplm.fit <- function(y,Z,X,S,
                            iter_max,
 						   burn_in,
                            thin = 1,
-						   chains = 1,
 						   fix_alpha = FALSE,
 						   seed = NULL){
 
-	stopifnot(c(sigma_a,sigma_b,tau_a,tau_b,alpha_a,alpha_b)>0)
+	stopifnot(all(c(sigma_a,sigma_b,tau_a,tau_b,alpha_a,alpha_b)>0))
 	stopifnot(nrow(S[[1]]) == ncol(Z) + ncol(X[[1]])*K)
 	stopifnot(length(weights) == length(y))
   if(is.null(seed)){
@@ -146,19 +143,10 @@ fdp_staplm.fit <- function(y,Z,X,S,
   num_penalties <- length(S) ## default for smoothing
   S <- do.call(cbind,S)
   X <- do.call(cbind,X)
-  if(chains>1)
-    fit <- parallel::mclapply(seed+sample(0:10,chains),FUN = function(y){
-      stappDP_fit(y,Z,X,S,weights,alpha_a,alpha_b,
-                  sigma_a,sigma_b,tau_a,tau_b,
-                  K,num_penalties,iter_max,burn_in,
-                  thin,y,num_posterior_samples,fix_alpha)}
-    )
-  else{
-      fit <- stappDP_fit(y,Z,X,S,weights,alpha_a,alpha_b,
-    					 sigma_a,sigma_b,tau_a,tau_b,
-    					 K,num_penalties,iter_max,burn_in,
-    					 thin,seed,num_posterior_samples,fix_alpha)
-  }
+  fit <- stappDP_fit(y,Z,X,S,weights,alpha_a,alpha_b,
+					 sigma_a,sigma_b,tau_a,tau_b,
+					 K,num_penalties,iter_max,burn_in,
+					 thin,seed,num_posterior_samples,fix_alpha)
 
 
   return(fit)

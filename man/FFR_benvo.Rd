@@ -6,6 +6,19 @@
 \title{Samll benvo for use in \pkg{rstapDP} examples and vignettes.}
 \format{
 A \code{\link[rbenvo]{benvo}} consisting of the \code{FFR_subjects} and \code{FFR_distances} dataframes
+
+subject data: A data frame with 1000 rows and 3 columns
+\describe{
+\item{\code{id}}{The subject unique identifier}
+\item{\code{sex}}{The measurement unique identifier}
+\item{\code{BMI}}{The Built Environment Unique identifier}
+}
+
+Distance data: A data frame with 9501 rows and 2 columns
+\describe{
+\item{ \code{id}}{ The subject unique identifier}
+\item{\code{Distance}}{The simulated distance between a hypothetical subject and fast food restaurant.}
+}
 }
 \usage{
 FFR_benvo

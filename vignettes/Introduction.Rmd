@@ -81,7 +81,6 @@ library(rstapDP)
 library(dplyr)
 library(ggplot2)
 theme_set(theme_bw())
-data("FFR_benvo")
 ```
 
 For this simple illustrative example, we'll use the data `FFR_benvo` (see [here](https://apeterson91.github.io/rbenvo/) for more information on `benvos`) which comes with the `rstapDP` package. This data is simulated in the manner previously described: with one high risk group that experiences an increase in the pseudo-BMI measure as a function of nearby FFRs, and one group that does not. There is also a binary sex covariate simulated. We can get a brief description of the FFR data by calling the print and summary functions of the `FFR_benvo` object.
@@ -92,7 +91,7 @@ FFR_benvo
 
 
 ```{r benvo_eda2}
-bef_summary(FFR_benvo)
+summary(FFR_benvo)
 ```
 
 
@@ -130,14 +129,13 @@ Finally, we'll take at look at the estimated and true exposure curves.
 
 ```{r truthpltdf,echo=F}
 truth <- tibble(Distance = seq(from=0,to=1,by=0.01),
-                Truth = 3*pweibull(Distance,shape = 5, scale = .6,lower.tail = F),
+                Truth = 2*pweibull(Distance,shape = 5, scale = .5,lower.tail = F),
                 Cluster = "High Risk") %>%
   rbind(tibble(Distance = seq(from =0,to=1,by=0.01),
                Truth = 0,
                Cluster = "Low Risk")) %>% mutate(Cluster = factor(Cluster))
 
 truth <- geom_line(aes(x=Distance,y=Truth,color=Cluster),data=truth)
-  
 ```
 
 

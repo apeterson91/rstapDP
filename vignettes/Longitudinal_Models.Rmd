@@ -78,7 +78,7 @@ $$
 The model syntax should be familiar to those who have used the `rsstap` package before. The `sap()` keyword denotes that a spatial aggregated predictor will be modeled using the distances in the `bdf` benvo associated with the `FFR` BEF-subject data. We'll sample a few thousand iterations from the gibbs sampler `rstapDP`, fixing the concentration parameter $\alpha=1$ and take a look at the estimates.
 
 ```{r model_fitting,results='hide'}
-fit <- fdp_staplmer(BMI ~ sex + year +  sap(FFR) + (1|ID),
+fit <- fdp_staplmer(BMI ~ sex + year +  sap(FFR) + (1|id),
                     benvo=bdf,fix_alpha = TRUE)
 ```
 
@@ -105,7 +105,7 @@ Note that both the between-subject effect $\bar{f}_i(\cdot)$ and the within-subj
 In order to fit this model, we use a similar syntax as before now using `sap_bw()` as our keyword to denote that a between-within decomposition will be performed on the design matrix associated with the FFR spatial exposure function.
 
 ```{r fit_bw,message=F,results='hide'}
-fit <- fdp_staplmer(BMI ~ sex + year +  sap_bw(FFR) + (1|ID),
+fit <- fdp_staplmer(BMI ~ sex + year +  sap_bw(FFR) + (1|id),
                     benvo=bdf,fix_alpha = TRUE)
 ```
 

@@ -1,3 +1,5 @@
+context("fdp_staplm interface checks")
+
 test_that("parameter checks", {
   expect_error(fdp_staplm(BMI ~ sex + sap(FFR),benvo = FFR_benvo,iter_max = 0,burn_in = 5))
   expect_error(fdp_staplm(BMI ~ sex + sap(FFR),benvo = FFR_benvo,iter_max = 3,burn_in = 5))

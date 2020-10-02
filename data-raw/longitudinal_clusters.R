@@ -1,5 +1,6 @@
 ## code to prepare `longitudinal_clusters` dataset goes here
-
+library(tidyverse)
+library(rbenvo)
 set.seed(3431)
 num_subj <- 5E2
 riskcat <- sapply(1:num_subj,function(x) sample(1:3,size=1,replace=F,prob = c(.7,.2,.1)))
@@ -55,6 +56,6 @@ sjdf$BMI <- 33 +  sjdf$sex* -2.2 + .1*sjdf$year + sjdf$exposure +
 
 
 longitudinal_clusters <- benvo(subject_data = sjdf,
-                              bef_data = list(FFR=FFR_distances))
+                              sub_bef_data = list(FFR=FFR_distances))
 
 usethis::use_data(longitudinal_clusters, overwrite = TRUE)

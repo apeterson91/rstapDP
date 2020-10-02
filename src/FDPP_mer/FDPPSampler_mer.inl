@@ -284,7 +284,7 @@ void FDPPSampler_mer::adjust_beta(std::mt19937 &rng){
 
 void FDPPSampler_mer::draw_subj_b(std::mt19937 &rng){
 
-	residual = y - X_fit * beta_temp;
+	residual = ( y - X_fit * beta_temp);
 	int row_ix = 0;
 	int num_cols = W.cols();
 	Eigen::MatrixXd temp;
@@ -293,7 +293,7 @@ void FDPPSampler_mer::draw_subj_b(std::mt19937 &rng){
 		draw_zb(rng);
 		temp = W.block(row_ix,0,subj_n(i),num_cols);
 		temp_res = residual.segment(row_ix,subj_n(i));
-		subj_b.row(i) = ((temp.transpose() * temp + sigma*subj_D).inverse() * temp.transpose() * temp_res + 
+		subj_b.row(i) = ((temp.transpose() * temp + sigma * subj_D).inverse() * temp.transpose() * temp_res + 
 			(temp.transpose() * temp + sigma * subj_D).inverse().llt().matrixL().toDenseMatrix() * z_b).transpose();
 		if((i+1)< n)
 			row_ix += subj_n(i);

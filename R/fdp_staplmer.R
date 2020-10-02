@@ -39,16 +39,16 @@ fdp_staplmer <- function(formula,
 						 sigma_b = 1,
 						 tau_a = 1,
 						 tau_b = 1,
-						 K = 5,
-						 iter_max = 1E3,
-						 burn_in = 5E2,
-						 thin = 1,
+						 K = 5L,
+						 iter_max = 1000L,
+						 burn_in = floor(iter_max/2),
+						 thin = 1L,
 						 fix_alpha = FALSE,
 						 seed = NULL){
 
 	## Parameter check
 	stopifnot(burn_in<iter_max && burn_in > 0)
-	stopifnot(any(c(alpha_a,alpha_b,sigma_a,sigma_b,tau_a,tau_b)>0))
+	stopifnot(all(c(alpha_a,alpha_b,sigma_a,sigma_b,tau_a,tau_b)>0))
 	stopifnot(thin>0)
 	## 
 	call <- match.call(expand.dots = TRUE)
@@ -168,7 +168,7 @@ fdp_staplmer.fit <- function(y,Z,X,W,S,
   num_posterior_samples <- sum((seq(from=burn_in+1,to=iter_max,by=1) %%thin)==0)
   stopifnot(num_posterior_samples>0)
 
-  if(bw){
+	if(bw){
 	  num_penalties <- length(S[[1]])
 	  S_b <- do.call(cbind,S[[1]])
 	  S_w <- do.call(cbind,S[[2]])
@@ -182,7 +182,7 @@ fdp_staplmer.fit <- function(y,Z,X,W,S,
 							   thin,seed,num_posterior_samples,fix_alpha
 							  )
 
-  }else{
+	}else{
 	  num_penalties <- length(S) ## default for smoothing
 	  S <- do.call(cbind,S)
 	  X <- do.call(cbind,X)
@@ -191,7 +191,7 @@ fdp_staplmer.fit <- function(y,Z,X,W,S,
 						 sigma_a,sigma_b,tau_a,tau_b,
 						 K,num_penalties,iter_max,burn_in,
 						 thin,seed,num_posterior_samples,fix_alpha)
-  }
+	}
 
 
   return(fit)

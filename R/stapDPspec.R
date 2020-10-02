@@ -139,7 +139,7 @@ stapDPspec <- function(stapless_formula,fake_formula,stap_mat,K,benvo){
 	if(!(all(unique(term)==term)))
 		stop("Only one BEF name may be assigned to a stap term e.g. no sap(foo) + tap(foo)\n
 			 If you wish to model components this way create a different name e.g. sap(foo) + tap(foo_bar)")
-	if(!all(term %in% benvo$bef_names))
+	if(!all(term %in% rbenvo::bef_names(benvo)))
 		stop("All stap terms must have data with corresponding name in benvo")
 	if(length(term)>1)
 		stop("Only one stap/sap/tap term allowed")
@@ -148,20 +148,19 @@ stapDPspec <- function(stapless_formula,fake_formula,stap_mat,K,benvo){
 	                  function(x,y,z) {
 						temp_df <- rbenvo::joinvo(benvo,x,y,NA_to_zero = TRUE)
 						temp_df$temp_ix_ <- 1:nrow(temp_df)
-	                    out <- mgcv::jagam(formula = z, family = gaussian(), 
-	                                       data = rbenvo::joinvo(benvo,x,y,
-	                                                             NA_to_zero = TRUE), 
-	                                       file = tempfile(fileext = ".jags"), 
-	                                       offset = NULL,
-	                                       centred = FALSE,
-	                                       diagonalize = FALSE)
-	                    out$name <- x
-						ix <- which(benvo$bef_names==x)
+						out <- mgcv::jagam(formula = z, family = gaussian(), 
+						                   data = temp_df,
+										   file = tempfile(fileext = ".jags"), 
+						                   offset = NULL,
+						                   centred = FALSE,
+						                   diagonalize = FALSE)
+						out$name <- x
+						ix <- which(rbenvo::bef_names(benvo)==x)
 						ranges <- list()
 						if(y=="Distance"|y=="Distance-Time")
-							ranges$Distance <- range(benvo$bef_data[[ix]]$Distance,na.rm=T)
+							ranges$Distance <- range(benvo$sub_bef_data[[ix]]$Distance,na.rm=T)
 						if(y=="Time"|y=="Distance-Time")
-							ranges$Time = range(benvo$bef_data[[ix]]$Time,na.rm=T)
+							ranges$Time = range(benvo$sub_bef_data[[ix]]$Time,na.rm=T)
 						out$ranges <- ranges
 	                    return(out)
 	                    })
