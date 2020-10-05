@@ -289,12 +289,14 @@ void FDPPSampler_mer::draw_subj_b(std::mt19937 &rng){
 	int num_cols = W.cols();
 	Eigen::MatrixXd temp;
 	Eigen::VectorXd temp_res;
+	Eigen::VectorXd temp_weights;
 	for(int i =0 ; i < n ; i++){
 		draw_zb(rng);
 		temp = W.block(row_ix,0,subj_n(i),num_cols);
+		temp_weights = w.segment(row_ix,subj_n(i));
 		temp_res = residual.segment(row_ix,subj_n(i));
-		subj_b.row(i) = ((temp.transpose() * temp + sigma * subj_D).inverse() * temp.transpose() * temp_res + 
-			(temp.transpose() * temp + sigma * subj_D).inverse().llt().matrixL().toDenseMatrix() * z_b).transpose();
+		subj_b.row(i) = ((temp.transpose() * temp_weights.asDiagonal() *  temp + sigma * subj_D).inverse() * temp.transpose() *temp_weights.asDiagonal() * temp_res + 
+			(temp.transpose() * temp_weights.asDiagonal() * temp + sigma * subj_D).inverse().llt().matrixL().toDenseMatrix() * z_b).transpose();
 		if((i+1)< n)
 			row_ix += subj_n(i);
 	}

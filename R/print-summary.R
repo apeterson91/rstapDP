@@ -11,7 +11,10 @@ print.stapDP <- function(x,digits=1,...){
 
 
 	Parameter <- Samples <- iteration_ix <- K <- P <- med <- NULL
-	cat("fdp_staplm \n")
+	if(is.mer(x))
+		cat("fdp_staplmer")
+	else
+		cat("fdp_staplm")
 	cat("\n Observations:", length(x$model$y))
 	cat("\n Formula: ", formula_string(x$model$formula))
 	cat("\n Fixed predictors: ", ncol(x$delta))
