@@ -9,6 +9,7 @@
 #include "auxiliary/print_function.hpp"
 
 // [[Rcpp::depends(RcppEigen)]]
+// [[Rcpp::depends(BH)]]
 
 //' Penalized Functional Dirichlet Process Linear Regression with N observations
 //'
@@ -349,4 +350,60 @@ Rcpp::List stappDP_merdecomp(const Eigen::VectorXd &y,
 							  Rcpp::Named("subj_D") = D_samples,
 							  Rcpp::Named("cluster_assignment") = cluster_assignment,
 							  Rcpp::Named("PairwiseProbabilityMat") = sampler.P_matrix / num_posterior_samples );
+}
+
+
+
+#include "VI_DP/VI.hpp"
+
+//'  Spatial Temporal Aggregated Predictor Functional Dirichlet Process Regression via Variational Inference
+//' 
+//' @export
+//' @param y vector of regression outcomes
+//' @param X matrix of regression covariates
+//' @param max_iter maximum number of iterations
+//' @param num_samples number of samples to draw from approximate posterior
+// [[Rcpp::export]]
+Rcpp::List VI_lm(const Eigen::VectorXd &y,
+				 const Eigen::MatrixXd &X,
+				 const double &tau_a,
+				 const double &tau_b,
+				 const double &sigma_a,
+				 const double &sigma_b,
+				 const int &max_iter,
+				 const int &num_samples,
+				 const int seed){
+
+    // set seed
+    std::mt19937 rng;
+    rng = std::mt19937(seed);
+	Eigen::ArrayXd bounds;
+	Eigen::ArrayXd sigma_samples;
+	Eigen::ArrayXd tau_samples;
+	Eigen::ArrayXXd yhat_samples;
+	Eigen::ArrayXXd beta_samples;
+	//regression constants,predictions, coefficients
+	const int Q = X.cols();
+	const int N = X.rows();
+
+	// containers
+	bounds.setZero(max_iter);
+	sigma_samples.setZero(num_samples);
+	tau_samples.setZero(num_samples);
+	yhat_samples.setZero(num_samples,N);
+	beta_samples.setZero(num_samples,Q);
+
+	VI sampler(y,X,tau_a,tau_b,sigma_a,sigma_b,max_iter,rng);
+	  
+	while(sampler.has_not_converged(bounds)){
+		sampler.descend_gradient();
+	}
+	sampler.draw_pars(rng,num_samples,beta_samples,sigma_samples,tau_samples,yhat_samples);
+
+
+
+	return Rcpp::List::create(Rcpp::Named("Bound") = bounds,
+								Rcpp::Named("beta") = beta_samples,
+								Rcpp::Named("sigma") = sigma_samples,
+								Rcpp::Named("tau") = tau_samples);
 }

@@ -90,3 +90,14 @@ stappDP_merdecomp <- function(y, Z, X_b, X_w, W, S_b, S_w, w, subj_mat_, subj_n,
     .Call(`_rstapDP_stappDP_merdecomp`, y, Z, X_b, X_w, W, S_b, S_w, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, fix_alpha)
 }
 
+#'  Spatial Temporal Aggregated Predictor Functional Dirichlet Process Regression via Variational Inference
+#' 
+#' @export
+#' @param y vector of regression outcomes
+#' @param X matrix of regression covariates
+#' @param max_iter maximum number of iterations
+#' @param num_samples number of samples to draw from approximate posterior
+VI_lm <- function(y, X, tau_a, tau_b, sigma_a, sigma_b, max_iter, num_samples, seed) {
+    .Call(`_rstapDP_VI_lm`, y, X, tau_a, tau_b, sigma_a, sigma_b, max_iter, num_samples, seed)
+}
+

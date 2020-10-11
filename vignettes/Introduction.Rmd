@@ -72,7 +72,7 @@ By placing a DP prior on the $\mathbf{\beta}$ coefficients, heterogenous effects
 In the following sections, this idea will be briefly illustrated using the simple simulated example. For more information, check out the `rstapDP` [documentation](https://apeterson91.github.io/rstapDP/reference/index.html).
 
 ## Exploratory Data Analysis
-We'll begin by loading the appropriate libaries.
+We'll begin by loading the appropriate libraries.
 
 
 ```{r setup,message=F,results='hide',warning=FALSE}

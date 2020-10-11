@@ -30,8 +30,9 @@ Imports:
     bayesplot,
     rstan,
     parallel,
-    bendr (>= 1.0.1)
-LinkingTo: Rcpp, RcppEigen
+    bendr (>= 1.0.1),
+    BH
+LinkingTo: Rcpp, RcppEigen,BH
 Suggests: 
     knitr,
     rmarkdown,

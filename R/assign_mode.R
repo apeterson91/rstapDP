@@ -21,3 +21,6 @@ assign_mode.stapDP <- function(x,loss = "green",...){
 				mode = x$cmat[ix,])
 
 }
+
+#' @export 
+bendr::assign_mode

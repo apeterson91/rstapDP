@@ -101,11 +101,31 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// VI_lm
+Rcpp::List VI_lm(const Eigen::VectorXd& y, const Eigen::MatrixXd& X, const double& tau_a, const double& tau_b, const double& sigma_a, const double& sigma_b, const int& max_iter, const int& num_samples, const int seed);
+RcppExport SEXP _rstapDP_VI_lm(SEXP ySEXP, SEXP XSEXP, SEXP tau_aSEXP, SEXP tau_bSEXP, SEXP sigma_aSEXP, SEXP sigma_bSEXP, SEXP max_iterSEXP, SEXP num_samplesSEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const double& >::type tau_a(tau_aSEXP);
+    Rcpp::traits::input_parameter< const double& >::type tau_b(tau_bSEXP);
+    Rcpp::traits::input_parameter< const double& >::type sigma_a(sigma_aSEXP);
+    Rcpp::traits::input_parameter< const double& >::type sigma_b(sigma_bSEXP);
+    Rcpp::traits::input_parameter< const int& >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< const int& >::type num_samples(num_samplesSEXP);
+    Rcpp::traits::input_parameter< const int >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(VI_lm(y, X, tau_a, tau_b, sigma_a, sigma_b, max_iter, num_samples, seed));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_rstapDP_stappDP_fit", (DL_FUNC) &_rstapDP_stappDP_fit, 19},
     {"_rstapDP_stappDP_mer_fit", (DL_FUNC) &_rstapDP_stappDP_mer_fit, 22},
     {"_rstapDP_stappDP_merdecomp", (DL_FUNC) &_rstapDP_stappDP_merdecomp, 24},
+    {"_rstapDP_VI_lm", (DL_FUNC) &_rstapDP_VI_lm, 9},
     {NULL, NULL, 0}
 };
 
