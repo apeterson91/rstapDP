@@ -10,10 +10,10 @@ void VI::initialize_pars(std::mt19937 &rng){
 	current_iter = 0;
 	current_bound = 100;
 	//initialize weights
-	for(int k = 0; k < (K-1); k++){
-		u(k) = rbeta(rng);
-	}
-	u(K-1) = 1;
+	//for(int k = 0; k < (K-1); k++){
+	//	u(k) = rbeta(rng);
+	//}
+    //u(K-1) = 1;
 
 }
 

@@ -11,9 +11,19 @@ VI_lm(y, X, tau_a, tau_b, sigma_a, sigma_b, max_iter, num_samples, seed)
 
 \item{X}{matrix of regression covariates}
 
+\item{tau_a}{penalty precision gamma shape hyperparameter}
+
+\item{tau_b}{penalty precision gamma scale hyperparameter}
+
+\item{sigma_a}{residual precision gamma shape hyperparameter}
+
+\item{sigma_b}{residual precision gamma scale hyperparameter}
+
 \item{max_iter}{maximum number of iterations}
 
 \item{num_samples}{number of samples to draw from approximate posterior}
+
+\item{seed}{random number generator seed initializer}
 }
 \description{
 Spatial Temporal Aggregated Predictor Functional Dirichlet Process Regression via Variational Inference

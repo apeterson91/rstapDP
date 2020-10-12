@@ -1,18 +1,6 @@
-#' Plotting functions for stapDP objects 
-
-
-#'
+#' @export
 #' @importFrom bendr plot_pairs
-#' @export
-plot_pairs.stapDP <- function(x,sample = NULL, sort = FALSE)
-	UseNextMethod("plot_pairs")
-
-
-#' @export
 bendr::plot_pairs
-
-
-
 
 #' Cluster-Specific Spatial Temporal Effects
 #' 
@@ -112,7 +100,7 @@ plot.stapDP <- function(x,p = 0.95,
 		  ggplot2::geom_ribbon(ggplot2::aes(ymin=Lower,ymax=Upper),alpha=0.3) + 
 		  ggplot2::facet_wrap(~K) + 
 		  ggplot2::theme(strip.background=ggplot2::element_blank()) +
-		  ggplot2::geom_label(aes(x=x,y=y,label=Prob),data=kprob) +
+		  ggplot2::geom_label(ggplot2::aes(x=x,y=y,label=Prob),data=kprob) +
 		  ggplot2::labs(y="Exposure Effect") -> pl
 	}
 

@@ -21,7 +21,7 @@ class VI
 		const double omega_b;
 		const int max_iter;
 		const int N;
-		const int n;
+		//const int n;
 		const int Q;
 		double tau_a_n;
 		double tau_b_n;

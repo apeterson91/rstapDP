@@ -30,7 +30,7 @@ Imports:
     bayesplot,
     rstan,
     parallel,
-    bendr (>= 1.0.1),
+    bendr (>= 1.0.3),
     BH
 LinkingTo: Rcpp, RcppEigen,BH
 Suggests: 

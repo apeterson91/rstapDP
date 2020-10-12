@@ -361,8 +361,13 @@ Rcpp::List stappDP_merdecomp(const Eigen::VectorXd &y,
 //' @export
 //' @param y vector of regression outcomes
 //' @param X matrix of regression covariates
+//' @param tau_a penalty precision gamma shape hyperparameter  
+//' @param tau_b penalty precision gamma scale hyperparameter  
+//' @param sigma_a residual precision gamma shape hyperparameter  
+//' @param sigma_b residual precision gamma scale hyperparameter  
 //' @param max_iter maximum number of iterations
 //' @param num_samples number of samples to draw from approximate posterior
+//' @param seed random number generator seed initializer
 // [[Rcpp::export]]
 Rcpp::List VI_lm(const Eigen::VectorXd &y,
 				 const Eigen::MatrixXd &X,

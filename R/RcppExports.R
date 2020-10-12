@@ -95,8 +95,13 @@ stappDP_merdecomp <- function(y, Z, X_b, X_w, W, S_b, S_w, w, subj_mat_, subj_n,
 #' @export
 #' @param y vector of regression outcomes
 #' @param X matrix of regression covariates
+#' @param tau_a penalty precision gamma shape hyperparameter  
+#' @param tau_b penalty precision gamma scale hyperparameter  
+#' @param sigma_a residual precision gamma shape hyperparameter  
+#' @param sigma_b residual precision gamma scale hyperparameter  
 #' @param max_iter maximum number of iterations
 #' @param num_samples number of samples to draw from approximate posterior
+#' @param seed random number generator seed initializer
 VI_lm <- function(y, X, tau_a, tau_b, sigma_a, sigma_b, max_iter, num_samples, seed) {
     .Call(`_rstapDP_VI_lm`, y, X, tau_a, tau_b, sigma_a, sigma_b, max_iter, num_samples, seed)
 }
