@@ -122,7 +122,7 @@ ppc(fit)
 An additional graphical check that can be used to identify clustering patterns is the pairwise probability matrix as described in [@rodriguez p.1136]
 
 ```{r pairs}
-plot_pairs(fit,sample=500,sort=TRUE)
+plot_pairs(fit,sample=500L,sort=TRUE)
 ```
 
 Finally, we'll take at look at the estimated and true exposure curves.
