@@ -26,19 +26,7 @@ assign_mode.stapDP <- function(x,loss = "green",...){
 bendr::assign_mode
 
 
-#' Estimates Posterior Mode Loss
-#'
-#' @param object stapDP object
-#' @param truth true adjacency matrix
-#' @param tau loss function tuning parameter
-#' @param a misclassification penalty parameter
-#' @param b misclassification penalty parameter - see Green and Lau for details
-#' @return list of three objects (1)loss:  the loss corresponding to each clustering 
-#' configuration, (2) best_loss_ix:  The index corresponding to the "best" partition,
-#' and (3) mode: the best partition itself
-#' @importFrom bendr green_loss
+
 #' @export
-green_loss.stapDP <- function(object,truth = NULL,tau = .5, a = 1, b = 1)
-	UseMethod("green_loss")
-
-
+#' @importFrom bendr green_loss
+bendr::green_loss

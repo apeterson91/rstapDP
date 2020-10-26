@@ -4,6 +4,7 @@
 \name{reexports}
 \alias{reexports}
 \alias{assign_mode}
+\alias{green_loss}
 \alias{plot_pairs}
 \title{Objects exported from other packages}
 \keyword{internal}
@@ -12,6 +13,6 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{bendr}{\code{\link[bendr]{assign_mode}}, \code{\link[bendr]{plot_pairs}}}
+  \item{bendr}{\code{\link[bendr]{assign_mode}}, \code{\link[bendr]{green_loss}}, \code{\link[bendr]{plot_pairs}}}
 }}
 
