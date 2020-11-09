@@ -18,20 +18,32 @@ stapDP <- function(object){
 		mer <- FALSE
 	}
 
+
 	K <- object$K
 	spec <- object$spec
 
+	probs <- object$pars$pi
+	meds <- apply(probs,2,median)
+	ix <- order(meds,decreasing=TRUE)
+	probs <- probs[,ix]
+	colnames(probs) <- paste0("K: ",1:K)
+	create_ixmat_vec <- function(K,K_product,ix){
+		as.numeric(Reduce(cbind,t(t(matrix(1:(K*K_product), nrow = K_product, ncol = K ))[ix,])  ))
+	}
+
 	if(has_bw(spec)){
 		num_penalties <- length(spec$S[[1]])
-		tau_b <- object$pars$tau_b
-		tau_w <- object$pars$tau_w
+		ixmat_scale <- create_ixmat_vec(K,num_penalties,ix)
+		tau_b <- object$pars$tau_b[,ixmat_scale]
+		tau_w <- object$pars$tau_w[,ixmat_scale]
 		colnames(tau_b) <- paste0("tau_b_",1:(K*num_penalties))
 		colnames(tau_w) <- paste0("tau_w_",1:(K*num_penalties))
 		scales <- cbind(tau_b,tau_w)
 
 	}else{
 		num_penalties <- length(object$spec$S)
-		scales <- object$pars$scales
+		ixmat_scale <- create_ixmat_vec(K,num_penalties,ix)
+		scales <- object$pars$scales[,ixmat_scale]
 		colnames(scales) <- paste0("tau_",1:(K*num_penalties))
 	}
 
@@ -40,7 +52,8 @@ stapDP <- function(object){
 	clnms_k <- lapply(1:K,function(x) paste0("K: " , x," ",nms ))
 	clnms <- Reduce(c,clnms_k)
 
-	beta <- object$pars$beta
+	ixmat_coef <- create_ixmat_vec(K,ncol(spec$X[[1]]),ix)
+	beta <- cbind(object$pars$beta[,1:ncol(spec$mf$X)],object$pars$beta[,(ncol(spec$mf$X)+1):(ncol(object$pars$beta))][,ixmat_coef])
 	colnames(beta) <- c(colnames(spec$mf$X),
 						clnms)
 	delta <- beta[,colnames(spec$mf$X)]
@@ -55,8 +68,6 @@ stapDP <- function(object){
 	sigma <- matrix(object$pars$sigma,ncol=1,nrow=nrow(alpha))
 	colnames(sigma) <- "sigma"
 
-	probs <- object$pars$pi
-	colnames(probs) <- paste0("pi","_",1:K)
 
 	parmat <- cbind(delta,betamat,alpha,sigma,probs,scales)
 	if(mer){
@@ -73,7 +84,7 @@ stapDP <- function(object){
 
 	ys <- suppressWarnings(dplyr::as_tibble(ys,quiet=T)) %>% 
 	  dplyr::mutate(iteration_ix = 1:dplyr::n()) %>% 
-		tidyr::gather(dplyr::contains("V_"),key="id",value="Samples") %>% 
+		tidyr::pivot_longer(dplyr::contains("V_"),names_to="id",values_to="Samples") %>% 
 		dplyr::mutate(id = as.integer(stringr::str_replace(id,"V_","")))
 
 	yhat <- dplyr::tibble(iteration_ix = as.integer(gd$iteration_ix), 
