@@ -75,7 +75,7 @@ VarCorr.stapDP <- function(x){
 #' @export
 #' @param ... ignored currently
 formula.stapDP <- function(x,...){
-	x$formula
+	x$model$formula
 }
 
 #' @rdname stapDP-methods

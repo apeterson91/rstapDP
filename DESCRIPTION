@@ -16,27 +16,27 @@ Imports:
     tidyr,
     purrr,
     RcppEigen,
-    ggplot2,
     stringr,
-    coda,
     mgcv,
     Matrix,
+    bendr (>= 1.0.3),
     rbenvo (>= 1.0.0),
+    nlme,
     lme4,
     RcppProgress,
     abind,
     rstantools,
-    nlme,
     bayesplot,
     rstan,
     parallel,
-    bendr (>= 1.0.3),
-    BH
+    BH,
+    RcppParallel
 LinkingTo: Rcpp, RcppEigen,BH
 Suggests: 
     knitr,
     rmarkdown,
     testthat (>= 2.1.0),
+    ggplot2,
     covr
 VignetteBuilder: knitr
 RoxygenNote: 7.1.1

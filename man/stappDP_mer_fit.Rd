@@ -25,6 +25,7 @@ stappDP_mer_fit(
   burn_in,
   thin,
   seed,
+  chain,
   num_posterior_samples,
   fix_alpha
 )
@@ -69,6 +70,8 @@ stappDP_mer_fit(
 \item{thin}{number by which to thin samples}
 
 \item{seed}{rng initializer}
+
+\item{chain}{chain label}
 
 \item{num_posterior_samples}{total number of posterior samples}
 

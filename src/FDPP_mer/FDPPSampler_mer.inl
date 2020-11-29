@@ -2,8 +2,11 @@ void FDPPSampler_mer::iteration_sample(std::mt19937 &rng){
 
 	// update cluster labels
 	calculate_b();
+	log_message("b calculated");
 	sample_cluster_labels(rng);
+	log_message("labels sampled");
 	update_weights(rng);
+	log_message("weights updated");
 
 	// create appropriately sized containers
 	beta_temp.setZero(temp_Q);
@@ -11,10 +14,12 @@ void FDPPSampler_mer::iteration_sample(std::mt19937 &rng){
 	X_fit.block(0,0,N,P) = Z;
 	draw_z(rng);
 	X_fit.block(0,P,N,temp_Q-P) = X_K;
+	log_message("matrix designed");
 
 	// calculate solution
 	V = (X_fit.transpose() * w.asDiagonal() * X_fit + 
 			nonzero_ics.transpose() * PenaltyMat * nonzero_ics ).inverse();
+	log_message("matrix inverted");
 
 	beta_temp = V.llt().matrixL().toDenseMatrix() * sigma * z + 
 		V * X_fit.transpose() * w.asDiagonal() * (y-Wb) ;
@@ -22,6 +27,7 @@ void FDPPSampler_mer::iteration_sample(std::mt19937 &rng){
 	beta = nonzero_ics * beta_temp;
 
 	adjust_beta(rng);
+	log_message("beta sampled");
 
 	// check for errors
 	if(std::isnan(beta(0)) & flag ){
@@ -32,16 +38,21 @@ void FDPPSampler_mer::iteration_sample(std::mt19937 &rng){
 
 	// update subject terms
 	draw_subj_D(rng);
+	log_message("subj_D sampled");
 
 	draw_subj_b(rng);
+	log_message("subj_b sampled");
 
 	// draw variance terms
 	draw_var(rng);
+	log_message("sigma sampled");
 
 	calculate_Wb();
+	log_message("Wb calculated");
 
 	// calculate predicted value
 	yhat = X_fit * beta + Wb;
+	log_message("yhat calculated");
 }
 
 void FDPPSampler_mer::calculate_Wb(){
@@ -100,6 +111,8 @@ void FDPPSampler_mer::sample_cluster_labels(std::mt19937 &rng){
 		iter_cluster_assignment(i) = d(rng);
 		cluster_matrix(i,iter_cluster_assignment(i)) = 1.0;
 	}
+
+	log_message("cluster labels: assigned");
 
 	adjust_zero_clusters(rng);
 

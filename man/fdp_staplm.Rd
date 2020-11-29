@@ -18,6 +18,7 @@ fdp_staplm(
   iter_max = 1000,
   burn_in = 500,
   thin = 1,
+  chains = 1,
   fix_alpha = FALSE,
   seed = NULL
 )
@@ -48,6 +49,8 @@ fdp_staplm(
 \item{burn_in}{number of burn in iterations}
 
 \item{thin}{number by which to thin samples}
+
+\item{chains}{number of randomly initialized chains to run}
 
 \item{fix_alpha}{boolean value indicating whether or not to fix the concentration parameter}
 

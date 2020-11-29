@@ -3,47 +3,52 @@
 #'
 #' @param object A list provided by the fdp_staplm(er) functions
 #' @return A stapDP object
+#' @importFrom utils tail
 #'
 stapDP <- function(object){
 
 	 Samples <- Parameter <- Lower <- Upper <- medp <- iteration_ix <- 
 		. <- Distance <- Median <- P <-  id <- NULL
 	
-	if(!is.null(object$pars$subj_b)){
-		glmod <- object$mf$glmod
-		b <- reformat_b(object$pars$subj_b,glmod)
-		D <- reformat_D(object$pars$subj_D,glmod)
-		mer <- TRUE
-	}else{
-		mer <- FALSE
+
+	## for sorting matrices by cluster probability
+	create_ixmat_vec <- function(K,K_product,ix){
+		as.numeric(Reduce(cbind,t(t(matrix(1:(K*K_product), nrow = K_product, ncol = K ))[ix,])  ))
+	}
+
+	collapse_pars <- function(par_name,K,K_product,ics){
+		ixmats <- lapply(ics,function(x) create_ixmat_vec(K,K_product,x))
+		par <- Reduce(rbind,purrr::map2(pars,ixmats,function(x,y) x[[par_name]][,y]))
 	}
 
 
 	K <- object$K
 	spec <- object$spec
+	pars <- object$pars
 
-	probs <- object$pars$pi
-	meds <- apply(probs,2,median)
-	ix <- order(meds,decreasing=TRUE)
-	probs <- probs[,ix]
-	colnames(probs) <- paste0("K: ",1:K)
-	create_ixmat_vec <- function(K,K_product,ix){
-		as.numeric(Reduce(cbind,t(t(matrix(1:(K*K_product), nrow = K_product, ncol = K ))[ix,])  ))
+	if(!is.null(pars[[1]]$subj_b)){
+		glmod <- object$mf$glmod
+		b <- Reduce(rbind,lapply(pars,function(x) reformat_b(x$subj_b,glmod)))
+		D <- Reduce(rbind,lapply(pars, function(x) reformat_D(x$subj_D,glmod)))
+		mer <- TRUE
+	}else{
+		mer <- FALSE
 	}
+
+	ix <- lapply(pars,function(x) order(apply(x$pi,2,median),decreasing=TRUE))
+	probs <- Reduce(rbind,purrr::map2(pars,ix,function(x,y) x$pi[,y]))
+	colnames(probs) <- paste0("pi_K: ",1:K)
 
 	if(has_bw(spec)){
 		num_penalties <- length(spec$S[[1]])
-		ixmat_scale <- create_ixmat_vec(K,num_penalties,ix)
-		tau_b <- object$pars$tau_b[,ixmat_scale]
-		tau_w <- object$pars$tau_w[,ixmat_scale]
+		tau_b <- collapse_pars("tau_b",K,num_penalties,ix)
+		tau_w <- collapse_pars("tau_w",K,num_penalties,ix)
 		colnames(tau_b) <- paste0("tau_b_",1:(K*num_penalties))
 		colnames(tau_w) <- paste0("tau_w_",1:(K*num_penalties))
 		scales <- cbind(tau_b,tau_w)
-
 	}else{
 		num_penalties <- length(object$spec$S)
-		ixmat_scale <- create_ixmat_vec(K,num_penalties,ix)
-		scales <- object$pars$scales[,ixmat_scale]
+		scales <- collapse_pars("scales",K,num_penalties,ix)
 		colnames(scales) <- paste0("tau_",1:(K*num_penalties))
 	}
 
@@ -51,21 +56,23 @@ stapDP <- function(object){
 	nms <- Reduce(c,lapply(spec$X,colnames))
 	clnms_k <- lapply(1:K,function(x) paste0("K: " , x," ",nms ))
 	clnms <- Reduce(c,clnms_k)
+	delta_ics <- 1:ncol(spec$mf$X)
+	beta_ics <- (tail(delta_ics,1)+1):ncol(pars[[1]]$beta)
+	beta_prod <- ncol(spec$X[[1]]) + has_bw(spec)*ncol(spec$X[[1]])
 
-	ixmat_coef <- create_ixmat_vec(K,ncol(spec$X[[1]]),ix)
-	beta <- cbind(object$pars$beta[,1:ncol(spec$mf$X)],object$pars$beta[,(ncol(spec$mf$X)+1):(ncol(object$pars$beta))][,ixmat_coef])
-	colnames(beta) <- c(colnames(spec$mf$X),
-						clnms)
-	delta <- beta[,colnames(spec$mf$X)]
-	betamat <- beta[,clnms]
+	bixmats <- lapply(ix,function(x) create_ixmat_vec(K,beta_prod,x))
+	betamat <- Reduce(rbind,purrr::map2(pars,bixmats,function(x,y) x$beta[,beta_ics][,y]))
+	delta <- Reduce(rbind,lapply(pars,function(x) x$beta[,delta_ics]))
+	colnames(delta) <- colnames(spec$mf$X)
+	colnames(betamat) <- clnms
 	beta <- lapply(clnms_k,function(k) betamat[,k])
 	beta <- abind::abind(beta,along=3)
 	dimnames(beta)[[2]] <- nms
 	dimnames(beta)[[3]] <- paste0("K: ",1:K)
 
-	alpha <- matrix(object$pars$alpha,ncol=1,nrow=length(object$pars$alpha))
+	alpha <- Reduce(rbind,lapply(pars, function(x) matrix(x$alpha,ncol=1,nrow=length(x$alpha))))
 	colnames(alpha) <- "alpha"
-	sigma <- matrix(object$pars$sigma,ncol=1,nrow=nrow(alpha))
+	sigma <- Reduce(rbind,lapply(pars, function(x) matrix(x$sigma,ncol=1,nrow=length(x$sigma))))
 	colnames(sigma) <- "sigma"
 
 
@@ -73,16 +80,16 @@ stapDP <- function(object){
 	if(mer){
 		parmat <- cbind(parmat,b,D)
 	}
-	parameter_summary <- get_summary(parmat)
+	parameter_summary <- get_summary(parmat,length(pars))
 
 
-	ys <- object$pars$yhat
-	gd <- expand.grid(id =paste("V_",1:ncol(object$pars$yhat)),
-					  iteration_ix = 1:length(object$pars$alpha))
+	ys <- Reduce(rbind,lapply(pars, function(x) x$yhat))
+	gd <- expand.grid(id =paste0("V_",1:ncol(pars[[1]]$yhat)),
+					  iteration_ix = 1:nrow(alpha))
 
-	colnames(ys) <- paste("V_",1:ncol(object$pars$yhat))
+	colnames(ys) <- paste("V_",1:ncol(pars[[1]]$yhat))
 
-	ys <- suppressWarnings(dplyr::as_tibble(ys,quiet=T)) %>% 
+	ys <- dplyr::as_tibble(ys,quiet=T) %>% 
 	  dplyr::mutate(iteration_ix = 1:dplyr::n()) %>% 
 		tidyr::pivot_longer(dplyr::contains("V_"),names_to="id",values_to="Samples") %>% 
 		dplyr::mutate(id = as.integer(stringr::str_replace(id,"V_","")))
@@ -91,8 +98,9 @@ stapDP <- function(object){
 						  Parameter = "yrep",
 						  id = as.integer(gd$id))
 
-	yhat <- suppressMessages(yhat %>% dplyr::right_join(ys))
-	yhat <- rbind(yhat,dplyr::tibble(iteration_ix = rep(0,length(spec$mf$y)),Parameter=rep("yobs",length(spec$mf$y)), 
+	yhat <- yhat %>% dplyr::right_join(ys,by=c('iteration_ix','id'))
+	yhat <- rbind(yhat,dplyr::tibble(iteration_ix = rep(0,length(spec$mf$y)),
+									 Parameter=rep("yobs",length(spec$mf$y)), 
 									 id = 1:length(spec$mf$y),Samples = spec$mf$y))
 
 
@@ -104,8 +112,8 @@ stapDP <- function(object){
 				probs = probs,
 				yhat = yhat,
 				scales = scales,
-				pmat = object$pars$pmat,
-				cmat = object$pars$clabels,
+				pmat = Reduce(`+`,lapply(pars,function(x) x$pmat))/length(pars),
+				cmat = Reduce(rbind,lapply(pars,function(x) x$clabels)),
 				model = list(formula = object$formula,
 							 K=object$K,
 							 y=spec$mf$y,
@@ -156,14 +164,23 @@ reformat_b <- function(subj_b,glmod){
 	colnames(subj_b) <- paste0("b[",grp,":", trms ,"]")
 	return(subj_b)
 }
+create_chain_mat <- function(mat_col,num_samples){
+	ixmat <- cbind(seq(from = 1L, to = length(mat_col),by=num_samples),
+				   seq(from = num_samples,to=length(mat_col),by=num_samples))
+	mat <- Reduce(cbind,lapply(1:nrow(ixmat),function(x) mat_col[ixmat[1,1]:ixmat[1,2]]))
+}
 
 
-get_summary <- function(parmat){
+get_summary <- function(parmat,chains){
 	nms <- colnames(parmat)
+	num_samples <- nrow(parmat) / chains
 	mean <- colMeans(parmat)
 	sd <- apply(parmat,2,sd)
 	qs <- t(apply(parmat,2,function(x) quantile(x,c(0.1,.25,.5,.75,.9),na.rm=T)))
-	n_eff <- apply(parmat,2,rstan::ess_tail)
-	Rhat <- apply(parmat,2,rstan::Rhat)
+	cols <- lapply(1:ncol(parmat),function(x) create_chain_mat(parmat[,x],num_samples))
+	n_eff <- Reduce(rbind,lapply(cols,rstan::ess_tail))
+	Rhat <- Reduce(rbind,lapply(cols,rstan::Rhat)) 
 	out <- cbind(mean,sd,qs,n_eff,Rhat)
+	colnames(out)[8:9] <- c("n_eff","Rhat")
+	return(out)
 }

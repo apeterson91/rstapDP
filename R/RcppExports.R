@@ -21,9 +21,10 @@
 #' @param thin number by which to thin samples
 #' @param seed rng initializer
 #' @param num_posterior_samples total number of posterior samples
+#' @param chain chain label
 #' @param fix_alpha  boolean value that determines whether or not to fix alpha in sampler
-stappDP_fit <- function(y, Z, X, S, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, fix_alpha) {
-    .Call(`_rstapDP_stappDP_fit`, y, Z, X, S, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, fix_alpha)
+stappDP_fit <- function(y, Z, X, S, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha) {
+    .Call(`_rstapDP_stappDP_fit`, y, Z, X, S, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha)
 }
 
 #' Penalized Functional Dirichlet Process Linear Mixed Effects Regression
@@ -51,10 +52,11 @@ stappDP_fit <- function(y, Z, X, S, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a
 #' @param burn_in number of burn in iterations
 #' @param thin number by which to thin samples
 #' @param seed rng initializer
+#' @param chain chain label
 #' @param num_posterior_samples total number of posterior samples
 #' @param fix_alpha  boolean value that determines whether or not to fix alpha in sampler
-stappDP_mer_fit <- function(y, Z, X, W, S, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, fix_alpha) {
-    .Call(`_rstapDP_stappDP_mer_fit`, y, Z, X, W, S, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, fix_alpha)
+stappDP_mer_fit <- function(y, Z, X, W, S, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, chain, num_posterior_samples, fix_alpha, logging) {
+    .Call(`_rstapDP_stappDP_mer_fit`, y, Z, X, W, S, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, chain, num_posterior_samples, fix_alpha, logging)
 }
 
 #' Penalized Functional Dirichlet Process Linear Mixed Effects Regression with Between-Within Decomposition
@@ -85,9 +87,10 @@ stappDP_mer_fit <- function(y, Z, X, W, S, w, subj_mat_, subj_n, alpha_a, alpha_
 #' @param thin number by which to thin samples
 #' @param seed rng initializer
 #' @param num_posterior_samples total number of posterior samples
+#' @param chain chain label
 #' @param fix_alpha  boolean value that determines whether or not to fix alpha in sampler
-stappDP_merdecomp <- function(y, Z, X_b, X_w, W, S_b, S_w, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, fix_alpha) {
-    .Call(`_rstapDP_stappDP_merdecomp`, y, Z, X_b, X_w, W, S_b, S_w, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, fix_alpha)
+stappDP_merdecomp <- function(y, Z, X_b, X_w, W, S_b, S_w, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha) {
+    .Call(`_rstapDP_stappDP_merdecomp`, y, Z, X_b, X_w, W, S_b, S_w, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha)
 }
 
 #'  Spatial Temporal Aggregated Predictor Functional Dirichlet Process Regression via Variational Inference

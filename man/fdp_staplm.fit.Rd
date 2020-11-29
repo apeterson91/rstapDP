@@ -16,12 +16,13 @@ fdp_staplm.fit(
   sigma_b = 1,
   tau_a = 1,
   tau_b = 1,
-  K = 5,
+  K = 5L,
   iter_max,
   burn_in,
-  thin = 1,
+  thin = 1L,
   fix_alpha = FALSE,
-  seed = NULL
+  seed = NULL,
+  chain = 1L
 )
 }
 \arguments{
@@ -58,6 +59,8 @@ fdp_staplm.fit(
 \item{fix_alpha}{boolean value}
 
 \item{seed}{random number generator seed will be set to default value if not by user}
+
+\item{chain}{chain label}
 }
 \description{
 Functional Dirichlet Process Spatial Temporal Aggregated Predictor Linear Model Fit

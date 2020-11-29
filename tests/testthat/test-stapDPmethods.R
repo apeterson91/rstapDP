@@ -1,9 +1,9 @@
 # capture_output(
-  xs <-  fdp_staplm(BMI ~ sex + sap(FFR),
-                          benvo = FFR_benvo,
-                          K = 5, ## for speed
-                          iter_max = 30,
-                          burn_in = 20)
+  # xs <-  fdp_staplm(BMI ~ sex + sap(FFR),
+                          # benvo = FFR_benvo,
+                          # K = 5, ## for speed
+                          # iter_max = 30,
+                          # burn_in = 20)
 # )
 
 # capture_output(

@@ -79,7 +79,7 @@ The model syntax should be familiar to those who have used the `rsstap` package 
 
 ```{r model_fitting,results='hide'}
 fit <- fdp_staplmer(BMI ~ sex + year +  sap(FFR) + (1|id),
-                    benvo=bdf,fix_alpha = TRUE)
+                    benvo=bdf,fix_alpha = TRUE,chains = 2)
 ```
 
 

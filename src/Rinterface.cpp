@@ -10,6 +10,8 @@
 
 // [[Rcpp::depends(RcppEigen)]]
 // [[Rcpp::depends(BH)]]
+// [[Rcpp::depends(RcppParallel)]]
+// [[Rcpp::plugins(cpp11)]]
 
 //' Penalized Functional Dirichlet Process Linear Regression with N observations
 //'
@@ -31,6 +33,7 @@
 //' @param thin number by which to thin samples
 //' @param seed rng initializer
 //' @param num_posterior_samples total number of posterior samples
+//' @param chain chain label
 //' @param fix_alpha  boolean value that determines whether or not to fix alpha in sampler
 // [[Rcpp::export]]
 Rcpp::List stappDP_fit(const Eigen::VectorXd &y,
@@ -51,6 +54,7 @@ Rcpp::List stappDP_fit(const Eigen::VectorXd &y,
 					   const int &thin,
 					   const int &seed,
 					   const int &num_posterior_samples,
+					   const int chain,
 					   const bool &fix_alpha
 					   ) {
 
@@ -74,7 +78,6 @@ Rcpp::List stappDP_fit(const Eigen::VectorXd &y,
 	tau_samples.setZero(num_posterior_samples,K*num_penalties);
 	yhat_samples.setZero(num_posterior_samples,y.rows());
 
-	const int chain = 1;
 
 	FDPPSampler sampler(y,Z,X,S,w, alpha_a,alpha_b,tau_a,tau_b,
 						sigma_a,sigma_b,K,num_penalties,fix_alpha,rng);
@@ -133,6 +136,7 @@ typedef Eigen::SparseMatrix<double> SpMat;
 //' @param burn_in number of burn in iterations
 //' @param thin number by which to thin samples
 //' @param seed rng initializer
+//' @param chain chain label
 //' @param num_posterior_samples total number of posterior samples
 //' @param fix_alpha  boolean value that determines whether or not to fix alpha in sampler
 // [[Rcpp::export]]
@@ -156,8 +160,10 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 						   const int &burn_in,
 						   const int &thin,
 						   const int &seed,
+						   const int &chain,
 						   const int &num_posterior_samples,
-						   const bool &fix_alpha
+						   const bool &fix_alpha,
+						   const bool &logging
 							)
 {
 
@@ -188,14 +194,17 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 	b_samples.setZero(num_posterior_samples,W.cols()*subj_mat.cols());
 	D_samples.setZero(num_posterior_samples,W.cols()*W.cols());
 
-	const int chain = 1;
 
 	FDPPSampler_mer sampler(y,Z,X,W,S,w,
 							subj_mat,subj_n,
 							alpha_a,
 							alpha_b,tau_a,tau_b,
 							sigma_a,sigma_b,K,
-							num_penalties,fix_alpha,rng);
+							num_penalties,fix_alpha,logging,rng);
+	if(logging){
+		sampler.iteration_sample(rng);
+		return(Rcpp::List::create(Rcpp::Named("log status") = 0));
+	}
 
 	for(int iter_ix = 1; iter_ix <= iter_max; iter_ix ++){
 
@@ -254,6 +263,7 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 //' @param thin number by which to thin samples
 //' @param seed rng initializer
 //' @param num_posterior_samples total number of posterior samples
+//' @param chain chain label
 //' @param fix_alpha  boolean value that determines whether or not to fix alpha in sampler
 // [[Rcpp::export]]
 Rcpp::List stappDP_merdecomp(const Eigen::VectorXd &y,
@@ -279,6 +289,7 @@ Rcpp::List stappDP_merdecomp(const Eigen::VectorXd &y,
 						   const int &thin,
 						   const int &seed,
 						   const int &num_posterior_samples,
+						   const int &chain,
 						   const bool &fix_alpha
 							)
 {
@@ -311,9 +322,6 @@ Rcpp::List stappDP_merdecomp(const Eigen::VectorXd &y,
 	yhat_samples.setZero(num_posterior_samples,y.rows());
 	b_samples.setZero(num_posterior_samples,W.cols()*subj_mat.cols());
 	D_samples.setZero(num_posterior_samples,W.cols()*W.cols());
-
-
-	const int chain = 1;
 
 	FDPPSamplerdecomp sampler(y,Z,X_b,W,S_b,w,
 							subj_mat,subj_n,
@@ -412,3 +420,34 @@ Rcpp::List VI_lm(const Eigen::VectorXd &y,
 								Rcpp::Named("sigma") = sigma_samples,
 								Rcpp::Named("tau") = tau_samples);
 }
+
+
+// RcppParallel barebones example
+/*
+#include <Rcpp.h>
+#include <RcppParallel.h>
+using namespace Rcpp;
+using namespace RcppParallel;
+
+// [[Rcpp::depends(RcppParallel)]]
+// [[Rcpp::plugins(cpp11)]]
+
+struct Test : public Worker {
+  tbb::enumerable_thread_specific<bool> printonce;
+  Test() : printonce(false) {}
+  
+  void operator()(std::size_t begin, std::size_t end) {
+    tbb::enumerable_thread_specific<bool>::reference p = printonce.local();
+    if(!p) { // print once per thread
+      std::cout << 1;
+      p= true;
+    }
+  }
+};
+
+// [[Rcpp::export(rng = false)]]
+void test() {
+  Test x{};
+  parallelFor(0, 10000, x);
+}
+*/

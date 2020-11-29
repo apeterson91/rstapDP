@@ -23,6 +23,7 @@ stappDP_fit(
   thin,
   seed,
   num_posterior_samples,
+  chain,
   fix_alpha
 )
 }
@@ -62,6 +63,8 @@ stappDP_fit(
 \item{seed}{rng initializer}
 
 \item{num_posterior_samples}{total number of posterior samples}
+
+\item{chain}{chain label}
 
 \item{fix_alpha}{boolean value that determines whether or not to fix alpha in sampler}
 }

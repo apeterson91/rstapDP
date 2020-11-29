@@ -21,6 +21,7 @@
 #' @param iter_max maximum number of iterations
 #' @param burn_in number of burn in iterations
 #' @param thin number by which to thin samples
+#' @param chains number of randomly initialized chains to run
 #' @param fix_alpha boolean value indicating whether or not to fix the concentration parameter
 #' @param seed random number generator seed will be set to default value if not by user
 #' 
@@ -41,6 +42,7 @@ fdp_staplm <- function(formula,
 					   iter_max = 1E3,
 					   burn_in = 5E2,
 					   thin = 1,
+					   chains = 1,
 					   fix_alpha = FALSE,
 					   seed = NULL){
 
@@ -49,6 +51,8 @@ fdp_staplm <- function(formula,
 	stopifnot(all(c(alpha_a,alpha_b,sigma_a,sigma_b,tau_a,tau_b)>0))
 	stopifnot(thin>0)
 	## 
+	if(is.null(seed))
+		seed <- 2341341
 	
 	spec <- get_stapDPspec(formula,K,benvo)
 	foo <- spec$stapless_formula
@@ -57,31 +61,37 @@ fdp_staplm <- function(formula,
 	  weights <- rep(1,length(spec$mf$y))
 
 	
-	fit <- fdp_staplm.fit(y = spec$mf$y,
-						  Z = spec$mf$X,
-						  X=spec$X, 
-						  S=spec$S,
-						  weights,
-						  alpha_a,
-						  alpha_b,
-						  sigma_a,
-						  sigma_b,
-						  tau_a,
-						  tau_b,
-						  K,iter_max,
-						  burn_in,thin,
-						  fix_alpha,seed)
+	fit <- lapply(1:chains,function(x) fdp_staplm.fit(y = spec$mf$y,
+													  Z = spec$mf$X,
+													  X = spec$X, 
+													  S = spec$S,
+													  weights = weights,
+													  alpha_a = alpha_a,
+													  alpha_b = alpha_b,
+													  sigma_a = sigma_a,
+													  sigma_b = sigma_b,
+													  tau_a = tau_a,
+													  tau_b = tau_b,
+													  K = K,iter_max = iter_max,
+													  burn_in = burn_in,
+													  thin = thin,
+													  fix_alpha = fix_alpha ,
+													  seed = seed + x,
+													  chain = x)
+	)
+
+    out <- lapply(fit,function(x) list(beta = x$beta,
+							pi = x$pi,
+							sigma = x$sigma,
+							alpha = x$alpha,
+							yhat = x$yhat,
+							scales = x$tau,
+							cluster_mat = x$cluster_mat,
+							pmat = x$PairwiseProbabilityMat,
+							clabels = x$cluster_assignment
+							))
 	
-    fit <- list(pars = list(beta = fit$beta,
-							pi = fit$pi,
-							sigma = fit$sigma,
-							alpha = fit$alpha, 
-							yhat = fit$yhat,
-							cluster_mat = fit$cluster_assignment,
-							scales =  fit$tau,
-							pmat = fit$PairwiseProbabilityMat,
-							clabels = fit$cluster_assignment
-							),
+    out <- list(pars=out,
 				benvo = benvo,
 				spec = spec,
 				formula = formula,
@@ -90,7 +100,7 @@ fdp_staplm <- function(formula,
 				K = K
 				)
 
-	return(stapDP(fit))
+	return(stapDP(out))
 }
 
 
@@ -113,6 +123,7 @@ fdp_staplm <- function(formula,
 #' @param thin number by which to thin samples
 #' @param fix_alpha boolean value 
 #' @param seed random number generator seed will be set to default value if not by user
+#' @param chain chain label
 #' @export
 #' 
 fdp_staplm.fit <- function(y,Z,X,S,
@@ -123,12 +134,13 @@ fdp_staplm.fit <- function(y,Z,X,S,
                            sigma_b = 1,
                            tau_a = 1,
                            tau_b = 1,
-                           K = 5,
+                           K = 5L,
                            iter_max,
 						   burn_in,
-                           thin = 1,
+                           thin = 1L,
 						   fix_alpha = FALSE,
-						   seed = NULL){
+						   seed = NULL,
+						   chain = 1L){
 
 	stopifnot(all(c(sigma_a,sigma_b,tau_a,tau_b,alpha_a,alpha_b)>0))
 	stopifnot(nrow(S[[1]]) == ncol(Z) + ncol(X[[1]])*K)
@@ -146,7 +158,7 @@ fdp_staplm.fit <- function(y,Z,X,S,
   fit <- stappDP_fit(y,Z,X,S,weights,alpha_a,alpha_b,
 					 sigma_a,sigma_b,tau_a,tau_b,
 					 K,num_penalties,iter_max,burn_in,
-					 thin,seed,num_posterior_samples,fix_alpha)
+					 thin,seed,num_posterior_samples,chain,fix_alpha)
 
 
   return(fit)

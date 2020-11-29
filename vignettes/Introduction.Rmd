@@ -108,7 +108,7 @@ fit <- fdp_staplm(BMI ~ sex + sap(FFR),
                   iter_max = 3E3,
                   burn_in = 2E3,
                   thin = 1,
-                  seed = 43431)
+                  seed = 434311,chains = 2)
 ```
 
 

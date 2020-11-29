@@ -69,6 +69,7 @@ class FDPPSampler_mer
 		bool flag = true;
 		const bool fix_alpha;
 		const double log_factor;
+		const bool logging;
 
 	public:
 		Eigen::ArrayXXd P_matrix;
@@ -90,6 +91,7 @@ class FDPPSampler_mer
 				const int &K,
 				const int &num_penalties,
 				const bool &fix_alpha,
+				const bool &logging,
 				std::mt19937 &rng
 			  ): 
 			y(y), Z(Z), X(X),
@@ -107,7 +109,8 @@ class FDPPSampler_mer
 			Q(Z.cols() + X.cols()*K), 
 			num_penalties(num_penalties),
 			fix_alpha(fix_alpha),
-			log_factor(log(pow(10,-16)) - log(N))
+			log_factor(log(pow(10,-16)) - log(N)),
+			logging(logging)
 	{
 		num_nonzero = K;
 		temp_Q = P + P_two * num_nonzero;
@@ -145,6 +148,7 @@ class FDPPSampler_mer
 		initializing = false;
 		check_initialization();
 		calculate_Wb();
+		log_message("Initialization Complete");
 	}
 
 		void iteration_sample(std::mt19937 &rng);
@@ -199,6 +203,11 @@ class FDPPSampler_mer
 		void calculate_Wb();
 
 		void check_initialization();
+
+		void log_message(const std::string& input){
+			if(logging)
+				Rcpp::Rcout << "Log: " <<  input << std::endl;
+		}
 
 };
 

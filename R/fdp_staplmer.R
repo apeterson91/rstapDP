@@ -23,9 +23,10 @@
 #' @param iter_max maximum number of iterations
 #' @param burn_in number of burn in iterations
 #' @param thin number by which to thin samples
+#' @param chains number of randomly initialized chains to run
 #' @param fix_alpha boolean value indicating whether or not to fix the concentration parameter
 #' @param seed random number generator seed will be set to default value if not by user
-#' 
+#' @param ... optional arguments to \link{\code{fdp_staplmer.fit}}
 #' @importFrom stats is.empty.model model.matrix model.response as.formula gaussian terms
 #' @export
 #' @return a stapDP model object
@@ -43,8 +44,10 @@ fdp_staplmer <- function(formula,
 						 iter_max = 1000L,
 						 burn_in = floor(iter_max/2),
 						 thin = 1L,
+						 chains = 1L,
 						 fix_alpha = FALSE,
-						 seed = NULL){
+						 seed = NULL,
+						 ...){
 
 	## Parameter check
 	stopifnot(burn_in<iter_max && burn_in > 0)
@@ -58,6 +61,8 @@ fdp_staplmer <- function(formula,
 	mf <- rbenvo::longitudinal_design(benvo,foo)
 	W <- get_W(mf$glmod)
 	subj_mat <- get_subjmat(mf$glmod)
+	if(is.null(seed))
+	  seed <- 3413431L
 
 
 	if(vapply(list(mf$glmod$reTrms$flist),nlevels,1)>1)
@@ -67,50 +72,58 @@ fdp_staplmer <- function(formula,
 	  weights <- rep(1,length(mf$y))
 	
 	
-	fit <- fdp_staplmer.fit(y = mf$y,
-							Z = mf$X,
-							X = spec$X,
-							W = W,
-							S = spec$S,
-							subj_mat = Matrix::t(subj_mat),
-							subj_n = Matrix::rowSums(subj_mat),
-							weights, 
-							alpha_a,
-							alpha_b,
-							sigma_a,
-							sigma_b,
-							tau_a,tau_b,
-							K,iter_max,
-							burn_in,thin,
-							fix_alpha = fix_alpha,
-							bw = has_bw(spec),
-							seed)
+	fit <- lapply(1L:chains,function(x) fdp_staplmer.fit(y = mf$y,
+	                                                    Z = mf$X,
+	                                                    X = spec$X,
+	                                                    W = W,
+	                                                    S = spec$S,
+	                                                    subj_mat = Matrix::t(subj_mat),
+	                                                    subj_n = Matrix::rowSums(subj_mat),
+	                                                    weights = weights, 
+	                                                    alpha_a = alpha_a,
+	                                                    alpha_b =  alpha_b,
+	                                                    sigma_a = sigma_a,
+	                                                    sigma_b = sigma_b,
+	                                                    tau_a = tau_a,
+	                                                    tau_b = tau_b,
+	                                                    K = K,
+	                                                    iter_max = iter_max,
+	                                                    burn_in = burn_in,
+	                                                    thin = thin,
+	                                                    fix_alpha = fix_alpha,
+														logging = logging,
+	                                                    bw = has_bw(spec),
+	                                                    seed = seed + x,
+	                                                    chain = x))
 	
-    out <- list(pars = list(beta = fit$beta,
-							pi = fit$pi,
-							sigma = fit$sigma,
-							alpha = fit$alpha,
-							yhat = fit$yhat,
-							subj_b = fit$subj_b,
-							subj_D = fit$subj_D,
-							cluster_mat = fit$cluster_mat,
-							pmat = fit$PairwiseProbabilityMat,
-							clabels = fit$cluster_assignment
-							),
-							spec = spec,
-							mf= mf,
-							formula = formula,
-							alpha_a = alpha_a,
-							alpha_b = alpha_b,
-							benvo = benvo,
-							K = K
-							)
+    out <- lapply(fit,function(x) list(beta = x$beta,
+							pi = x$pi,
+							sigma = x$sigma,
+							alpha = x$alpha,
+							scales = x$tau,
+							tau_b  = if(has_bw(spec)) x$tau_b,
+							tau_w = if(has_bw(spec)) x$tau_w,
+							yhat = x$yhat,
+							subj_b = x$subj_b,
+							subj_D = x$subj_D,
+							pmat = x$PairwiseProbabilityMat,
+							clabels = x$cluster_assignment
+							))
+	out <- list(pars=out,
+				spec = spec,
+				mf= mf,
+				formula = formula,
+				alpha_a = alpha_a,
+				alpha_b = alpha_b,
+				benvo = benvo,
+				K = K)
 	if(has_bw(spec)){
-		out$pars$tau_b <- fit$tau_b
-		out$pars$tau_w <- fit$tau_w
-	}else{
-		out$pars$scales <- fit$tau
+		lapply(1:chains,function(x) {
+				   out$pars[[x]]$tau_b = fit[[x]]$tau_b
+				   out$pars[[x]]$tau_w = fit[[x]]$tau_w
+					 })
 	}
+
 
 	return(stapDP(out))
 }
@@ -137,27 +150,32 @@ fdp_staplmer <- function(formula,
 #' @param burn_in number of iterations to burn-in
 #' @param thin number by which to thin samples
 #' @param fix_alpha boolean value 
+#' @param logging boolean value indicating whether or not to do a sample iteration with diagnostic log messages
 #' @param bw boolean value indicating whether or not subject decomposition is used
 #' @param seed random number generator seed will be set to default value if not by user
+#' @param chain chain label
 #' @export
 #' 
 fdp_staplmer.fit <- function(y,Z,X,W,S,
                              subj_mat,
-							 subj_n,
-							 weights = rep(1,length(y)),
-							 alpha_a = 1,
-							 alpha_b = 1, 
-							 sigma_a = 1,
-							 sigma_b = 1,
-							 tau_a = 1,
-							 tau_b = 1,
-							 K = 5,
-							 iter_max,
-							 burn_in,
-							 thin = 1,
-							 fix_alpha = FALSE,
-							 bw = FALSE,
-							 seed = NULL){
+              							 subj_n,
+              							 weights = rep(1,length(y)),
+              							 alpha_a = 1,
+              							 alpha_b = 1, 
+              							 sigma_a = 1,
+              							 sigma_b = 1,
+              							 tau_a = 1,
+              							 tau_b = 1,
+              							 K = 5L,
+              							 iter_max,
+              							 burn_in,
+              							 thin = 1L,
+              							 fix_alpha = FALSE,
+              							 bw = FALSE,
+              							 seed = NULL,
+              							 chain = 1L,
+              							 logging = FALSE
+              							 ){
 
 	stopifnot(c(sigma_a,sigma_b,tau_a,tau_b,alpha_a,alpha_b)>0)
 	stopifnot(length(weights) == length(y))
@@ -179,7 +197,7 @@ fdp_staplmer.fit <- function(y,Z,X,W,S,
 							   subj_n,alpha_a,alpha_b,
 							   sigma_a,sigma_b,tau_a,tau_b,
 							   K,num_penalties,iter_max,burn_in,
-							   thin,seed,num_posterior_samples,fix_alpha
+							   thin,seed,num_posterior_samples,chain,fix_alpha
 							  )
 
 	}else{
@@ -187,10 +205,10 @@ fdp_staplmer.fit <- function(y,Z,X,W,S,
 	  S <- do.call(cbind,S)
 	  X <- do.call(cbind,X)
 	  fit <- stappDP_mer_fit(y,Z,X,W,S,weights,subj_mat,
-						 subj_n,alpha_a,alpha_b,
-						 sigma_a,sigma_b,tau_a,tau_b,
-						 K,num_penalties,iter_max,burn_in,
-						 thin,seed,num_posterior_samples,fix_alpha)
+							 subj_n,alpha_a,alpha_b,
+							 sigma_a,sigma_b,tau_a,tau_b,
+							 K,num_penalties,iter_max,burn_in,
+							 thin,seed,chain,num_posterior_samples,fix_alpha,logging)
 	}
 
 
