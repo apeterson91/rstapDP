@@ -27,7 +27,9 @@ stappDP_mer_fit(
   seed,
   chain,
   num_posterior_samples,
-  fix_alpha
+  fix_alpha,
+  logging,
+  summarize_yhat
 )
 }
 \arguments{
@@ -76,6 +78,10 @@ stappDP_mer_fit(
 \item{num_posterior_samples}{total number of posterior samples}
 
 \item{fix_alpha}{boolean value that determines whether or not to fix alpha in sampler}
+
+\item{logging}{boolean parameter indicating whether or not a single iteration should be run with print messages indicating successful completion of the Sampler's sub modules}
+
+\item{summarize_yhat}{boolean value indicating whether a single mean vector of yhat values should be returned instead of a N X num samples matrix. Useful in situations where N is large.}
 }
 \description{
 fits a functional dirichlet process linear mixed effects regression model

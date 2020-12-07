@@ -136,13 +136,12 @@ void FDPPSampler_mer::adjust_zero_clusters(std::mt19937 &rng){
 	nonzero_ics.setZero(Q,temp_Q);
 	nonzero_ics.block(0,0,P,P) = Eigen::MatrixXd::Identity(P,P);
 	X_K.setZero(N,P_two*num_nonzero);
+	log_message("Finished preparing X_K Zero Matrix");
 
 	int k_ = 0;
-	Eigen::MatrixXd temp;
 	for(int k = 0; k < K; k++){
 		if(cluster_count(k)!=0){
-			temp = (subj_mat * cluster_matrix.col(k).asDiagonal() * subj_mat.transpose() );
-			X_K.block(0,k_*P_two,N,P_two) = temp.diagonal().asDiagonal() * X;
+			X_K.block(0,k_*P_two,N,P_two) = (subj_mat * cluster_matrix.col(k)).asDiagonal() * X;
 			nonzero_ics.block(P+k*P_two,P+k_*P_two,P_two,P_two) = Eigen::MatrixXd::Identity(P_two,P_two);
 			k_ ++;
 		}

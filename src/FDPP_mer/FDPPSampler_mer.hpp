@@ -6,6 +6,7 @@
 #include <Eigen/Dense>
 
 typedef Eigen::SparseMatrix<double> SpMat;
+typedef Eigen::SparseMatrix<int> SpiMat;
 typedef Eigen::ArrayXXd arr;
 
 class FDPPSampler_mer

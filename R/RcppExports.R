@@ -55,8 +55,10 @@ stappDP_fit <- function(y, Z, X, S, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a
 #' @param chain chain label
 #' @param num_posterior_samples total number of posterior samples
 #' @param fix_alpha  boolean value that determines whether or not to fix alpha in sampler
-stappDP_mer_fit <- function(y, Z, X, W, S, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, chain, num_posterior_samples, fix_alpha, logging) {
-    .Call(`_rstapDP_stappDP_mer_fit`, y, Z, X, W, S, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, chain, num_posterior_samples, fix_alpha, logging)
+#' @param logging boolean parameter indicating whether or not a single iteration should be run with print messages indicating successful completion of the Sampler's sub modules
+#' @param summarize_yhat boolean value indicating whether a single mean vector of yhat values should be returned instead of a N X num samples matrix. Useful in situations where N is large.
+stappDP_mer_fit <- function(y, Z, X, W, S, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, chain, num_posterior_samples, fix_alpha, logging, summarize_yhat) {
+    .Call(`_rstapDP_stappDP_mer_fit`, y, Z, X, W, S, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, chain, num_posterior_samples, fix_alpha, logging, summarize_yhat)
 }
 
 #' Penalized Functional Dirichlet Process Linear Mixed Effects Regression with Between-Within Decomposition

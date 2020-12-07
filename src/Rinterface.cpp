@@ -139,6 +139,8 @@ typedef Eigen::SparseMatrix<double> SpMat;
 //' @param chain chain label
 //' @param num_posterior_samples total number of posterior samples
 //' @param fix_alpha  boolean value that determines whether or not to fix alpha in sampler
+//' @param logging boolean parameter indicating whether or not a single iteration should be run with print messages indicating successful completion of the Sampler's sub modules
+//' @param summarize_yhat boolean value indicating whether a single mean vector of yhat values should be returned instead of a N X num samples matrix. Useful in situations where N is large.
 // [[Rcpp::export]]
 Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 						   const Eigen::MatrixXd &Z,
@@ -163,7 +165,8 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 						   const int &chain,
 						   const int &num_posterior_samples,
 						   const bool &fix_alpha,
-						   const bool &logging
+						   const bool &logging,
+						   const bool &summarize_yhat
 							)
 {
 
@@ -217,6 +220,10 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 								  cluster_assignment,yhat_samples,
 								  b_samples,D_samples);
 		}
+	}
+
+	if(summarize_yhat){
+		yhat_samples = yhat_samples.rowwise().mean();
 	}
 
 

@@ -26,28 +26,28 @@
 #' @param chains number of randomly initialized chains to run
 #' @param fix_alpha boolean value indicating whether or not to fix the concentration parameter
 #' @param seed random number generator seed will be set to default value if not by user
-#' @param ... optional arguments to \link{\code{fdp_staplmer.fit}}
+#' @param ... optional arguments to \code{\link{fdp_staplmer.fit}}
 #' @importFrom stats is.empty.model model.matrix model.response as.formula gaussian terms
 #' @export
 #' @return a stapDP model object
 #' 
 fdp_staplmer <- function(formula,
-						 benvo,
-						 weights = NULL,
-						 alpha_a = 1,
-						 alpha_b = 1, 
-						 sigma_a = 1,
-						 sigma_b = 1,
-						 tau_a = 1,
-						 tau_b = 1,
-						 K = 5L,
-						 iter_max = 1000L,
-						 burn_in = floor(iter_max/2),
-						 thin = 1L,
-						 chains = 1L,
-						 fix_alpha = FALSE,
-						 seed = NULL,
-						 ...){
+            						 benvo,
+            						 weights = NULL,
+            						 alpha_a = 1,
+            						 alpha_b = 1, 
+            						 sigma_a = 1,
+            						 sigma_b = 1,
+            						 tau_a = 1,
+            						 tau_b = 1,
+            						 K = 5L,
+            						 iter_max = 1000L,
+            						 burn_in = floor(iter_max/2),
+            						 thin = 1L,
+            						 chains = 1L,
+            						 fix_alpha = FALSE,
+            						 seed = NULL,
+            						 ...){
 
 	## Parameter check
 	stopifnot(burn_in<iter_max && burn_in > 0)
@@ -91,10 +91,9 @@ fdp_staplmer <- function(formula,
 	                                                    burn_in = burn_in,
 	                                                    thin = thin,
 	                                                    fix_alpha = fix_alpha,
-														logging = logging,
 	                                                    bw = has_bw(spec),
 	                                                    seed = seed + x,
-	                                                    chain = x))
+	                                                    chain = x,...))
 	
     out <- lapply(fit,function(x) list(beta = x$beta,
 							pi = x$pi,
@@ -154,6 +153,8 @@ fdp_staplmer <- function(formula,
 #' @param bw boolean value indicating whether or not subject decomposition is used
 #' @param seed random number generator seed will be set to default value if not by user
 #' @param chain chain label
+#' @param logging boolean parameter indicating whether or not a single iteration should be run with print messages indicating successful completion of the Sampler's sub modules
+#' @param summarize_yhat boolean value indicating whether a single mean vector of yhat values should be returned instead of a N X num samples matrix. Useful in situations where N is large.
 #' @export
 #' 
 fdp_staplmer.fit <- function(y,Z,X,W,S,
@@ -174,7 +175,8 @@ fdp_staplmer.fit <- function(y,Z,X,W,S,
               							 bw = FALSE,
               							 seed = NULL,
               							 chain = 1L,
-              							 logging = FALSE
+              							 logging = FALSE,
+              							 summarize_yhat = FALSE
               							 ){
 
 	stopifnot(c(sigma_a,sigma_b,tau_a,tau_b,alpha_a,alpha_b)>0)
@@ -208,7 +210,8 @@ fdp_staplmer.fit <- function(y,Z,X,W,S,
 							 subj_n,alpha_a,alpha_b,
 							 sigma_a,sigma_b,tau_a,tau_b,
 							 K,num_penalties,iter_max,burn_in,
-							 thin,seed,chain,num_posterior_samples,fix_alpha,logging)
+							 thin,seed,chain,num_posterior_samples,
+							 fix_alpha,logging,summarize_yhat)
 	}
 
 
