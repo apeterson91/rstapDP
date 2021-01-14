@@ -4,14 +4,14 @@
 #include <RcppEigen.h>
 #include <random>
 #include "FDPP/FDPPSampler.hpp"
-
+#include <progress.hpp>
+ 
 
 #include "auxiliary/print_function.hpp"
 
 // [[Rcpp::depends(RcppEigen)]]
 // [[Rcpp::depends(BH)]]
-// [[Rcpp::depends(RcppParallel)]]
-// [[Rcpp::plugins(cpp11)]]
+// [[Rcpp::depends(RcppProgress)]]
 
 //' Penalized Functional Dirichlet Process Linear Regression with N observations
 //'
@@ -197,7 +197,7 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 	b_samples.setZero(num_posterior_samples,W.cols()*subj_mat.cols());
 	D_samples.setZero(num_posterior_samples,W.cols()*W.cols());
 
-
+	Progress p(0,false);
 	FDPPSampler_mer sampler(y,Z,X,W,S,w,
 							subj_mat,subj_n,
 							alpha_a,
@@ -214,6 +214,11 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 		print_progress(iter_ix,burn_in,iter_max,chain);
 
 		sampler.iteration_sample(rng);
+		if(iter_ix % 100 == 0){
+			if(Progress::check_abort())
+				return(Rcpp::List::create(Rcpp::Named("log status") = 1));
+		}
+
 		if(iter_ix > burn_in && (iter_ix % thin == 0)){
 			sampler.store_samples(beta_samples,sigma_samples,pi_samples,
 								  tau_samples,alpha_samples,

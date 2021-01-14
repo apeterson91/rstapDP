@@ -159,7 +159,7 @@ void FDPPSamplerdecomp::draw_var(std::mt19937 &rng){
 	residual = y - X_fit * beta_temp - Wb;
 	s = (residual.transpose() * w.asDiagonal()).dot(residual) * .5;
 	s += .5 * (beta_temp.transpose() * nonzero_ics.transpose() * PenaltyMat * nonzero_ics).dot(beta_temp) ;
-	std::gamma_distribution<double> rgamma(sigma_a + N/2 + P_two, 1/( (1 / sigma_b) + s) );
+	std::gamma_distribution<double> rgamma(sigma_a + N/2 + P_two*num_nonzero, 1/( (1 / sigma_b) + s) );
 	precision = rgamma(rng);
 	sigma = sqrt(1 / precision);
 	double temp_scale;

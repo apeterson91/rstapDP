@@ -136,12 +136,17 @@ void FDPPSampler::update_weights(std::mt19937 &rng){
 
 void FDPPSampler::draw_var(std::mt19937 &rng){
 
+	// scale for sigma precision
 	residual = y - X_fit * beta_temp ;
 	s = (residual.transpose() * w.asDiagonal()).dot(residual) * .5;
 	s += .5 * (beta_temp.transpose() * nonzero_ics.transpose() * PenaltyMat * nonzero_ics).dot(beta_temp) ;
-	std::gamma_distribution<double> rgamma(sigma_a + n/2 + P_two, 1/( (1 / sigma_b) + s) );
+	std::gamma_distribution<double> rgamma(sigma_a + n/2 + P_two*num_nonzero, 1/( (1 / sigma_b) + s) );
 	precision = rgamma(rng);
 	sigma = sqrt(1 / precision);
+	// scale for omega precision
+	//s = .5 * (beta.transpose() * PenaltyMat  * beta.transpose());
+	//std::gamma_distribution<double> rgamma_omega(tau_a + (P_two*K)/2 , 1/( (1 / tau_a) + s) );
+
 	double temp_scale;
 	PenaltyMat.setZero(Q,Q);
 	for(int k = 0; k< K; k++){

@@ -31,7 +31,7 @@ Imports:
     parallel,
     BH,
     RcppParallel
-LinkingTo: Rcpp, RcppEigen,BH
+LinkingTo: Rcpp, RcppEigen,BH, RcppProgress
 Suggests: 
     knitr,
     rmarkdown,

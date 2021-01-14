@@ -104,11 +104,12 @@ size of the data.
 ```{r fit,results='hide',messages=F}
 fit <- fdp_staplm(BMI ~ sex + sap(FFR),
                   benvo = FFR_benvo,
-                  K = 5, ## for speed
+                  K = 20, ## for speed
                   iter_max = 3E3,
                   burn_in = 2E3,
                   thin = 1,
-                  seed = 434311,chains = 2)
+                  seed = 434311,
+                  chains = 2)
 ```
 
 
