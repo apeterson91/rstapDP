@@ -29,8 +29,6 @@ void FDPPSampler_mer::iteration_sample(std::mt19937 &rng){
 	adjust_beta(rng);
 	log_message("beta sampled");
 
-	if(flag)
-		Rcpp::Rcout << "cluster count: \n " << cluster_count.transpose() << std::endl;
 	/*
 	Rcpp::Rcout << "unique_taus: \n" << unique_taus.block(0,0,2,2) << std::endl;
 	Rcpp::Rcout << "beta: \n" <<  beta.head(20) << std::endl;
