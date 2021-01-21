@@ -63,6 +63,7 @@ stapDP <- function(object){
 	bixmats <- lapply(ix,function(x) create_ixmat_vec(K,beta_prod,x))
 	betamat <- Reduce(rbind,purrr::map2(pars,bixmats,function(x,y) x$beta[,beta_ics][,y]))
 	delta <- Reduce(rbind,lapply(pars,function(x) x$beta[,delta_ics]))
+	delta <- rescale_delta(delta,object$Z_scl,object$Z_cnt,object$has_intercept)
 	colnames(delta) <- colnames(spec$mf$X)
 	colnames(betamat) <- clnms
 	beta <- lapply(clnms_k,function(k) betamat[,k])
@@ -130,6 +131,21 @@ stapDP <- function(object){
 }
 
 ## ----------- internal reformatting functions
+
+
+rescale_delta <- function(delta, scale, center, has_intercept){
+
+	if(has_intercept){
+		intercept <- delta[,1]
+		del <- delta[,2:ncol(delta), drop = F] / scale
+		intercept <- intercept - del * center
+		out <- cbind(intercept,del) 
+	}else{
+		out <- delta / scale
+	}
+	return(out)
+}
+
 reformat_D <- function(subj_D,glmod){
 
 	grp <- names(glmod$reTrms$cnms)

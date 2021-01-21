@@ -204,6 +204,7 @@ double FDPPSampler_mer::calculate_penalty_scale(const int &k, const int &pen_ix)
 	out = (beta.segment(diag_ix,P_two).transpose() * S.block(diag_ix,col_ix,P_two,P_two)).dot(
 			beta.segment(diag_ix,P_two));
 	out *= .5;
+
 	return(out);
 
 }

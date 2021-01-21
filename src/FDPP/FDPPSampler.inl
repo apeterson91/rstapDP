@@ -143,10 +143,6 @@ void FDPPSampler::draw_var(std::mt19937 &rng){
 	std::gamma_distribution<double> rgamma(sigma_a + n/2 + P_two*num_nonzero, 1/( (1 / sigma_b) + s) );
 	precision = rgamma(rng);
 	sigma = sqrt(1 / precision);
-	// scale for omega precision
-	//s = .5 * (beta.transpose() * PenaltyMat  * beta.transpose());
-	//std::gamma_distribution<double> rgamma_omega(tau_a + (P_two*K)/2 , 1/( (1 / tau_a) + s) );
-
 	double temp_scale;
 	PenaltyMat.setZero(Q,Q);
 	for(int k = 0; k< K; k++){
@@ -175,6 +171,8 @@ double FDPPSampler::calculate_penalty_scale(const int &k, const int &pen_ix){
 	out = (beta.segment(diag_ix,P_two).transpose() * S.block(diag_ix,col_ix,P_two,P_two)).dot(
 			beta.segment(diag_ix,P_two));
 	out *= .5;
+
+
 	return(out);
 
 }

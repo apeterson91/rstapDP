@@ -32,22 +32,24 @@
 #' @return a stapDP model object
 #' 
 fdp_staplmer <- function(formula,
-            						 benvo,
-            						 weights = NULL,
-            						 alpha_a = 1,
-            						 alpha_b = 1, 
-            						 sigma_a = 1,
-            						 sigma_b = 1,
-            						 tau_a = 1,
-            						 tau_b = 1,
-            						 K = 5L,
-            						 iter_max = 1000L,
-            						 burn_in = floor(iter_max/2),
-            						 thin = 1L,
-            						 chains = 1L,
-            						 fix_alpha = FALSE,
-            						 seed = NULL,
-            						 ...){
+						 benvo,
+						 weights = NULL,
+						 alpha_a = 1,
+						 alpha_b = 1, 
+						 sigma_a = 1,
+						 sigma_b = 1,
+						 tau_a = 1,
+						 tau_b = 1,
+						 K = 5L,
+						 iter_max = 1000L,
+						 burn_in = floor(iter_max/2),
+						 thin = 1L,
+						 chains = 1L,
+						 fix_alpha = FALSE,
+						 seed = NULL,
+						 scale = TRUE,
+						 center = TRUE,
+						 ...){
 
 	## Parameter check
 	stopifnot(burn_in<iter_max && burn_in > 0)
@@ -70,10 +72,23 @@ fdp_staplmer <- function(formula,
 
 	if(is.null(weights))
 	  weights <- rep(1,length(mf$y))
+
+	if(all(mf$X[,1]==1)){
+		has_intercept <- TRUE
+		Z <- cbind(1,scale(mf$X[,2:ncol(mf$X) , drop = F],scale = scale, center = center))
+	}
+	else{
+		has_intercept <- FALSE 
+		Z <- scale(mf$X, scale = scale, center = center)
+	}
+	Z_scl <- attr(Z,"scaled:scale")
+	Z_cnt <- attr(Z,"scaled:center")
+	Z_scl <- ifelse(is.null(Z_scl),1,Z_scl)
+	Z_cnt <- ifelse(is.null(Z_cnt),0,Z_cnt)
 	
 	
 	fit <- lapply(1L:chains,function(x) fdp_staplmer.fit(y = mf$y,
-	                                                    Z = mf$X,
+	                                                    Z = Z,
 	                                                    X = spec$X,
 	                                                    W = W,
 	                                                    S = spec$S,
@@ -115,7 +130,11 @@ fdp_staplmer <- function(formula,
 				alpha_a = alpha_a,
 				alpha_b = alpha_b,
 				benvo = benvo,
-				K = K)
+				K = K,
+				Z_scl = Z_scl,
+				Z_cnt = Z_cnt,
+				has_intercept = has_intercept
+				)
 	if(has_bw(spec)){
 		lapply(1:chains,function(x) {
 				   out$pars[[x]]$tau_b = fit[[x]]$tau_b

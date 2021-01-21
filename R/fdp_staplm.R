@@ -44,7 +44,10 @@ fdp_staplm <- function(formula,
 					   thin = 1,
 					   chains = 1,
 					   fix_alpha = FALSE,
-					   seed = NULL){
+					   seed = NULL,
+					   scale = TRUE,
+					   center = TRUE
+					   ){
 
 	## Parameter check
 	stopifnot(burn_in<iter_max && burn_in > 0)
@@ -60,9 +63,26 @@ fdp_staplm <- function(formula,
 	if(is.null(weights))
 	  weights <- rep(1,length(spec$mf$y))
 
+	mf <- spec$mf
+
+	if(all(mf$X[,1]==1)){
+		has_intercept <- TRUE
+		Z <- scale(mf$X[,2:ncol(mf$X), drop = F],scale = scale, center = center)
+	}
+	else{
+		has_intercept <- FALSE 
+		Z <- scale(mf$X, scale = scale, center = center)
+	}
+	Z_scl <- attr(Z,"scaled:scale")
+	Z_cnt <- attr(Z,"scaled:center")
+	Z_scl <- ifelse(is.null(Z_scl),1,Z_scl)
+	Z_cnt <- ifelse(is.null(Z_cnt),0,Z_cnt)
+	if(has_intercept)
+	  Z <- cbind(1,Z)
+
 	
-	fit <- lapply(1:chains,function(x) fdp_staplm.fit(y = spec$mf$y,
-													  Z = spec$mf$X,
+	fit <- lapply(1:chains,function(x) fdp_staplm.fit(y = mf$y,
+													  Z = Z,
 													  X = spec$X, 
 													  S = spec$S,
 													  weights = weights,
@@ -97,7 +117,10 @@ fdp_staplm <- function(formula,
 				formula = formula,
 				alpha_a = alpha_a,
 				alpha_b = alpha_b,
-				K = K
+				K = K,
+				Z_scl = Z_scl,
+				Z_cnt = Z_cnt,
+				has_intercept = has_intercept
 				)
 
 	return(stapDP(out))
