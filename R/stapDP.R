@@ -138,7 +138,7 @@ rescale_delta <- function(delta, scale, center, has_intercept){
 	if(has_intercept){
 		intercept <- delta[,1]
 		del <- delta[,2:ncol(delta), drop = F] / scale
-		intercept <- intercept - del * center
+		intercept <- intercept - rowSums(del * center)
 		out <- cbind(intercept,del) 
 	}else{
 		out <- delta / scale

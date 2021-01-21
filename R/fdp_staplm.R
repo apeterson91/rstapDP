@@ -24,6 +24,8 @@
 #' @param chains number of randomly initialized chains to run
 #' @param fix_alpha boolean value indicating whether or not to fix the concentration parameter
 #' @param seed random number generator seed will be set to default value if not by user
+#' @param scale boolean determining if fixed effects matrix is scaled for estimation
+#' @param center boolean determining if fixed effects matrix is centered for estimation
 #' 
 #' @importFrom stats is.empty.model model.matrix model.response as.formula gaussian terms
 #' @export
@@ -75,8 +77,10 @@ fdp_staplm <- function(formula,
 	}
 	Z_scl <- attr(Z,"scaled:scale")
 	Z_cnt <- attr(Z,"scaled:center")
-	Z_scl <- ifelse(is.null(Z_scl),1,Z_scl)
-	Z_cnt <- ifelse(is.null(Z_cnt),0,Z_cnt)
+	if(is.null(Z_scl))
+	  Z_scl <- rep(1,ncol(Z))
+	if(is.null(Z_cnt))
+	  Z_cnt <- rep(0,ncol(Z))
 	if(has_intercept)
 	  Z <- cbind(1,Z)
 

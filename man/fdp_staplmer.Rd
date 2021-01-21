@@ -21,6 +21,8 @@ fdp_staplmer(
   chains = 1L,
   fix_alpha = FALSE,
   seed = NULL,
+  scale = TRUE,
+  center = TRUE,
   ...
 )
 }
@@ -56,6 +58,10 @@ fdp_staplmer(
 \item{fix_alpha}{boolean value indicating whether or not to fix the concentration parameter}
 
 \item{seed}{random number generator seed will be set to default value if not by user}
+
+\item{scale}{boolean determining if fixed effects matrix is scaled for estimation}
+
+\item{center}{boolean determining if fixed effects matrix is centered for estimation}
 
 \item{...}{optional arguments to \code{\link{fdp_staplmer.fit}}}
 }

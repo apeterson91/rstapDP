@@ -20,7 +20,9 @@ fdp_staplm(
   thin = 1,
   chains = 1,
   fix_alpha = FALSE,
-  seed = NULL
+  seed = NULL,
+  scale = TRUE,
+  center = TRUE
 )
 }
 \arguments{
@@ -55,6 +57,10 @@ fdp_staplm(
 \item{fix_alpha}{boolean value indicating whether or not to fix the concentration parameter}
 
 \item{seed}{random number generator seed will be set to default value if not by user}
+
+\item{scale}{boolean determining if fixed effects matrix is scaled for estimation}
+
+\item{center}{boolean determining if fixed effects matrix is centered for estimation}
 }
 \value{
 a stapDP model object
