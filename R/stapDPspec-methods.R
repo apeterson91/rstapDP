@@ -189,10 +189,11 @@ get_stap <- function(x,term,component,beta)
 get_stap.stapDPspec <- function(x,term,component,beta){
 
 	gd <- get_grid(x,term,component)
+	gd$L <- 1
 
 	sob <- get_smooth_obj(x,term)
 
-	mat <- mgcv::Predict.matrix(sob,gd)
+	mat <- mgcv::PredictMat(sob,gd)
 
 	if(has_bw(x)){
 		nms <- grep(x=colnames(beta),pattern="_bw",value=T)
