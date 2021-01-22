@@ -121,7 +121,7 @@ get_range <- function(x,term,component)
 	UseMethod("get_range")
 
 get_range.stapDPspec <- function(x,term,component){
-	return(x$range[[which(x$term==term)]][[component]])
+	return(x$ranges[[which(x$term==term)]][[component]])
 }
 
 # Get Stap Grid

@@ -53,12 +53,12 @@ stapDP <- function(object){
 	}
 
 
-	nms <- Reduce(c,lapply(spec$X,colnames))
+	nms <- colnames(spec$X)
 	clnms_k <- lapply(1:K,function(x) paste0("K: " , x," ",nms ))
 	clnms <- Reduce(c,clnms_k)
 	delta_ics <- 1:ncol(spec$mf$X)
 	beta_ics <- (tail(delta_ics,1)+1):ncol(pars[[1]]$beta)
-	beta_prod <- ncol(spec$X[[1]]) + has_bw(spec)*ncol(spec$X[[1]])
+	beta_prod <- P_two+ has_bw(spec)*P_two
 
 	bixmats <- lapply(ix,function(x) create_ixmat_vec(K,beta_prod,x))
 	betamat <- Reduce(rbind,purrr::map2(pars,bixmats,function(x,y) x$beta[,beta_ics][,y]))

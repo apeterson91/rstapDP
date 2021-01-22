@@ -135,45 +135,58 @@ stapDPspec <- function(stapless_formula,stap_mat,K,benvo){
 		stop("Only one stap/sap/tap term allowed")
 	## adapting for iid gaussian priors
 
-	temp_df <- rbenvo::joinvo(benvo,x,y,NA_to_zero = FALSE)
+	temp_df <- rbenvo::joinvo(benvo,term = term,
+							  component = component,
+							  NA_to_zero = FALSE)
 	ids <- rbenvo::get_id(benvo)
 	bef_id <- setdiff(colnames(temp_df),c(component,ids))
 	if(length(bef_id)!=1)
 		stop("BEF ID must be included as single column in benvo")
-	## may need to enquo (or something) values below
-	Xmat <- temp_df %>% pivot_wider(id_cols = ids,names_from = bef_id ,values_from = component ) %>% 
-		select_at(-ids) %>% as.matrix()
+
+	Xmat <- temp_df %>% tidyr::pivot_wider(id_cols = ids,
+	                                       names_from = bef_id ,
+	                                       values_from = component) %>% 
+		dplyr::select_at(dplyr::vars(!dplyr::contains(ids))) %>% as.matrix()
 	msk <- which(is.na(Xmat))
 	Xmat[msk] <- -1
 	L <- (Xmat> 0)*1
-
-	out <- mgcv::jagam(formula = noise ~ 0 + s(Xmat,by=L), family = gaussian(), 
+  noise <- rnorm(nrow(Xmat))
+  
+	out <- mgcv::jagam(formula = noise ~ 0 + s(Xmat,by=L,bs='cr'), family = gaussian(), 
 					   data = temp_df,
 					   file = tempfile(fileext = ".jags"), 
 					   offset = NULL,
 					   centred = FALSE,
 					   diagonalize = TRUE)
 	ranges <- list()
-	if(y=="Distance"|y=="Distance-Time")
-		ranges$Distance <- range(benvo$sub_bef_data[[ix]]$Distance,na.rm=T)
-	if(y=="Time"|y=="Distance-Time")
-		ranges$Time = range(benvo$sub_bef_data[[ix]]$Time,na.rm=T)
+	ranges[[term]] <- list()
+	if(component=="Distance"|component=="Distance-Time")
+		ranges[[term]]$Distance <- range(benvo$sub_bef_data[[term]]$Distance,na.rm=T)
+	if(component=="Time"|component=="Distance-Time")
+		ranges[[term]]$Time = range(benvo$sub_bef_data[[term]]$Time,na.rm=T)
 
 	mf <- rbenvo::subject_design(benvo,lme4::nobars(stapless_formula))
 
 	f_ <-  lme4::nobars(stapless_formula)
 	num_fixed <- ncol(mf$X)
+
+	X <- out$jags.data$X
+	nms <- stringr::str_c("s(",term,".",1:ncol(X),")")
+	colnames(X) <- nms
 	
+
+	sobj <- out$pregam$smooth
+	sobj[[1]]$term <- component
 
 	out <- list(stapless_formula = stapless_formula,
 				term = term,
 				component = component,
 				between_within = between_within,
 				dimension = dimension,
-				ranges = ranges
-				X = out$jags.data$X,
+				ranges = ranges,
+				X = X,
 				mf = mf,
-				smooth_objs = out$pregam$smooth
+				smooth_objs = sobj
 				)
 
 	structure(out,class=c("stapDPspec"))

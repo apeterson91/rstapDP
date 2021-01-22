@@ -120,7 +120,6 @@ typedef Eigen::SparseMatrix<double> SpMat;
 //' @param Z a matrix of population level confounders
 //' @param X a matrix of spatial temporal aggregated predictors
 //' @param W a design matrix for group specific terms
-//' @param S penalty matrix for stap parameters
 //' @param w a vector of weights for weighted regression
 //' @param subj_mat_ N x n sparse matrix used to aggregate subject observations
 //' @param subj_n n x 1 vector of integers representing how many observations correspond to each subject
@@ -145,7 +144,6 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 						   const Eigen::MatrixXd &Z,
 						   const Eigen::MatrixXd &X,
 						   const Eigen::ArrayXXd &W,
-						   const Eigen::MatrixXd &S,
 						   const Eigen::VectorXd &w,
 						   const SEXP &subj_mat_,
 						   const Eigen::ArrayXi &subj_n,
@@ -190,13 +188,13 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 	beta_samples.setZero(num_posterior_samples,Z.cols() + X.cols()*K);
 	sigma_samples.setZero(num_posterior_samples);
 	pi_samples.setZero(num_posterior_samples,K);
-	tau_samples.setZero(num_posterior_samples,K*P_two);
+	tau_samples.setZero(num_posterior_samples,K*X.cols());
 	yhat_samples.setZero(num_posterior_samples,y.rows());
 	b_samples.setZero(num_posterior_samples,W.cols()*subj_mat.cols());
 	D_samples.setZero(num_posterior_samples,W.cols()*W.cols());
 
 	Progress p(0,false);
-	FDPPSampler_mer sampler(y,Z,X,W,S,w,
+	FDPPSampler_mer sampler(y,Z,X,W,w,
 							subj_mat,subj_n,
 							alpha_a,
 							alpha_b,tau_a,tau_b,

@@ -224,11 +224,10 @@ fdp_staplmer.fit <- function(y,Z,X,W,
 							  )
 
 	}else{
-	  X <- do.call(cbind,X)
 	  fit <- stappDP_mer_fit(y,Z,X,W,weights,subj_mat,
 							 subj_n,alpha_a,alpha_b,
 							 sigma_a,sigma_b,tau_a,tau_b,
-							 K,num_penalties,iter_max,burn_in,
+							 K,iter_max,burn_in,
 							 thin,seed,chain,num_posterior_samples,
 							 fix_alpha,logging,summarize_yhat)
 	}

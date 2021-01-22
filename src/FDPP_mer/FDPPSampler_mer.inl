@@ -176,15 +176,15 @@ void FDPPSampler_mer::draw_var(std::mt19937 &rng){
 		if(cluster_count(k)!=0){
 			for(int p_ix = 0; p_ix < P_two; p_ix ++){
 				temp_scale = pow(beta(P + P_two *k + p_ix),2);
-				std::gamma_distribution<double> rgamma_tau(tau_a + 1 / 2, 1/( (1/tau_b) + temp_scale) );
-				unique_taus(k,pen_ix) = rgamma_tau(rng);
-				update_penaltymat(k,pen_ix);
+				std::gamma_distribution<double> rgamma_tau(tau_a + 1 , 1/( (1/tau_b) + temp_scale) );
+				unique_taus(k,p_ix) = rgamma_tau(rng);
+				update_penaltymat(k,p_ix);
 			}
 		}else{
 			std::gamma_distribution<double> rgamma_tau_prior(tau_a,1/tau_b);
 			for(int p_ix = 0; p_ix < P_two; p_ix ++){
-				unique_taus(k,pen_ix) = rgamma_tau_prior(rng);
-				update_penaltymat(k,pen_ix);
+				unique_taus(k,p_ix) = rgamma_tau_prior(rng);
+				update_penaltymat(k,p_ix);
 			}
 		}
 	}
@@ -236,7 +236,7 @@ void FDPPSampler_mer::initialize_beta(std::mt19937 &rng){
 	for(int k = 0; k< K; k++){
 		for(int p_ix = 0; p_ix < P_two; p_ix ++ ){
 			unique_taus(k,p_ix) = rgamma(rng);
-			update_penaltymat(k,pen_ix);
+			update_penaltymat(k,p_ix);
 		}
 	}
 
@@ -266,8 +266,8 @@ void FDPPSampler_mer::draw_zb(std::mt19937 &rng){
 
 void FDPPSampler_mer::update_penaltymat(const int &k,const int &ix){
 
-	int diag_ix = P+k*P_two + ix;
-	PenaltyMat.block(diag_ix,diag_ix,1,1) = unique_taus(k,pen_ix)  
+	int diag_ix = P + k*P_two + ix;
+	PenaltyMat(diag_ix,diag_ix) = unique_taus(k,ix);
 }
 
 void FDPPSampler_mer::adjust_beta(std::mt19937 &rng){

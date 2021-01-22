@@ -1,6 +1,5 @@
 ## code to prepare `longitudinal_clusters` dataset goes here
 library(tidyverse)
-library(rbenvo)
 set.seed(3431)
 num_subj <- 5E2
 riskcat <- sapply(1:num_subj,function(x) sample(1:3,size=1,replace=F,prob = c(.7,.2,.1)))
@@ -39,7 +38,9 @@ FFR_distances <- purrr::map_dfr(1:length(ldists),function(x) {
   dplyr::tibble(ix=x,Distance=ldists[[x]])}) %>% 
   dplyr::right_join(visit_num %>% dplyr::mutate(ix=1:dplyr::n())) %>%
   dplyr::filter(!is.na(Distance)) %>%
-  dplyr::select(id,measurement,Distance)
+  group_by(ix) %>% 
+  mutate(BEF_ID = 1:n()) %>% ungroup() %>% 
+  dplyr::select(id,measurement,BEF_ID,Distance)
 
 FFR_distances %>% dplyr::right_join(visit_num) %>% dplyr::left_join(sjdf) %>% 
   dplyr::group_by(id,measurement) %>% 
@@ -55,7 +56,7 @@ sjdf$BMI <- 33 +  sjdf$sex* -2.2 + .1*sjdf$year + sjdf$exposure +
 
 
 
-longitudinal_clusters <- benvo(subject_data = sjdf,
+longitudinal_clusters <- rbenvo::benvo(subject_data = sjdf,
                               sub_bef_data = list(FFR=FFR_distances))
 
 usethis::use_data(longitudinal_clusters, overwrite = TRUE)

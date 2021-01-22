@@ -17,7 +17,6 @@ class FDPPSampler_mer
 		const Eigen::MatrixXd &X;
 		const arr W;
 		const SpMat &subj_mat;
-		const Eigen::MatrixXd &S;
 		const Eigen::VectorXd &w;
 		Eigen::VectorXd yhat;
 		Eigen::MatrixXd X_fit;
@@ -189,8 +188,6 @@ class FDPPSampler_mer
 		void update_penaltymat(const int &k, const int &pen_ix);
 
 		void adjust_zero_clusters(std::mt19937 &rng);
-
-		double calculate_penalty_scale(const int &k, const int &pen_ix);
 
 		void adjust_beta(std::mt19937 &rng);
 
