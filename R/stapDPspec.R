@@ -93,19 +93,8 @@ get_stapDPspec <- function(f,K,benvo){
 		new_f <- paste0(new_f," + ",mer_f)
 	}
 
-	str <- purrr::map2(stap_mat[,2],stap_mat[,4],function(x,y) {
-	  switch(x,
-	         "Distance-Time"= paste0("t2(Distance,Time,bs='ps'",y ),
-	         "Distance" = paste0("s(Distance,bs='ps'",y),
-	         "Time"= paste0("s(Time,bs='ps'",y)
-	         )
-	  })
-
-	fake_formula <- purrr::map(str,function(x) as.formula(paste0("temp_ix_ ~ -1 + ",paste0(x,collapse="+"))))
-
     return(
 		   stapDPspec(stapless_formula = as.formula(new_f, env = environment(f)),
-					  fake_formula = fake_formula,
 					  stap_mat = stap_mat,
 					  K = K,
 					  benvo = benvo
@@ -122,7 +111,7 @@ get_stapDPspec <- function(f,K,benvo){
 #' @param K DP truncation
 #' @param benvo Built Environment object - \code{\link[rbenvo]{benvo}} - containing data for model 
 #'
-stapDPspec <- function(stapless_formula,fake_formula,stap_mat,K,benvo){
+stapDPspec <- function(stapless_formula,stap_mat,K,benvo){
 
 
 	term <- stap_mat[,1]
@@ -136,6 +125,7 @@ stapDPspec <- function(stapless_formula,fake_formula,stap_mat,K,benvo){
 																					 "\\)",""),
 																"k = ",""))
 		   })
+
 	if(!(all(unique(term)==term)))
 		stop("Only one BEF name may be assigned to a stap term e.g. no sap(foo) + tap(foo)\n
 			 If you wish to model components this way create a different name e.g. sap(foo) + tap(foo_bar)")
@@ -143,64 +133,47 @@ stapDPspec <- function(stapless_formula,fake_formula,stap_mat,K,benvo){
 		stop("All stap terms must have data with corresponding name in benvo")
 	if(length(term)>1)
 		stop("Only one stap/sap/tap term allowed")
+	## adapting for iid gaussian priors
 
-	jd <- purrr::pmap(list(term,component,fake_formula),
-	                  function(x,y,z) {
-						temp_df <- rbenvo::joinvo(benvo,x,y,NA_to_zero = TRUE)
-						temp_df$temp_ix_ <- 1:nrow(temp_df)
-						out <- mgcv::jagam(formula = z, family = gaussian(), 
-						                   data = temp_df,
-										   file = tempfile(fileext = ".jags"), 
-						                   offset = NULL,
-						                   centred = FALSE,
-						                   diagonalize = FALSE)
-						out$name <- x
-						ix <- which(rbenvo::bef_names(benvo)==x)
-						ranges <- list()
-						if(y=="Distance"|y=="Distance-Time")
-							ranges$Distance <- range(benvo$sub_bef_data[[ix]]$Distance,na.rm=T)
-						if(y=="Time"|y=="Distance-Time")
-							ranges$Time = range(benvo$sub_bef_data[[ix]]$Time,na.rm=T)
-						out$ranges <- ranges
-	                    return(out)
-	                    })
+	temp_df <- rbenvo::joinvo(benvo,x,y,NA_to_zero = FALSE)
+	ids <- rbenvo::get_id(benvo)
+	bef_id <- setdiff(colnames(temp_df),c(component,ids))
+	if(length(bef_id)!=1)
+		stop("BEF ID must be included as single column in benvo")
+	## may need to enquo (or something) values below
+	Xmat <- temp_df %>% pivot_wider(id_cols = ids,names_from = bef_id ,values_from = component ) %>% 
+		select_at(-ids) %>% as.matrix()
+	msk <- which(is.na(Xmat))
+	Xmat[msk] <- -1
+	L <- (Xmat> 0)*1
+
+	out <- mgcv::jagam(formula = noise ~ 0 + s(Xmat,by=L), family = gaussian(), 
+					   data = temp_df,
+					   file = tempfile(fileext = ".jags"), 
+					   offset = NULL,
+					   centred = FALSE,
+					   diagonalize = TRUE)
+	ranges <- list()
+	if(y=="Distance"|y=="Distance-Time")
+		ranges$Distance <- range(benvo$sub_bef_data[[ix]]$Distance,na.rm=T)
+	if(y=="Time"|y=="Distance-Time")
+		ranges$Time = range(benvo$sub_bef_data[[ix]]$Time,na.rm=T)
 
 	mf <- rbenvo::subject_design(benvo,lme4::nobars(stapless_formula))
-
-	X <- purrr::pmap(list(term,component,between_within,jd),function(x,y,z,jdi){
-			X <- create_X(x,y,z,
-			              jdi$jags.data$X,benvo,
-			              jdi$pregam$term.names)
-						})
 
 	f_ <-  lme4::nobars(stapless_formula)
 	num_fixed <- ncol(mf$X)
 	
-	S <- purrr::pmap(list(1:length(jd),between_within),function(ix,bw_){create_S(K,jd[[ix]],bw_,num_fixed)})
-
-	combine_list_entries <- function(l){
-		if(any(sapply(l,is.list)))
-			l <- Reduce(c,l)
-		return(l)
-	}
-
-	X <- combine_list_entries(X)
-	S <- combine_list_entries(S)
-	
-
-
 
 	out <- list(stapless_formula = stapless_formula,
-				fake_formula = fake_formula,
 				term = term,
 				component = component,
 				between_within = between_within,
 				dimension = dimension,
-				ranges = lapply(jd,function(x) x$ranges),
-				X = X,
-				S = S,
+				ranges = ranges
+				X = out$jags.data$X,
 				mf = mf,
-				smooth_objs = Reduce(c,lapply(jd,function(x) x$pregam$smooth))
+				smooth_objs = out$pregam$smooth
 				)
 
 	structure(out,class=c("stapDPspec"))

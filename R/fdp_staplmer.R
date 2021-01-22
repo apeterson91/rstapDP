@@ -97,7 +97,6 @@ fdp_staplmer <- function(formula,
 	                                                    Z = Z,
 	                                                    X = spec$X,
 	                                                    W = W,
-	                                                    S = spec$S,
 	                                                    subj_mat = Matrix::t(subj_mat),
 	                                                    subj_n = Matrix::rowSums(subj_mat),
 	                                                    weights = weights, 
@@ -159,7 +158,6 @@ fdp_staplmer <- function(formula,
 #' @param Z design matrix
 #' @param X stap design matrix
 #' @param W group terms design matrix from \code{\link[lme4]{glFormula}}
-#' @param S list of penalty matrices from \code{\link[mgcv]{jagam}} 
 #' @param subj_mat matrix indexing subject-measurement locations in (Z,X,W)
 #' @param subj_n  vector of number of subject measurements
 #' @param alpha_a alpha gamma prior hyperparameter
@@ -182,26 +180,26 @@ fdp_staplmer <- function(formula,
 #' @param summarize_yhat boolean value indicating whether a single mean vector of yhat values should be returned instead of a N X num samples matrix. Useful in situations where N is large.
 #' @export
 #' 
-fdp_staplmer.fit <- function(y,Z,X,W,S,
+fdp_staplmer.fit <- function(y,Z,X,W,
                              subj_mat,
-              							 subj_n,
-              							 weights = rep(1,length(y)),
-              							 alpha_a = 1,
-              							 alpha_b = 1, 
-              							 sigma_a = 1,
-              							 sigma_b = 1,
-              							 tau_a = 1,
-              							 tau_b = 1,
-              							 K = 5L,
-              							 iter_max,
-              							 burn_in,
-              							 thin = 1L,
-              							 fix_alpha = FALSE,
-              							 bw = FALSE,
-              							 seed = NULL,
-              							 chain = 1L,
-              							 logging = FALSE,
-              							 summarize_yhat = FALSE
+							 subj_n,
+							 weights = rep(1,length(y)),
+							 alpha_a = 1,
+							 alpha_b = 1, 
+							 sigma_a = 1,
+							 sigma_b = 1,
+							 tau_a = 1,
+							 tau_b = 1,
+							 K = 5L,
+							 iter_max,
+							 burn_in,
+							 thin = 1L,
+							 fix_alpha = FALSE,
+							 bw = FALSE,
+							 seed = NULL,
+							 chain = 1L,
+							 logging = FALSE,
+							 summarize_yhat = FALSE
               							 ){
 
 	stopifnot(c(sigma_a,sigma_b,tau_a,tau_b,alpha_a,alpha_b)>0)
@@ -215,8 +213,6 @@ fdp_staplmer.fit <- function(y,Z,X,W,S,
 
 	if(bw){
 	  num_penalties <- length(S[[1]])
-	  S_b <- do.call(cbind,S[[1]])
-	  S_w <- do.call(cbind,S[[2]])
 	  X_b <- X[[1]]
 	  X_w <- X[[2]]
 	  fit <- stappDP_merdecomp(y,Z,X_b,X_w,W,S_b,S_w,
@@ -228,10 +224,8 @@ fdp_staplmer.fit <- function(y,Z,X,W,S,
 							  )
 
 	}else{
-	  num_penalties <- length(S) ## default for smoothing
-	  S <- do.call(cbind,S)
 	  X <- do.call(cbind,X)
-	  fit <- stappDP_mer_fit(y,Z,X,W,S,weights,subj_mat,
+	  fit <- stappDP_mer_fit(y,Z,X,W,weights,subj_mat,
 							 subj_n,alpha_a,alpha_b,
 							 sigma_a,sigma_b,tau_a,tau_b,
 							 K,num_penalties,iter_max,burn_in,

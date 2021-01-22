@@ -61,7 +61,6 @@ class FDPPSampler_mer
 		const int n;
 		const int K;
 		const int Q;
-		const int num_penalties;
 		int sample_ix = 0;
 		int num_nonzero;
 		int temp_Q;
@@ -79,7 +78,6 @@ class FDPPSampler_mer
 				const Eigen::MatrixXd &Z,
 				const Eigen::MatrixXd &X,
 				const arr &W,
-				const Eigen::MatrixXd &S,
 				const Eigen::VectorXd &w,
 				const SpMat &subj_mat,
 				const Eigen::ArrayXi &subj_n,
@@ -90,14 +88,14 @@ class FDPPSampler_mer
 				const double &tau_a,
 				const double &tau_b,
 				const int &K,
-				const int &num_penalties,
 				const bool &fix_alpha,
 				const bool &logging,
 				std::mt19937 &rng
 			  ): 
 			y(y), Z(Z), X(X),
-			W(W), subj_mat(subj_mat),
-			S(S),  w(w),
+			W(W),
+			subj_mat(subj_mat),
+			 w(w),
 			subj_D_df(subj_mat.cols()-W.cols()+1),
 			subj_n(subj_n),
 			alpha_b(alpha_b),sigma_a(sigma_a),
@@ -108,7 +106,6 @@ class FDPPSampler_mer
 			N(y.rows()), n(subj_mat.cols()),
 			K(K),
 			Q(Z.cols() + X.cols()*K), 
-			num_penalties(num_penalties),
 			fix_alpha(fix_alpha),
 			log_factor(log(pow(10,-16)) - log(N)),
 			logging(logging)
@@ -117,7 +114,7 @@ class FDPPSampler_mer
 		temp_Q = P + P_two * num_nonzero;
 		PenaltyMat.setZero(Q,Q); 
 		P_matrix.setZero(n,n);
-		unique_taus.setZero(K,num_penalties);
+		unique_taus.setZero(K,P_two);
 		b.setZero(n,K);
 		z.setZero(temp_Q); 
 		z_b.setZero(W.cols()); 

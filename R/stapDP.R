@@ -47,9 +47,9 @@ stapDP <- function(object){
 		colnames(tau_w) <- paste0("tau_w_",1:(K*num_penalties))
 		scales <- cbind(tau_b,tau_w)
 	}else{
-		num_penalties <- length(object$spec$S)
-		scales <- collapse_pars("scales",K,num_penalties,ix)
-		colnames(scales) <- paste0("tau_",1:(K*num_penalties))
+		P_two <- ncol(spec$X)
+		scales <- collapse_pars("scales",K,P_two,ix)
+		colnames(scales) <- paste0("tau_",1:(K*P_two))
 	}
 
 
