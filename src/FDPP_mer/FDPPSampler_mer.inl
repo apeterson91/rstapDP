@@ -36,8 +36,8 @@ void FDPPSampler_mer::iteration_sample(std::mt19937 &rng){
 
 	// check for errors
 	if(std::isnan(beta(0)) & flag ){
-		Rcpp::Rcout << "things are NaN" << std::endl;
-		Rcpp::Rcout << " V block: \n" << V.block(0,0,5,5) << std::endl;
+		Rcpp::Rcout << "The dynamic design matrix failed to invert successfully" << std::endl;
+		Rcpp::Rcout << " V block: \n" << V.block(0,0,10,10) << std::endl;
 		Rcpp::Rcout << "cluster count" << cluster_count.transpose() << std::endl;
 		Rcpp::Rcout << "taus: \n " << unique_taus << std::endl;
 		flag = false;
@@ -173,17 +173,21 @@ void FDPPSampler_mer::draw_var(std::mt19937 &rng){
 	s = (residual.transpose() * w.asDiagonal()).dot(residual) * .5;
 	s += .5 * (beta_temp.transpose() * nonzero_ics.transpose() * PenaltyMat * nonzero_ics).dot(beta_temp) ;
 	std::gamma_distribution<double> rgamma(sigma_a + N/2 + P_two*num_nonzero, 1/( (1 / sigma_b) + s) );
+	std::normal_distribution<double> rnorm(0,1);
+	std::uniform_real_distribution<double> runif(0,1);
 	precision = rgamma(rng);
 	sigma = sqrt(1 / precision);
-	double temp_scale;
+	double prop = 0;
 	PenaltyMat.setZero(Q,Q);
 	for(int k = 0; k< K; k++){
 		if(cluster_count(k)!=0){
 			for(int pen_ix = 0; pen_ix < num_penalties; pen_ix ++){
-				temp_scale = calculate_penalty_scale(k,pen_ix);
-				std::gamma_distribution<double> rgamma_tau(tau_a + P_two / 2, 1/( (1/tau_b) + temp_scale) );
-				unique_taus(k,pen_ix) = rgamma_tau(rng);
-				update_penaltymat(k,pen_ix);
+				prop = exp(rnorm(rng)*.5 + unique_taus(k,pen_ix));
+				if(calculate_penalty_ratio(prop,k,pen_ix) >= log(runif(rng))){
+					unique_taus(k,pen_ix) = prop;
+					update_penaltymat(k,pen_ix);
+					Rcpp::Rcout << pen_ix << " accepted! " << std::endl;
+				}
 			}
 		}else{
 			std::gamma_distribution<double> rgamma_tau_prior(tau_a,1/tau_b);
@@ -196,17 +200,27 @@ void FDPPSampler_mer::draw_var(std::mt19937 &rng){
 
 }
 
-double FDPPSampler_mer::calculate_penalty_scale(const int &k, const int &pen_ix){
+double FDPPSampler_mer::calculate_penalty_ratio(double &prop, const int &k, const int &pen_ix){
 
-	double out = 0;
-	int col_ix = P+Q*pen_ix + k*P_two;
+	double ratio = 0;
+	int not_pen = pen_ix == 0 ? 1 : 0;
+	int col_ix_one = P+Q*pen_ix + k*P_two;
+	int col_ix_two = P+Q*not_pen + k*P_two;
 	int diag_ix = P+k*P_two;
-	out = (beta.segment(diag_ix,P_two).transpose() * S.block(diag_ix,col_ix,P_two,P_two)).dot(
+	Eigen::MatrixXd Omega = prop * S.block(diag_ix,col_ix_one,P_two,P_two) + unique_taus(k,not_pen) * S.block(diag_ix,col_ix_two,P_two,P_two);
+	//proposed  -- accounts for jacobian by  tau_a - 1 --> tau_a since (tau_a -1) * log(prop) + log(prop) = tau_a*log(prop)
+	ratio += .5 * log(Omega.determinant()) + tau_a  * log(prop) + tau_b - .5 * (beta.segment(diag_ix,P_two).transpose() * Omega).dot(
+			beta.segment(diag_ix,P_two)) ;
+	Omega = unique_taus(k,pen_ix) * S.block(diag_ix,col_ix_one,P_two,P_two) + unique_taus(k,not_pen) * S.block(diag_ix,col_ix_two,P_two,P_two);
+	if(flag)
+		Rcpp::Rcout << "ratio 1: " << ratio << std::endl;
+	//current
+	ratio -= .5 *log(Omega.determinant()) + tau_a * log(unique_taus(k,pen_ix)) + tau_b - .5 * (beta.segment(diag_ix,P_two).transpose() * Omega).dot(
 			beta.segment(diag_ix,P_two));
-	out *= .5;
+	if(flag)
+		Rcpp::Rcout << "ratio 2: " << ratio << std::endl;
 
-	return(out);
-
+	return(ratio);
 }
 
 void FDPPSampler_mer::store_samples(Eigen::ArrayXXd &beta_samples,

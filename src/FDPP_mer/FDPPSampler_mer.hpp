@@ -193,7 +193,7 @@ class FDPPSampler_mer
 
 		void adjust_zero_clusters(std::mt19937 &rng);
 
-		double calculate_penalty_scale(const int &k, const int &pen_ix);
+		double calculate_penalty_ratio(double &prop, const int &k, const int &pen_ix);
 
 		void adjust_beta(std::mt19937 &rng);
 
