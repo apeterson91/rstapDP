@@ -4,18 +4,18 @@
 \alias{stapDPspec}
 \title{Create STAP-DP data structure}
 \usage{
-stapDPspec(stapless_formula, fake_formula, stap_mat, K, benvo)
+stapDPspec(stapless_formula, stap_mat, K, benvo)
 }
 \arguments{
 \item{stapless_formula}{from \code{\link{get_stapDPspec}}}
-
-\item{fake_formula}{list of ``fake'' formulas from \code{\link{get_stapDPspec}}}
 
 \item{stap_mat}{matrix of stap specification properties}
 
 \item{K}{DP truncation}
 
 \item{benvo}{Built Environment object - \code{\link[rbenvo]{benvo}} - containing data for model}
+
+\item{fake_formula}{list of ``fake'' formulas from \code{\link{get_stapDPspec}}}
 }
 \description{
 Create STAP-DP data structure

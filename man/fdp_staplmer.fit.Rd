@@ -9,7 +9,6 @@ fdp_staplmer.fit(
   Z,
   X,
   W,
-  S,
   subj_mat,
   subj_n,
   weights = rep(1, length(y)),
@@ -20,6 +19,7 @@ fdp_staplmer.fit(
   tau_a = 1,
   tau_b = 1,
   K = 5L,
+  threshold = 0L,
   iter_max,
   burn_in,
   thin = 1L,
@@ -40,8 +40,6 @@ fdp_staplmer.fit(
 
 \item{W}{group terms design matrix from \code{\link[lme4]{glFormula}}}
 
-\item{S}{list of penalty matrices from \code{\link[mgcv]{jagam}}}
-
 \item{subj_mat}{matrix indexing subject-measurement locations in (Z,X,W)}
 
 \item{subj_n}{vector of number of subject measurements}
@@ -61,6 +59,8 @@ fdp_staplmer.fit(
 \item{tau_b}{penalty parameters gamma prior hyperparameter}
 
 \item{K}{truncation number for DP mixture components}
+
+\item{threshold}{number of members per cluster at which cluster is included in regression}
 
 \item{iter_max}{maximum number of iterations}
 

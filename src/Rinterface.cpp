@@ -130,6 +130,7 @@ typedef Eigen::SparseMatrix<double> SpMat;
 //' @param tau_a penalty gamma prior shape hyperparameter
 //' @param tau_b penalty gamma prior scale hyperparameter
 //' @param K truncation number
+//' @param threshold number of members per cluster at which cluster is included in regression
 //' @param iter_max maximum number of iterations
 //' @param burn_in number of burn in iterations
 //' @param thin number by which to thin samples
@@ -154,6 +155,7 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 						   const double &tau_a,
 						   const double &tau_b,
 						   const int &K,
+						   const int &threshold,
 						   const int &iter_max,
 						   const int &burn_in,
 						   const int &thin,
@@ -188,7 +190,7 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 	beta_samples.setZero(num_posterior_samples,Z.cols() + X.cols()*K);
 	sigma_samples.setZero(num_posterior_samples);
 	pi_samples.setZero(num_posterior_samples,K);
-	tau_samples.setZero(num_posterior_samples,K*X.cols());
+	tau_samples.setZero(num_posterior_samples,K);
 	yhat_samples.setZero(num_posterior_samples,y.rows());
 	b_samples.setZero(num_posterior_samples,W.cols()*subj_mat.cols());
 	D_samples.setZero(num_posterior_samples,W.cols()*W.cols());
@@ -198,7 +200,7 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 							subj_mat,subj_n,
 							alpha_a,
 							alpha_b,tau_a,tau_b,
-							sigma_a,sigma_b,K,
+							sigma_a,sigma_b,K,threshold,
 							fix_alpha,logging,rng);
 	if(logging){
 		sampler.iteration_sample(rng);

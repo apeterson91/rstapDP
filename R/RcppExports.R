@@ -46,6 +46,7 @@ stappDP_fit <- function(y, Z, X, S, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a
 #' @param tau_a penalty gamma prior shape hyperparameter
 #' @param tau_b penalty gamma prior scale hyperparameter
 #' @param K truncation number
+#' @param threshold number of members per cluster at which cluster is included in regression
 #' @param iter_max maximum number of iterations
 #' @param burn_in number of burn in iterations
 #' @param thin number by which to thin samples
@@ -55,8 +56,8 @@ stappDP_fit <- function(y, Z, X, S, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a
 #' @param fix_alpha  boolean value that determines whether or not to fix alpha in sampler
 #' @param logging boolean parameter indicating whether or not a single iteration should be run with print messages indicating successful completion of the Sampler's sub modules
 #' @param summarize_yhat boolean value indicating whether a single mean vector of yhat values should be returned instead of a N X num samples matrix. Useful in situations where N is large.
-stappDP_mer_fit <- function(y, Z, X, W, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, iter_max, burn_in, thin, seed, chain, num_posterior_samples, fix_alpha, logging, summarize_yhat) {
-    .Call(`_rstapDP_stappDP_mer_fit`, y, Z, X, W, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, iter_max, burn_in, thin, seed, chain, num_posterior_samples, fix_alpha, logging, summarize_yhat)
+stappDP_mer_fit <- function(y, Z, X, W, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, threshold, iter_max, burn_in, thin, seed, chain, num_posterior_samples, fix_alpha, logging, summarize_yhat) {
+    .Call(`_rstapDP_stappDP_mer_fit`, y, Z, X, W, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, threshold, iter_max, burn_in, thin, seed, chain, num_posterior_samples, fix_alpha, logging, summarize_yhat)
 }
 
 #' Penalized Functional Dirichlet Process Linear Mixed Effects Regression with Between-Within Decomposition

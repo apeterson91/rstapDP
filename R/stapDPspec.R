@@ -118,12 +118,12 @@ stapDPspec <- function(stapless_formula,stap_mat,K,benvo){
 	component <- stap_mat[,2]
 	between_within <- as.integer(stap_mat[,3])
 	dimension <- sapply(stap_mat[,4],function(x){ 
-							if(length(x)==1) 
-								return(-1)
+							if(stringr::str_length(x)==1) 
+								return(10)
 							else 
 								as.integer(stringr::str_replace(stringr::str_replace(stap_mat[,4],
 																					 "\\)",""),
-																"k = ",""))
+																", ?k = ",""))
 		   })
 
 	if(!(all(unique(term)==term)))
@@ -135,24 +135,43 @@ stapDPspec <- function(stapless_formula,stap_mat,K,benvo){
 		stop("Only one stap/sap/tap term allowed")
 	## adapting for iid gaussian priors
 
+create_unique_ID_mat <- function(id_one,id_two = NULL){
+	tmp <- paste0(id_one,"_",id_two)
+	lvls <- unique(tmp)
+	new_id <- factor(tmp,levels=lvls)
+	Matrix::fac2sparse(new_id)
+}
+
 	temp_df <- rbenvo::joinvo(benvo,term = term,
 							  component = component,
 							  NA_to_zero = FALSE)
 	ids <- rbenvo::get_id(benvo)
-	bef_id <- setdiff(colnames(temp_df),c(component,ids))
-	if(length(bef_id)!=1)
-		stop("BEF ID must be included as single column in benvo")
 
-	Xmat <- temp_df %>% tidyr::pivot_wider(id_cols = ids,
-	                                       names_from = bef_id ,
-	                                       values_from = component) %>% 
-		dplyr::select_at(dplyr::vars(!dplyr::contains(ids))) %>% as.matrix()
+	Xmat <- temp_df %>% 
+		dplyr::group_by_at(ids) %>% 
+		dplyr::mutate(bef_id = stringr::str_c("BEF_",1:dplyr::n())) %>%
+		tidyr::pivot_wider(id_cols = ids,
+						   names_from = "bef_id" ,
+						   values_from = component) %>% 
+	  dplyr::ungroup() %>% 
+		dplyr::select_at(dplyr::vars(!dplyr::contains(ids))) %>%
+		as.matrix()
+
+	if(length(ids)>1)
+		idmat <- create_unique_ID_mat(benvo$subject_data[,ids[1],drop=T],
+									  benvo$subject_data[,ids[2],drop=T])
+	else
+		idmat <- Matrix::fac2sparse(benvo$subject_data[,ids,drop=T])
+
+	Xmat <- as.matrix(Matrix::t(idmat) %*% Xmat)
 	msk <- which(is.na(Xmat))
 	Xmat[msk] <- -1
 	L <- (Xmat> 0)*1
-  noise <- rnorm(nrow(Xmat))
+
+	
+	noise <- rnorm(nrow(Xmat))
   
-	out <- mgcv::jagam(formula = noise ~ 0 + s(Xmat,by=L,bs='cr'), family = gaussian(), 
+	out <- mgcv::jagam(formula = noise ~ 0 + s(Xmat,by = L,bs='ps',k = dimension), family = gaussian(), 
 					   data = temp_df,
 					   file = tempfile(fileext = ".jags"), 
 					   offset = NULL,
@@ -174,6 +193,8 @@ stapDPspec <- function(stapless_formula,stap_mat,K,benvo){
 	nms <- stringr::str_c("s(",term,".",1:ncol(X),")")
 	colnames(X) <- nms
 	
+
+
 
 	sobj <- out$pregam$smooth
 	sobj[[1]]$term <- component

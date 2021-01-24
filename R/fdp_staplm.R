@@ -116,7 +116,6 @@ fdp_staplm <- function(formula,
 							))
 	
     out <- list(pars=out,
-				benvo = benvo,
 				spec = spec,
 				formula = formula,
 				alpha_a = alpha_a,

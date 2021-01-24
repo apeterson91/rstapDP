@@ -48,8 +48,8 @@ stapDP <- function(object){
 		scales <- cbind(tau_b,tau_w)
 	}else{
 		P_two <- ncol(spec$X)
-		scales <- collapse_pars("scales",K,P_two,ix)
-		colnames(scales) <- paste0("tau_",1:(K*P_two))
+		scales <- collapse_pars("scales",K,1,ix)
+		colnames(scales) <- paste0("tau_",1:(K))
 	}
 
 
@@ -105,7 +105,8 @@ stapDP <- function(object){
 									 id = 1:length(spec$mf$y),Samples = spec$mf$y))
 
 
-	out <- list(beta = beta,
+	out <- list(call = object$call,
+				beta = beta,
 				summary = parameter_summary,
 				delta = delta,
 				alpha = alpha,

@@ -9,7 +9,6 @@ stappDP_mer_fit(
   Z,
   X,
   W,
-  S,
   w,
   subj_mat_,
   subj_n,
@@ -20,7 +19,7 @@ stappDP_mer_fit(
   tau_a,
   tau_b,
   K,
-  num_penalties,
+  threshold,
   iter_max,
   burn_in,
   thin,
@@ -40,8 +39,6 @@ stappDP_mer_fit(
 \item{X}{a matrix of spatial temporal aggregated predictors}
 
 \item{W}{a design matrix for group specific terms}
-
-\item{S}{penalty matrix for stap parameters}
 
 \item{w}{a vector of weights for weighted regression}
 
@@ -63,7 +60,7 @@ stappDP_mer_fit(
 
 \item{K}{truncation number}
 
-\item{num_penalties}{number of penalty matrices accounted for in S}
+\item{threshold}{number of members per cluster at which cluster is included in regression}
 
 \item{iter_max}{maximum number of iterations}
 

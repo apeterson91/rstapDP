@@ -128,13 +128,13 @@ fdp_staplmer <- function(formula,
 							pmat = x$PairwiseProbabilityMat,
 							clabels = x$cluster_assignment
 							))
-	out <- list(pars=out,
+	out <- list(call=call,
+				pars=out,
 				spec = spec,
 				mf= mf,
 				formula = formula,
 				alpha_a = alpha_a,
 				alpha_b = alpha_b,
-				benvo = benvo,
 				K = K,
 				Z_scl = Z_scl,
 				Z_cnt = Z_cnt,
@@ -167,6 +167,7 @@ fdp_staplmer <- function(formula,
 #' @param tau_a penalty parameters gamma prior hyperparameter
 #' @param tau_b penalty parameters gamma prior hyperparameter
 #' @param K truncation number for DP mixture components
+#' @param threshold number of members per cluster at which cluster is included in regression
 #' @param weights weights for weighted regression - default is vector of ones 
 #' @param iter_max maximum number of iterations
 #' @param burn_in number of iterations to burn-in
@@ -191,6 +192,7 @@ fdp_staplmer.fit <- function(y,Z,X,W,
 							 tau_a = 1,
 							 tau_b = 1,
 							 K = 5L,
+							 threshold = 0L,
 							 iter_max,
 							 burn_in,
 							 thin = 1L,
@@ -227,7 +229,7 @@ fdp_staplmer.fit <- function(y,Z,X,W,
 	  fit <- stappDP_mer_fit(y,Z,X,W,weights,subj_mat,
 							 subj_n,alpha_a,alpha_b,
 							 sigma_a,sigma_b,tau_a,tau_b,
-							 K,iter_max,burn_in,
+							 K,threshold,iter_max,burn_in,
 							 thin,seed,chain,num_posterior_samples,
 							 fix_alpha,logging,summarize_yhat)
 	}

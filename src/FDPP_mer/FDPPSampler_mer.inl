@@ -31,8 +31,8 @@ void FDPPSampler_mer::iteration_sample(std::mt19937 &rng){
 
 	// check for errors
 	if(std::isnan(beta(0)) & flag ){
-		Rcpp::Rcout << "things are NaN" << std::endl;
-		Rcpp::Rcout << " V block: \n" << V.block(0,0,5,5) << std::endl;
+		Rcpp::Rcout << "The matrix failed to invert" << std::endl;
+		Rcpp::Rcout << " V block: \n" << V.block(0,0,10,10) << std::endl;
 		Rcpp::Rcout << "cluster count" << cluster_count.transpose() << std::endl;
 		Rcpp::Rcout << "taus: \n " << unique_taus << std::endl;
 		flag = false;
@@ -127,7 +127,7 @@ void FDPPSampler_mer::adjust_zero_clusters(std::mt19937 &rng){
 
 	for(int k = 0; k < K; k++){
 		cluster_count(k) = (iter_cluster_assignment == k).count();
-		if(cluster_count(k) == 0)
+		if(cluster_count(k) <=threshold)
 			num_nonzero --;
 	}
 
@@ -142,7 +142,7 @@ void FDPPSampler_mer::adjust_zero_clusters(std::mt19937 &rng){
 
 	int k_ = 0;
 	for(int k = 0; k < K; k++){
-		if(cluster_count(k)!=0){
+		if(cluster_count(k)>threshold){
 			X_K.block(0,k_*P_two,N,P_two) = (subj_mat * cluster_matrix.col(k)).asDiagonal() * X;
 			nonzero_ics.block(P+k*P_two,P+k_*P_two,P_two,P_two) = Eigen::MatrixXd::Identity(P_two,P_two);
 			k_ ++;
@@ -173,21 +173,25 @@ void FDPPSampler_mer::draw_var(std::mt19937 &rng){
 	double temp_scale;
 	PenaltyMat.setZero(Q,Q);
 	for(int k = 0; k< K; k++){
-		if(cluster_count(k)!=0){
-			for(int p_ix = 0; p_ix < P_two; p_ix ++){
-				temp_scale = pow(beta(P + P_two *k + p_ix),2);
-				std::gamma_distribution<double> rgamma_tau(tau_a + 1 , 1/( (1/tau_b) + temp_scale) );
-				unique_taus(k,p_ix) = rgamma_tau(rng);
-				update_penaltymat(k,p_ix);
-			}
-		}else{
+		if(cluster_count(k)>threshold){
+				temp_scale = calculate_penalty_scale(k);
+				std::gamma_distribution<double> rgamma_tau(tau_a + P_two , 1/( (1/tau_b) + temp_scale) );
+				unique_taus(k) = rgamma_tau(rng);
+				update_penaltymat(k);
+		}
+		else{
 			std::gamma_distribution<double> rgamma_tau_prior(tau_a,1/tau_b);
-			for(int p_ix = 0; p_ix < P_two; p_ix ++){
-				unique_taus(k,p_ix) = rgamma_tau_prior(rng);
-				update_penaltymat(k,p_ix);
-			}
+				unique_taus(k) = rgamma_tau_prior(rng);
+				update_penaltymat(k);
 		}
 	}
+
+}
+
+double FDPPSampler_mer::calculate_penalty_scale(const int &k){
+
+	double out = .5 * beta.segment(P + P_two *k,P_two).squaredNorm();
+	return(out);
 
 }
 
@@ -213,8 +217,7 @@ void FDPPSampler_mer::store_samples(Eigen::ArrayXXd &beta_samples,
 	Eigen::MatrixXd temp = subj_D.inverse();
 	Eigen::Map<Eigen::RowVectorXd> subj_D_row(temp.data(),temp.size());
 	subj_D_samples.row(sample_ix) = subj_D_row;
-	for(int i = 0; i < P_two; i ++)
-		tau_samples.block(sample_ix,K*i,1,K) = unique_taus.col(i);
+	tau_samples.row(sample_ix) = unique_taus.transpose();
 	yhat_samples.row(sample_ix) = yhat;
 	sample_ix ++;
 	for(int i = 0; i< n; i ++){
@@ -234,10 +237,8 @@ void FDPPSampler_mer::initialize_beta(std::mt19937 &rng){
 		beta(p) = rnorm(rng);
 
 	for(int k = 0; k< K; k++){
-		for(int p_ix = 0; p_ix < P_two; p_ix ++ ){
-			unique_taus(k,p_ix) = rgamma(rng);
-			update_penaltymat(k,p_ix);
-		}
+		unique_taus(k) = rgamma(rng);
+		update_penaltymat(k);
 	}
 
 	for(int i = 0; i < n ; i ++){
@@ -264,10 +265,10 @@ void FDPPSampler_mer::draw_zb(std::mt19937 &rng){
 		z_b(ix) = rnorm(rng);
 }
 
-void FDPPSampler_mer::update_penaltymat(const int &k,const int &ix){
+void FDPPSampler_mer::update_penaltymat(const int &k){
 
-	int diag_ix = P + k*P_two + ix;
-	PenaltyMat(diag_ix,diag_ix) = unique_taus(k,ix);
+	int diag_ix = P + k*P_two;
+	PenaltyMat.block(diag_ix,diag_ix,P_two,P_two) = Eigen::MatrixXd::Identity(P_two,P_two) * unique_taus(k);
 }
 
 void FDPPSampler_mer::adjust_beta(std::mt19937 &rng){
@@ -275,7 +276,7 @@ void FDPPSampler_mer::adjust_beta(std::mt19937 &rng){
 	std::normal_distribution<double> rnorm(0,1);
 
 	for(int k = 0; k < K ; k++){
-		if(cluster_count(k)==0){
+		if(cluster_count(k)<=threshold){
 			for(int p = 0; p < P_two; p++)
 				beta(P+P_two*k+p) = rnorm(rng)*sigma * sqrt(1/unique_taus(k,p));
 		}
