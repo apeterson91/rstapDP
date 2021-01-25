@@ -167,7 +167,7 @@ void FDPPSampler_mer::draw_var(std::mt19937 &rng){
 	residual = y - X_fit * beta_temp - Wb;
 	s = (residual.transpose() * w.asDiagonal()).dot(residual) * .5;
 	s += .5 * (beta_temp.transpose() * nonzero_ics.transpose() * PenaltyMat * nonzero_ics).dot(beta_temp) ;
-	std::gamma_distribution<double> rgamma(sigma_a + N * .5 + P_two*num_nonzero * .5, 1/( (1 / sigma_b) + s) );
+	std::gamma_distribution<double> rgamma(sigma_a + N*.5 + P_two*num_nonzero*.5, 1/( (1 / sigma_b) + s) );
 	precision = rgamma(rng);
 	sigma = sqrt(1 / precision);
 	double temp_scale;
@@ -175,7 +175,7 @@ void FDPPSampler_mer::draw_var(std::mt19937 &rng){
 	for(int k = 0; k< K; k++){
 		if(cluster_count(k)>threshold){
 				temp_scale = calculate_penalty_scale(k);
-				std::gamma_distribution<double> rgamma_tau(tau_a + P_two *.5 , 1/( (1/tau_b) + temp_scale) );
+				std::gamma_distribution<double> rgamma_tau(tau_a + P_two*.5 , 1/( (1/tau_b) + temp_scale) );
 				unique_taus(k) = rgamma_tau(rng);
 				update_penaltymat(k);
 		}
