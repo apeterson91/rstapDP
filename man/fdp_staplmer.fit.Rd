@@ -27,8 +27,7 @@ fdp_staplmer.fit(
   bw = FALSE,
   seed = NULL,
   chain = 1L,
-  logging = FALSE,
-  summarize_yhat = FALSE
+  logging = FALSE
 )
 }
 \arguments{
@@ -77,8 +76,6 @@ fdp_staplmer.fit(
 \item{chain}{chain label}
 
 \item{logging}{boolean parameter indicating whether or not a single iteration should be run with print messages indicating successful completion of the Sampler's sub modules}
-
-\item{summarize_yhat}{boolean value indicating whether a single mean vector of yhat values should be returned instead of a N X num samples matrix. Useful in situations where N is large.}
 }
 \description{
 Functional Dirichlet Process Spatial Temporal Aggregated Predictor Linear Mixed Effects Regression Model Fit

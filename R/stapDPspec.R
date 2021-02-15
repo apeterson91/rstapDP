@@ -106,7 +106,6 @@ get_stapDPspec <- function(f,K,benvo){
 #' Create STAP-DP data structure
 #' 
 #' @param stapless_formula from \code{\link{get_stapDPspec}}
-#' @param fake_formula list of ``fake'' formulas from \code{\link{get_stapDPspec}}
 #' @param stap_mat matrix of stap specification properties 
 #' @param K DP truncation
 #' @param benvo Built Environment object - \code{\link[rbenvo]{benvo}} - containing data for model 
@@ -169,7 +168,7 @@ create_unique_ID_mat <- function(id_one,id_two = NULL){
 	L <- (Xmat> 0)*1
 
 	
-	noise <- rnorm(nrow(Xmat))
+	noise <- stats::rnorm(nrow(Xmat))
   
 	out <- mgcv::jagam(formula = noise ~ 0 + s(Xmat,by = L,bs='ps',k = dimension), family = gaussian(), 
 					   data = temp_df,
@@ -192,6 +191,11 @@ create_unique_ID_mat <- function(id_one,id_two = NULL){
 	X <- out$jags.data$X
 	nms <- stringr::str_c("s(",term,".",1:ncol(X),")")
 	colnames(X) <- nms
+	if(between_within)
+		X <- .create_X_bw_wi(X,
+		                     Matrix::fac2sparse(benvo$subject_data[,ids[1],drop=T]),
+		                     term)
+	
 	
 
 
@@ -213,3 +217,21 @@ create_unique_ID_mat <- function(id_one,id_two = NULL){
 	structure(out,class=c("stapDPspec"))
 }
 
+
+#------------------------
+
+
+.create_X_bw_wi <- function(X, idmat,term){
+
+	Xb <- Matrix::t(idmat) %*% (idmat %*% X)
+	Xw <- X - Xb
+	Xb <- as.matrix(Xb)
+	Xw <- as.matrix(Xw)
+	colnames(Xb) <- stringr::str_c("s(",term,"_bw.",1:ncol(Xb),")")
+	colnames(Xw) <- stringr::str_c("s(",term,"_wi.",1:ncol(Xw),")")
+
+
+	return(list(X_bw = Xb,X_wi=Xw))
+
+
+}

@@ -23,6 +23,7 @@ fdp_staplmer(
   seed = NULL,
   scale = TRUE,
   center = TRUE,
+  subsample_yhat = NULL,
   ...
 )
 }
@@ -62,6 +63,8 @@ fdp_staplmer(
 \item{scale}{boolean determining if fixed effects matrix is scaled for estimation}
 
 \item{center}{boolean determining if fixed effects matrix is centered for estimation}
+
+\item{subsample_yhat}{integer value indicating how many samples to subsample of yhat samples. Useful when N is big.}
 
 \item{...}{optional arguments to \code{\link{fdp_staplmer.fit}}}
 }

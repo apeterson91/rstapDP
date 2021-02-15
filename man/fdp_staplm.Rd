@@ -22,7 +22,9 @@ fdp_staplm(
   fix_alpha = FALSE,
   seed = NULL,
   scale = TRUE,
-  center = TRUE
+  center = TRUE,
+  subsample_yhat = NULL,
+  ...
 )
 }
 \arguments{
@@ -61,6 +63,10 @@ fdp_staplm(
 \item{scale}{boolean determining if fixed effects matrix is scaled for estimation}
 
 \item{center}{boolean determining if fixed effects matrix is centered for estimation}
+
+\item{subsample_yhat}{integer value indicating how many samples to subsample of yhat samples. Useful when N is big.}
+
+\item{...}{optional arguments for \link{fdp_staplm.fit}}
 }
 \value{
 a stapDP model object
@@ -74,6 +80,6 @@ improper priors assigned to the "standard" regression covariates designated
 in the formula argument and a Dirichlet process prior with normal-gamma base measure 
 assigned to the stap basis function expansion using penalized splines via \code{\link[mgcv]{jagam}}.
 
-The concentration parameter is assigned gamma prior with  hyperparameters shape alpha_a and scale alpha_b.
- Precision parameters sigma_a,sigma_b, tau_a,tau_b are similar for the residual and penalties' precision, respectively.
+The concentration parameter is assigned a gamma prior with  hyperparameters shape alpha_a and scale alpha_b.
+ Precision parameters sigma_a,sigma_b, tau_a,tau_b are similar for the residual and penalties' precision gamma priors, respectively.
 }

@@ -10,8 +10,6 @@ stappDP_merdecomp(
   X_b,
   X_w,
   W,
-  S_b,
-  S_w,
   w,
   subj_mat_,
   subj_n,
@@ -22,14 +20,15 @@ stappDP_merdecomp(
   tau_a,
   tau_b,
   K,
-  num_penalties,
+  threshold,
   iter_max,
   burn_in,
   thin,
   seed,
   num_posterior_samples,
   chain,
-  fix_alpha
+  fix_alpha,
+  logging
 )
 }
 \arguments{
@@ -42,10 +41,6 @@ stappDP_merdecomp(
 \item{X_w}{Matrix of within subject spatial temporal aggregated predictor covariates}
 
 \item{W}{a design matrix for group specific terms}
-
-\item{S_b}{penalty matrix corresponding to between subject covariate matrix}
-
-\item{S_w}{penalty matrix corresponding to within subject covariate matrix}
 
 \item{w}{a vector of weights for weighted regression}
 
@@ -67,7 +62,7 @@ stappDP_merdecomp(
 
 \item{K}{truncation number}
 
-\item{num_penalties}{number of penalty matrices accounted for in S}
+\item{threshold}{number of members per cluster at which cluster is included in regression}
 
 \item{iter_max}{maximum number of iterations}
 
@@ -82,6 +77,8 @@ stappDP_merdecomp(
 \item{chain}{chain label}
 
 \item{fix_alpha}{boolean value that determines whether or not to fix alpha in sampler}
+
+\item{logging}{boolean parameter indicating whether or not a single iteration should be run with print messages indicating successful completion of the Sampler's sub modules}
 }
 \description{
 fits a functional dirichlet process linear mixed effects regression model

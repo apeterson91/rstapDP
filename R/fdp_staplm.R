@@ -5,8 +5,8 @@
 #' in the formula argument and a Dirichlet process prior with normal-gamma base measure 
 #' assigned to the stap basis function expansion using penalized splines via \code{\link[mgcv]{jagam}}.
 #'
-#' The concentration parameter is assigned gamma prior with  hyperparameters shape alpha_a and scale alpha_b.
-#'  Precision parameters sigma_a,sigma_b, tau_a,tau_b are similar for the residual and penalties' precision, respectively.
+#' The concentration parameter is assigned a gamma prior with  hyperparameters shape alpha_a and scale alpha_b.
+#'  Precision parameters sigma_a,sigma_b, tau_a,tau_b are similar for the residual and penalties' precision gamma priors, respectively.
 #' 
 #' @param formula Similar as for \code{\link[rsstap]{sstap_lm}}, though fdp_staplm is currently restricted to only one stap term.
 #' @param benvo built environment object from the rbenvo package containing the relevant data
@@ -26,6 +26,8 @@
 #' @param seed random number generator seed will be set to default value if not by user
 #' @param scale boolean determining if fixed effects matrix is scaled for estimation
 #' @param center boolean determining if fixed effects matrix is centered for estimation
+#' @param subsample_yhat  integer value indicating how many samples to subsample of yhat samples. Useful when N is big.
+#' @param ... optional arguments for \link{fdp_staplm.fit}
 #' 
 #' @importFrom stats is.empty.model model.matrix model.response as.formula gaussian terms
 #' @export
@@ -48,16 +50,23 @@ fdp_staplm <- function(formula,
 					   fix_alpha = FALSE,
 					   seed = NULL,
 					   scale = TRUE,
-					   center = TRUE
+					   center = TRUE,
+					   subsample_yhat = NULL,
+					   ...
 					   ){
 
 	## Parameter check
+	num_posterior_samples <- sum((seq(from=burn_in+1,to=iter_max,by=1) %%thin)==0)
 	stopifnot(burn_in<iter_max && burn_in > 0)
 	stopifnot(all(c(alpha_a,alpha_b,sigma_a,sigma_b,tau_a,tau_b)>0))
 	stopifnot(thin>0)
 	## 
 	if(is.null(seed))
 		seed <- 2341341
+	if(is.null(subsample_yhat))
+		subsample_yhat <- 1:num_posterior_samples
+	else 
+		subsample_yhat <- sample(1:num_posterior_samples,size = subsample_yhat,replace=F)
 	
 	spec <- get_stapDPspec(formula,K,benvo)
 	foo <- spec$stapless_formula
@@ -88,7 +97,6 @@ fdp_staplm <- function(formula,
 	fit <- lapply(1:chains,function(x) fdp_staplm.fit(y = mf$y,
 													  Z = Z,
 													  X = spec$X, 
-													  S = spec$S,
 													  weights = weights,
 													  alpha_a = alpha_a,
 													  alpha_b = alpha_b,
@@ -99,32 +107,32 @@ fdp_staplm <- function(formula,
 													  K = K,iter_max = iter_max,
 													  burn_in = burn_in,
 													  thin = thin,
-													  fix_alpha = fix_alpha ,
+													  fix_alpha = fix_alpha,
 													  seed = seed + x,
-													  chain = x)
+													  chain = x,...)
 	)
 
     out <- lapply(fit,function(x) list(beta = x$beta,
-							pi = x$pi,
-							sigma = x$sigma,
-							alpha = x$alpha,
-							yhat = x$yhat,
-							scales = x$tau,
-							cluster_mat = x$cluster_mat,
-							pmat = x$PairwiseProbabilityMat,
-							clabels = x$cluster_assignment
+                                       pi = x$pi,
+                                       sigma = x$sigma,
+                                       alpha = x$alpha,
+                                       yhat = x$yhat[subsample_yhat,],
+                                       scales = x$tau,
+                                       cluster_mat = x$cluster_mat,
+                                       pmat = x$PairwiseProbabilityMat,
+                                       clabels = x$cluster_assignment
 							))
 	
-    out <- list(pars=out,
-				spec = spec,
-				formula = formula,
-				alpha_a = alpha_a,
-				alpha_b = alpha_b,
-				K = K,
-				Z_scl = Z_scl,
-				Z_cnt = Z_cnt,
-				has_intercept = has_intercept
-				)
+    out <- list(pars = out,
+                spec = spec,
+                formula = formula,
+                alpha_a = alpha_a,
+                alpha_b = alpha_b,
+                K = K,
+                Z_scl = Z_scl,
+                Z_cnt = Z_cnt,
+                has_intercept = has_intercept
+                )
 
 	return(stapDP(out))
 }
@@ -135,13 +143,12 @@ fdp_staplm <- function(formula,
 #' @param y vector of outcomes
 #' @param Z design matrix
 #' @param X stap design matrix
-#' @param S list of penalty matrices from \code{\link[mgcv]{jagam}} 
 #' @param alpha_a alpha gamma prior hyperparameter
 #' @param alpha_b alpha gamma prior hyperparameter
 #' @param sigma_a precision gamma prior hyperparameter
 #' @param sigma_b precision gamma prior hyperparameter
-#' @param tau_a penalty parameters gamma prior hyperparameter
-#' @param tau_b penalty parameters gamma prior hyperparameter
+#' @param tau_a penalty parameter gamma prior hyperparameter
+#' @param tau_b penalty parameter gamma prior hyperparameter
 #' @param K truncation number for DP mixture components
 #' @param weights weights for weighted regression - default is vector of ones 
 #' @param iter_max maximum number of iterations
@@ -150,9 +157,11 @@ fdp_staplm <- function(formula,
 #' @param fix_alpha boolean value 
 #' @param seed random number generator seed will be set to default value if not by user
 #' @param chain chain label
+#' @param logging boolean parameter indicating whether or not a single iteration should be run with print messages indicating successful completion of the Sampler's sub modules
+#' @param threshold  number of observations assigned to a cluster that may be considered negligble. Default is 0, but may need to be increased to 3,4, or 5 depending on how informative the data is.
 #' @export
 #' 
-fdp_staplm.fit <- function(y,Z,X,S,
+fdp_staplm.fit <- function(y,Z,X,
                            weights = rep(1,length(y)),
                            alpha_a = 1,
                            alpha_b = 1, 
@@ -166,10 +175,11 @@ fdp_staplm.fit <- function(y,Z,X,S,
                            thin = 1L,
 						   fix_alpha = FALSE,
 						   seed = NULL,
-						   chain = 1L){
+						   chain = 1L,
+						   logging = FALSE,
+						   threshold = 0){
 
 	stopifnot(all(c(sigma_a,sigma_b,tau_a,tau_b,alpha_a,alpha_b)>0))
-	stopifnot(nrow(S[[1]]) == ncol(Z) + ncol(X[[1]])*K)
 	stopifnot(length(weights) == length(y))
   if(is.null(seed)){
     seed <- 3413
@@ -178,13 +188,19 @@ fdp_staplm.fit <- function(y,Z,X,S,
   num_posterior_samples <- sum((seq(from=burn_in+1,to=iter_max,by=1) %%thin)==0)
   stopifnot(num_posterior_samples>0)
 
-  num_penalties <- length(S) ## default for smoothing
-  S <- do.call(cbind,S)
-  X <- do.call(cbind,X)
-  fit <- stappDP_fit(y,Z,X,S,weights,alpha_a,alpha_b,
-					 sigma_a,sigma_b,tau_a,tau_b,
-					 K,num_penalties,iter_max,burn_in,
-					 thin,seed,num_posterior_samples,chain,fix_alpha)
+  fit <- stappDP_fit(y = y,Z = Z, X = X,
+					 w = weights,
+					 alpha_a = alpha_a, alpha_b = alpha_b,
+					 sigma_a = sigma_a, sigma_b = sigma_b,
+					 tau_a = tau_a,tau_b = tau_b,
+					 K = K,threshold = threshold,
+					 iter_max = iter_max ,burn_in = burn_in, 
+					 thin = thin,
+					 seed = seed,
+					 num_posterior_samples = num_posterior_samples,
+					 chain = chain,fix_alpha = fix_alpha,
+					 logging = logging
+					 )
 
 
   return(fit)

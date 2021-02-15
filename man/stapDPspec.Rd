@@ -14,8 +14,6 @@ stapDPspec(stapless_formula, stap_mat, K, benvo)
 \item{K}{DP truncation}
 
 \item{benvo}{Built Environment object - \code{\link[rbenvo]{benvo}} - containing data for model}
-
-\item{fake_formula}{list of ``fake'' formulas from \code{\link{get_stapDPspec}}}
 }
 \description{
 Create STAP-DP data structure

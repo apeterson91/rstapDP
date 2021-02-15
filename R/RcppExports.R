@@ -6,7 +6,6 @@
 #' @param y a vector of continuous outcomes
 #' @param Z a matrix of population level confounders
 #' @param X a matrix of spatial temporal aggregated predictors
-#' @param S penalty matrix for stap parameters
 #' @param w a vector of weights for weighted regression
 #' @param alpha_a alpha gamma prior shape hyperparameter
 #' @param alpha_b alpha gamma prior scale hyperparameter
@@ -15,7 +14,7 @@
 #' @param tau_a penalty gamma prior shape hyperparameter
 #' @param tau_b penalty gamma prior scale hyperparameter
 #' @param K truncation number
-#' @param num_penalties number of penalty matrices accounted for in S
+#' @param threshold number of members per cluster at which cluster is included in regression
 #' @param iter_max maximum number of iterations
 #' @param burn_in number of burn in iterations
 #' @param thin number by which to thin samples
@@ -23,8 +22,9 @@
 #' @param num_posterior_samples total number of posterior samples
 #' @param chain chain label
 #' @param fix_alpha  boolean value that determines whether or not to fix alpha in sampler
-stappDP_fit <- function(y, Z, X, S, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha) {
-    .Call(`_rstapDP_stappDP_fit`, y, Z, X, S, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha)
+#' @param logging boolean parameter indicating whether or not a single iteration should be run with print messages indicating successful completion of the Sampler's sub modules
+stappDP_fit <- function(y, Z, X, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, threshold, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha, logging) {
+    .Call(`_rstapDP_stappDP_fit`, y, Z, X, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, threshold, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha, logging)
 }
 
 #' Penalized Functional Dirichlet Process Linear Mixed Effects Regression
@@ -55,9 +55,8 @@ stappDP_fit <- function(y, Z, X, S, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a
 #' @param num_posterior_samples total number of posterior samples
 #' @param fix_alpha  boolean value that determines whether or not to fix alpha in sampler
 #' @param logging boolean parameter indicating whether or not a single iteration should be run with print messages indicating successful completion of the Sampler's sub modules
-#' @param summarize_yhat boolean value indicating whether a single mean vector of yhat values should be returned instead of a N X num samples matrix. Useful in situations where N is large.
-stappDP_mer_fit <- function(y, Z, X, W, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, threshold, iter_max, burn_in, thin, seed, chain, num_posterior_samples, fix_alpha, logging, summarize_yhat) {
-    .Call(`_rstapDP_stappDP_mer_fit`, y, Z, X, W, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, threshold, iter_max, burn_in, thin, seed, chain, num_posterior_samples, fix_alpha, logging, summarize_yhat)
+stappDP_mer_fit <- function(y, Z, X, W, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, threshold, iter_max, burn_in, thin, seed, chain, num_posterior_samples, fix_alpha, logging) {
+    .Call(`_rstapDP_stappDP_mer_fit`, y, Z, X, W, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, threshold, iter_max, burn_in, thin, seed, chain, num_posterior_samples, fix_alpha, logging)
 }
 
 #' Penalized Functional Dirichlet Process Linear Mixed Effects Regression with Between-Within Decomposition
@@ -70,8 +69,6 @@ stappDP_mer_fit <- function(y, Z, X, W, w, subj_mat_, subj_n, alpha_a, alpha_b, 
 #' @param X_b Matrix of between subject spatial temporal aggregated predictor covariates
 #' @param X_w Matrix of within subject spatial temporal aggregated predictor covariates
 #' @param W a design matrix for group specific terms
-#' @param S_b penalty matrix corresponding to between subject covariate matrix
-#' @param S_w penalty matrix corresponding to within subject covariate matrix
 #' @param w a vector of weights for weighted regression
 #' @param subj_mat_ N x n sparse matrix used to aggregate subject observations
 #' @param subj_n n x 1 vector of integers representing how many observations correspond to each subject
@@ -82,7 +79,7 @@ stappDP_mer_fit <- function(y, Z, X, W, w, subj_mat_, subj_n, alpha_a, alpha_b, 
 #' @param tau_a penalty gamma prior shape hyperparameter
 #' @param tau_b penalty gamma prior scale hyperparameter
 #' @param K truncation number
-#' @param num_penalties number of penalty matrices accounted for in S
+#' @param threshold number of members per cluster at which cluster is included in regression
 #' @param iter_max maximum number of iterations
 #' @param burn_in number of burn in iterations
 #' @param thin number by which to thin samples
@@ -90,23 +87,8 @@ stappDP_mer_fit <- function(y, Z, X, W, w, subj_mat_, subj_n, alpha_a, alpha_b, 
 #' @param num_posterior_samples total number of posterior samples
 #' @param chain chain label
 #' @param fix_alpha  boolean value that determines whether or not to fix alpha in sampler
-stappDP_merdecomp <- function(y, Z, X_b, X_w, W, S_b, S_w, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha) {
-    .Call(`_rstapDP_stappDP_merdecomp`, y, Z, X_b, X_w, W, S_b, S_w, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha)
-}
-
-#'  Spatial Temporal Aggregated Predictor Functional Dirichlet Process Regression via Variational Inference
-#' 
-#' @export
-#' @param y vector of regression outcomes
-#' @param X matrix of regression covariates
-#' @param tau_a penalty precision gamma shape hyperparameter  
-#' @param tau_b penalty precision gamma scale hyperparameter  
-#' @param sigma_a residual precision gamma shape hyperparameter  
-#' @param sigma_b residual precision gamma scale hyperparameter  
-#' @param max_iter maximum number of iterations
-#' @param num_samples number of samples to draw from approximate posterior
-#' @param seed random number generator seed initializer
-VI_lm <- function(y, X, tau_a, tau_b, sigma_a, sigma_b, max_iter, num_samples, seed) {
-    .Call(`_rstapDP_VI_lm`, y, X, tau_a, tau_b, sigma_a, sigma_b, max_iter, num_samples, seed)
+#' @param logging boolean parameter indicating whether or not a single iteration should be run with print messages indicating successful completion of the Sampler's sub modules
+stappDP_merdecomp <- function(y, Z, X_b, X_w, W, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, threshold, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha, logging) {
+    .Call(`_rstapDP_stappDP_merdecomp`, y, Z, X_b, X_w, W, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, threshold, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha, logging)
 }
 

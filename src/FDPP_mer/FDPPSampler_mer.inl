@@ -31,10 +31,9 @@ void FDPPSampler_mer::iteration_sample(std::mt19937 &rng){
 
 	// check for errors
 	if(std::isnan(beta(0)) & flag ){
-		Rcpp::Rcout << "The matrix failed to invert" << std::endl;
-		Rcpp::Rcout << " V block: \n" << V.block(0,0,10,10) << std::endl;
-		Rcpp::Rcout << "cluster count" << cluster_count.transpose() << std::endl;
-		Rcpp::Rcout << "taus: \n " << unique_taus << std::endl;
+		Rcpp::Rcout << "There was an error inverting the design matrix" << std::endl;
+		Rcpp::Rcout << "You may need to adjust the threshold parameter" << std::endl;
+		Rcpp::Rcout << "Find out more in ?fdp_staplmer.fit" << std::endl;
 		flag = false;
 	}
 
