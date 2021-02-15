@@ -17,8 +17,6 @@ class FDPPSamplerdecomp
 		const Eigen::MatrixXd &X_w;
 		const arr W;
 		const SpMat &subj_mat;
-		const Eigen::MatrixXd &S_b;
-		const Eigen::MatrixXd &S_w;
 		const Eigen::VectorXd &w;
 		Eigen::VectorXd yhat;
 		Eigen::MatrixXd X_fit;
@@ -42,8 +40,8 @@ class FDPPSamplerdecomp
 		Eigen::MatrixXd subj_D;
 		const int subj_D_df;
 		const Eigen::ArrayXi subj_n;
-		Eigen::ArrayXXd unique_taus_b;
-		Eigen::ArrayXXd unique_taus_w;
+		Eigen::ArrayXd unique_taus_b;
+		Eigen::ArrayXd unique_taus_w;
 		const double alpha_b;
 		const double sigma_a; 
 		const double sigma_b; 
@@ -64,15 +62,16 @@ class FDPPSamplerdecomp
 		const int N;
 		const int n;
 		const int K;
+		const int threshold;
 		const int Q;
-		const int num_penalties;
 		int sample_ix = 0;
 		int num_nonzero;
 		int temp_Q;
 		Eigen::MatrixXd nonzero_ics;
 		bool initializing = true;
 		bool flag = true;
-		const bool fix_alpha;
+		const bool &fix_alpha;
+		const bool &logging;
 		const double log_factor;
 	public:
 		Eigen::ArrayXXd P_matrix;
@@ -81,7 +80,6 @@ class FDPPSamplerdecomp
 				const Eigen::MatrixXd &Z,
 				const Eigen::MatrixXd &X_b,
 				const arr &W,
-				const Eigen::MatrixXd &S_b,
 				const Eigen::VectorXd &w,
 				const SpMat &subj_mat,
 				const Eigen::ArrayXi &subj_n,
@@ -92,14 +90,14 @@ class FDPPSamplerdecomp
 				const double &tau_a,
 				const double &tau_b,
 				const int &K,
-				const int &num_penalties,
+				const int &threshold,
 				const bool &fix_alpha,
+				const bool &logging,
 				std::mt19937 &rng,
-				const Eigen::MatrixXd &X_w,
-				const Eigen::MatrixXd &S_w) : 
+				const Eigen::MatrixXd &X_w) : 
 			y(y), Z(Z), X_b(X_b), X_w(X_w),
 			W(W), subj_mat(subj_mat),
-			S_b(S_b),  S_w(S_w),w(w),
+			w(w),
 			subj_D_df(subj_mat.cols()-W.cols()+1),
 			subj_n(subj_n),
 			alpha_b(alpha_b),sigma_a(sigma_a),
@@ -110,10 +108,10 @@ class FDPPSamplerdecomp
 			P_b(X_b.cols()),
 			P_w(X_w.cols()),
 			N(y.rows()), n(subj_mat.cols()),
-			K(K),
+			K(K), threshold(threshold),
 			Q(Z.cols() + (X_w.cols() +  X_b.cols())*K), 
-			num_penalties(num_penalties),
 			fix_alpha(fix_alpha),
+			logging(logging),
 			log_factor(log(pow(10,-16)) - log(N))
 	{
 		std::gamma_distribution<double> rgamma(alpha_a,alpha_b);
@@ -164,11 +162,11 @@ class FDPPSamplerdecomp
 
 		void initialize_beta(std::mt19937 &rng);
 
-		void update_penaltymat(const int &k, const int &pen_ix);
+		void update_penaltymat(const int &k);
 
 		void adjust_zero_clusters(std::mt19937 &rng);
 
-		double calculate_penalty_scale(const int &k, const int &pen_ix, const bool &between);
+		double calculate_penalty_scale(const int &k, const bool &between);
 
 		void adjust_beta(std::mt19937 &rng);
 
@@ -179,6 +177,11 @@ class FDPPSamplerdecomp
 		void calculate_Wb();
 
 		void initialization(std::mt19937 &rng);
+
+		void log_message(const std::string& input){
+			if(logging)
+				Rcpp::Rcout << "Log: " <<  input << std::endl;
+		}
 
 
 };

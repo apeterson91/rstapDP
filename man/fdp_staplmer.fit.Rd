@@ -9,7 +9,6 @@ fdp_staplmer.fit(
   Z,
   X,
   W,
-  S,
   subj_mat,
   subj_n,
   weights = rep(1, length(y)),
@@ -20,6 +19,7 @@ fdp_staplmer.fit(
   tau_a = 1,
   tau_b = 1,
   K = 5L,
+  threshold = 0L,
   iter_max,
   burn_in,
   thin = 1L,
@@ -27,8 +27,7 @@ fdp_staplmer.fit(
   bw = FALSE,
   seed = NULL,
   chain = 1L,
-  logging = FALSE,
-  summarize_yhat = FALSE
+  logging = FALSE
 )
 }
 \arguments{
@@ -39,8 +38,6 @@ fdp_staplmer.fit(
 \item{X}{stap design matrix}
 
 \item{W}{group terms design matrix from \code{\link[lme4]{glFormula}}}
-
-\item{S}{list of penalty matrices from \code{\link[mgcv]{jagam}}}
 
 \item{subj_mat}{matrix indexing subject-measurement locations in (Z,X,W)}
 
@@ -62,6 +59,8 @@ fdp_staplmer.fit(
 
 \item{K}{truncation number for DP mixture components}
 
+\item{threshold}{number of members per cluster at which cluster is included in regression}
+
 \item{iter_max}{maximum number of iterations}
 
 \item{burn_in}{number of iterations to burn-in}
@@ -77,8 +76,6 @@ fdp_staplmer.fit(
 \item{chain}{chain label}
 
 \item{logging}{boolean parameter indicating whether or not a single iteration should be run with print messages indicating successful completion of the Sampler's sub modules}
-
-\item{summarize_yhat}{boolean value indicating whether a single mean vector of yhat values should be returned instead of a N X num samples matrix. Useful in situations where N is large.}
 }
 \description{
 Functional Dirichlet Process Spatial Temporal Aggregated Predictor Linear Mixed Effects Regression Model Fit

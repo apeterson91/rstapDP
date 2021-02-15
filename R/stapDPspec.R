@@ -93,19 +93,8 @@ get_stapDPspec <- function(f,K,benvo){
 		new_f <- paste0(new_f," + ",mer_f)
 	}
 
-	str <- purrr::map2(stap_mat[,2],stap_mat[,4],function(x,y) {
-	  switch(x,
-	         "Distance-Time"= paste0("t2(Distance,Time,bs='ps'",y ),
-	         "Distance" = paste0("s(Distance,bs='ps'",y),
-	         "Time"= paste0("s(Time,bs='ps'",y)
-	         )
-	  })
-
-	fake_formula <- purrr::map(str,function(x) as.formula(paste0("temp_ix_ ~ -1 + ",paste0(x,collapse="+"))))
-
     return(
 		   stapDPspec(stapless_formula = as.formula(new_f, env = environment(f)),
-					  fake_formula = fake_formula,
 					  stap_mat = stap_mat,
 					  K = K,
 					  benvo = benvo
@@ -117,25 +106,25 @@ get_stapDPspec <- function(f,K,benvo){
 #' Create STAP-DP data structure
 #' 
 #' @param stapless_formula from \code{\link{get_stapDPspec}}
-#' @param fake_formula list of ``fake'' formulas from \code{\link{get_stapDPspec}}
 #' @param stap_mat matrix of stap specification properties 
 #' @param K DP truncation
 #' @param benvo Built Environment object - \code{\link[rbenvo]{benvo}} - containing data for model 
 #'
-stapDPspec <- function(stapless_formula,fake_formula,stap_mat,K,benvo){
+stapDPspec <- function(stapless_formula,stap_mat,K,benvo){
 
 
 	term <- stap_mat[,1]
 	component <- stap_mat[,2]
 	between_within <- as.integer(stap_mat[,3])
 	dimension <- sapply(stap_mat[,4],function(x){ 
-							if(length(x)==1) 
-								return(-1)
+							if(stringr::str_length(x)==1) 
+								return(10)
 							else 
 								as.integer(stringr::str_replace(stringr::str_replace(stap_mat[,4],
 																					 "\\)",""),
-																"k = ",""))
+																", ?k = ",""))
 		   })
+
 	if(!(all(unique(term)==term)))
 		stop("Only one BEF name may be assigned to a stap term e.g. no sap(foo) + tap(foo)\n
 			 If you wish to model components this way create a different name e.g. sap(foo) + tap(foo_bar)")
@@ -143,66 +132,106 @@ stapDPspec <- function(stapless_formula,fake_formula,stap_mat,K,benvo){
 		stop("All stap terms must have data with corresponding name in benvo")
 	if(length(term)>1)
 		stop("Only one stap/sap/tap term allowed")
+	## adapting for iid gaussian priors
 
-	jd <- purrr::pmap(list(term,component,fake_formula),
-	                  function(x,y,z) {
-						temp_df <- rbenvo::joinvo(benvo,x,y,NA_to_zero = TRUE)
-						temp_df$temp_ix_ <- 1:nrow(temp_df)
-						out <- mgcv::jagam(formula = z, family = gaussian(), 
-						                   data = temp_df,
-										   file = tempfile(fileext = ".jags"), 
-						                   offset = NULL,
-						                   centred = FALSE,
-						                   diagonalize = FALSE)
-						out$name <- x
-						ix <- which(rbenvo::bef_names(benvo)==x)
-						ranges <- list()
-						if(y=="Distance"|y=="Distance-Time")
-							ranges$Distance <- range(benvo$sub_bef_data[[ix]]$Distance,na.rm=T)
-						if(y=="Time"|y=="Distance-Time")
-							ranges$Time = range(benvo$sub_bef_data[[ix]]$Time,na.rm=T)
-						out$ranges <- ranges
-	                    return(out)
-	                    })
+create_unique_ID_mat <- function(id_one,id_two = NULL){
+	tmp <- paste0(id_one,"_",id_two)
+	lvls <- unique(tmp)
+	new_id <- factor(tmp,levels=lvls)
+	Matrix::fac2sparse(new_id)
+}
+
+	temp_df <- rbenvo::joinvo(benvo,term = term,
+							  component = component,
+							  NA_to_zero = FALSE)
+	ids <- rbenvo::get_id(benvo)
+
+	Xmat <- temp_df %>% 
+		dplyr::group_by_at(ids) %>% 
+		dplyr::mutate(bef_id = stringr::str_c("BEF_",1:dplyr::n())) %>%
+		tidyr::pivot_wider(id_cols = ids,
+						   names_from = "bef_id" ,
+						   values_from = component) %>% 
+	  dplyr::ungroup() %>% 
+		dplyr::select_at(dplyr::vars(!dplyr::contains(ids))) %>%
+		as.matrix()
+
+	if(length(ids)>1)
+		idmat <- create_unique_ID_mat(benvo$subject_data[,ids[1],drop=T],
+									  benvo$subject_data[,ids[2],drop=T])
+	else
+		idmat <- Matrix::fac2sparse(benvo$subject_data[,ids,drop=T])
+
+	Xmat <- as.matrix(Matrix::t(idmat) %*% Xmat)
+	msk <- which(is.na(Xmat))
+	Xmat[msk] <- -1
+	L <- (Xmat> 0)*1
+
+	
+	noise <- stats::rnorm(nrow(Xmat))
+  
+	out <- mgcv::jagam(formula = noise ~ 0 + s(Xmat,by = L,bs='ps',k = dimension), family = gaussian(), 
+					   data = temp_df,
+					   file = tempfile(fileext = ".jags"), 
+					   offset = NULL,
+					   centred = FALSE,
+					   diagonalize = TRUE)
+	ranges <- list()
+	ranges[[term]] <- list()
+	if(component=="Distance"|component=="Distance-Time")
+		ranges[[term]]$Distance <- range(benvo$sub_bef_data[[term]]$Distance,na.rm=T)
+	if(component=="Time"|component=="Distance-Time")
+		ranges[[term]]$Time = range(benvo$sub_bef_data[[term]]$Time,na.rm=T)
 
 	mf <- rbenvo::subject_design(benvo,lme4::nobars(stapless_formula))
 
-	X <- purrr::pmap(list(term,component,between_within,jd),function(x,y,z,jdi){
-			X <- create_X(x,y,z,
-			              jdi$jags.data$X,benvo,
-			              jdi$pregam$term.names)
-						})
-
 	f_ <-  lme4::nobars(stapless_formula)
 	num_fixed <- ncol(mf$X)
+
+	X <- out$jags.data$X
+	nms <- stringr::str_c("s(",term,".",1:ncol(X),")")
+	colnames(X) <- nms
+	if(between_within)
+		X <- .create_X_bw_wi(X,
+		                     Matrix::fac2sparse(benvo$subject_data[,ids[1],drop=T]),
+		                     term)
 	
-	S <- purrr::pmap(list(1:length(jd),between_within),function(ix,bw_){create_S(K,jd[[ix]],bw_,num_fixed)})
-
-	combine_list_entries <- function(l){
-		if(any(sapply(l,is.list)))
-			l <- Reduce(c,l)
-		return(l)
-	}
-
-	X <- combine_list_entries(X)
-	S <- combine_list_entries(S)
 	
 
 
+
+	sobj <- out$pregam$smooth
+	sobj[[1]]$term <- component
 
 	out <- list(stapless_formula = stapless_formula,
-				fake_formula = fake_formula,
 				term = term,
 				component = component,
 				between_within = between_within,
 				dimension = dimension,
-				ranges = lapply(jd,function(x) x$ranges),
+				ranges = ranges,
 				X = X,
-				S = S,
 				mf = mf,
-				smooth_objs = Reduce(c,lapply(jd,function(x) x$pregam$smooth))
+				smooth_objs = sobj
 				)
 
 	structure(out,class=c("stapDPspec"))
 }
 
+
+#------------------------
+
+
+.create_X_bw_wi <- function(X, idmat,term){
+
+	Xb <- Matrix::t(idmat) %*% (idmat %*% X)
+	Xw <- X - Xb
+	Xb <- as.matrix(Xb)
+	Xw <- as.matrix(Xw)
+	colnames(Xb) <- stringr::str_c("s(",term,"_bw.",1:ncol(Xb),")")
+	colnames(Xw) <- stringr::str_c("s(",term,"_wi.",1:ncol(Xw),")")
+
+
+	return(list(X_bw = Xb,X_wi=Xw))
+
+
+}

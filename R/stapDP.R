@@ -40,25 +40,26 @@ stapDP <- function(object){
 	colnames(probs) <- paste0("pi_K: ",1:K)
 
 	if(has_bw(spec)){
-		num_penalties <- length(spec$S[[1]])
-		tau_b <- collapse_pars("tau_b",K,num_penalties,ix)
-		tau_w <- collapse_pars("tau_w",K,num_penalties,ix)
-		colnames(tau_b) <- paste0("tau_b_",1:(K*num_penalties))
-		colnames(tau_w) <- paste0("tau_w_",1:(K*num_penalties))
+		P_two <- ncol(spec$X[[1]])
+		nms <- Reduce(c,lapply(spec$X,colnames))
+		tau_b <- collapse_pars("tau_b",K,1,ix)
+		tau_w <- collapse_pars("tau_w",K,1,ix)
+		colnames(tau_b) <- paste0("tau_b_",1:K)
+		colnames(tau_w) <- paste0("tau_w_",1:K)
 		scales <- cbind(tau_b,tau_w)
 	}else{
-		num_penalties <- length(object$spec$S)
-		scales <- collapse_pars("scales",K,num_penalties,ix)
-		colnames(scales) <- paste0("tau_",1:(K*num_penalties))
+		P_two <- ncol(spec$X)
+		nms <- colnames(spec$X)
+		scales <- collapse_pars("scales",K,1,ix)
+		colnames(scales) <- paste0("tau_",1:(K))
 	}
 
 
-	nms <- Reduce(c,lapply(spec$X,colnames))
 	clnms_k <- lapply(1:K,function(x) paste0("K: " , x," ",nms ))
 	clnms <- Reduce(c,clnms_k)
 	delta_ics <- 1:ncol(spec$mf$X)
 	beta_ics <- (tail(delta_ics,1)+1):ncol(pars[[1]]$beta)
-	beta_prod <- ncol(spec$X[[1]]) + has_bw(spec)*ncol(spec$X[[1]])
+	beta_prod <- P_two+ has_bw(spec)*P_two
 
 	bixmats <- lapply(ix,function(x) create_ixmat_vec(K,beta_prod,x))
 	betamat <- Reduce(rbind,purrr::map2(pars,bixmats,function(x,y) x$beta[,beta_ics][,y]))
@@ -105,7 +106,8 @@ stapDP <- function(object){
 									 id = 1:length(spec$mf$y),Samples = spec$mf$y))
 
 
-	out <- list(beta = beta,
+	out <- list(call = object$call,
+				beta = beta,
 				summary = parameter_summary,
 				delta = delta,
 				alpha = alpha,

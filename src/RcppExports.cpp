@@ -7,15 +7,14 @@
 using namespace Rcpp;
 
 // stappDP_fit
-Rcpp::List stappDP_fit(const Eigen::VectorXd& y, const Eigen::MatrixXd& Z, const Eigen::MatrixXd& X, const Eigen::MatrixXd& S, const Eigen::VectorXd& w, const double& alpha_a, const double& alpha_b, const double& sigma_a, const double& sigma_b, const double& tau_a, const double& tau_b, const int& K, const int& num_penalties, const int& iter_max, const int& burn_in, const int& thin, const int& seed, const int& num_posterior_samples, const int chain, const bool& fix_alpha);
-RcppExport SEXP _rstapDP_stappDP_fit(SEXP ySEXP, SEXP ZSEXP, SEXP XSEXP, SEXP SSEXP, SEXP wSEXP, SEXP alpha_aSEXP, SEXP alpha_bSEXP, SEXP sigma_aSEXP, SEXP sigma_bSEXP, SEXP tau_aSEXP, SEXP tau_bSEXP, SEXP KSEXP, SEXP num_penaltiesSEXP, SEXP iter_maxSEXP, SEXP burn_inSEXP, SEXP thinSEXP, SEXP seedSEXP, SEXP num_posterior_samplesSEXP, SEXP chainSEXP, SEXP fix_alphaSEXP) {
+Rcpp::List stappDP_fit(const Eigen::VectorXd& y, const Eigen::MatrixXd& Z, const Eigen::MatrixXd& X, const Eigen::VectorXd& w, const double& alpha_a, const double& alpha_b, const double& sigma_a, const double& sigma_b, const double& tau_a, const double& tau_b, const int& K, const int& threshold, const int& iter_max, const int& burn_in, const int& thin, const int& seed, const int& num_posterior_samples, const int chain, const bool& fix_alpha, const bool& logging);
+RcppExport SEXP _rstapDP_stappDP_fit(SEXP ySEXP, SEXP ZSEXP, SEXP XSEXP, SEXP wSEXP, SEXP alpha_aSEXP, SEXP alpha_bSEXP, SEXP sigma_aSEXP, SEXP sigma_bSEXP, SEXP tau_aSEXP, SEXP tau_bSEXP, SEXP KSEXP, SEXP thresholdSEXP, SEXP iter_maxSEXP, SEXP burn_inSEXP, SEXP thinSEXP, SEXP seedSEXP, SEXP num_posterior_samplesSEXP, SEXP chainSEXP, SEXP fix_alphaSEXP, SEXP loggingSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type y(ySEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type Z(ZSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type S(SSEXP);
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type w(wSEXP);
     Rcpp::traits::input_parameter< const double& >::type alpha_a(alpha_aSEXP);
     Rcpp::traits::input_parameter< const double& >::type alpha_b(alpha_bSEXP);
@@ -24,7 +23,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double& >::type tau_a(tau_aSEXP);
     Rcpp::traits::input_parameter< const double& >::type tau_b(tau_bSEXP);
     Rcpp::traits::input_parameter< const int& >::type K(KSEXP);
-    Rcpp::traits::input_parameter< const int& >::type num_penalties(num_penaltiesSEXP);
+    Rcpp::traits::input_parameter< const int& >::type threshold(thresholdSEXP);
     Rcpp::traits::input_parameter< const int& >::type iter_max(iter_maxSEXP);
     Rcpp::traits::input_parameter< const int& >::type burn_in(burn_inSEXP);
     Rcpp::traits::input_parameter< const int& >::type thin(thinSEXP);
@@ -32,13 +31,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const int& >::type num_posterior_samples(num_posterior_samplesSEXP);
     Rcpp::traits::input_parameter< const int >::type chain(chainSEXP);
     Rcpp::traits::input_parameter< const bool& >::type fix_alpha(fix_alphaSEXP);
-    rcpp_result_gen = Rcpp::wrap(stappDP_fit(y, Z, X, S, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha));
+    Rcpp::traits::input_parameter< const bool& >::type logging(loggingSEXP);
+    rcpp_result_gen = Rcpp::wrap(stappDP_fit(y, Z, X, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, threshold, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha, logging));
     return rcpp_result_gen;
 END_RCPP
 }
 // stappDP_mer_fit
-Rcpp::List stappDP_mer_fit(const Eigen::VectorXd& y, const Eigen::MatrixXd& Z, const Eigen::MatrixXd& X, const Eigen::ArrayXXd& W, const Eigen::MatrixXd& S, const Eigen::VectorXd& w, const SEXP& subj_mat_, const Eigen::ArrayXi& subj_n, const double& alpha_a, const double& alpha_b, const double& sigma_a, const double& sigma_b, const double& tau_a, const double& tau_b, const int& K, const int& num_penalties, const int& iter_max, const int& burn_in, const int& thin, const int& seed, const int& chain, const int& num_posterior_samples, const bool& fix_alpha, const bool& logging, const bool& summarize_yhat);
-RcppExport SEXP _rstapDP_stappDP_mer_fit(SEXP ySEXP, SEXP ZSEXP, SEXP XSEXP, SEXP WSEXP, SEXP SSEXP, SEXP wSEXP, SEXP subj_mat_SEXP, SEXP subj_nSEXP, SEXP alpha_aSEXP, SEXP alpha_bSEXP, SEXP sigma_aSEXP, SEXP sigma_bSEXP, SEXP tau_aSEXP, SEXP tau_bSEXP, SEXP KSEXP, SEXP num_penaltiesSEXP, SEXP iter_maxSEXP, SEXP burn_inSEXP, SEXP thinSEXP, SEXP seedSEXP, SEXP chainSEXP, SEXP num_posterior_samplesSEXP, SEXP fix_alphaSEXP, SEXP loggingSEXP, SEXP summarize_yhatSEXP) {
+Rcpp::List stappDP_mer_fit(const Eigen::VectorXd& y, const Eigen::MatrixXd& Z, const Eigen::MatrixXd& X, const Eigen::ArrayXXd& W, const Eigen::VectorXd& w, const SEXP& subj_mat_, const Eigen::ArrayXi& subj_n, const double& alpha_a, const double& alpha_b, const double& sigma_a, const double& sigma_b, const double& tau_a, const double& tau_b, const int& K, const int& threshold, const int& iter_max, const int& burn_in, const int& thin, const int& seed, const int& chain, const int& num_posterior_samples, const bool& fix_alpha, const bool& logging);
+RcppExport SEXP _rstapDP_stappDP_mer_fit(SEXP ySEXP, SEXP ZSEXP, SEXP XSEXP, SEXP WSEXP, SEXP wSEXP, SEXP subj_mat_SEXP, SEXP subj_nSEXP, SEXP alpha_aSEXP, SEXP alpha_bSEXP, SEXP sigma_aSEXP, SEXP sigma_bSEXP, SEXP tau_aSEXP, SEXP tau_bSEXP, SEXP KSEXP, SEXP thresholdSEXP, SEXP iter_maxSEXP, SEXP burn_inSEXP, SEXP thinSEXP, SEXP seedSEXP, SEXP chainSEXP, SEXP num_posterior_samplesSEXP, SEXP fix_alphaSEXP, SEXP loggingSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -46,7 +46,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type Z(ZSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type X(XSEXP);
     Rcpp::traits::input_parameter< const Eigen::ArrayXXd& >::type W(WSEXP);
-    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type S(SSEXP);
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type w(wSEXP);
     Rcpp::traits::input_parameter< const SEXP& >::type subj_mat_(subj_mat_SEXP);
     Rcpp::traits::input_parameter< const Eigen::ArrayXi& >::type subj_n(subj_nSEXP);
@@ -57,7 +56,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double& >::type tau_a(tau_aSEXP);
     Rcpp::traits::input_parameter< const double& >::type tau_b(tau_bSEXP);
     Rcpp::traits::input_parameter< const int& >::type K(KSEXP);
-    Rcpp::traits::input_parameter< const int& >::type num_penalties(num_penaltiesSEXP);
+    Rcpp::traits::input_parameter< const int& >::type threshold(thresholdSEXP);
     Rcpp::traits::input_parameter< const int& >::type iter_max(iter_maxSEXP);
     Rcpp::traits::input_parameter< const int& >::type burn_in(burn_inSEXP);
     Rcpp::traits::input_parameter< const int& >::type thin(thinSEXP);
@@ -66,14 +65,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const int& >::type num_posterior_samples(num_posterior_samplesSEXP);
     Rcpp::traits::input_parameter< const bool& >::type fix_alpha(fix_alphaSEXP);
     Rcpp::traits::input_parameter< const bool& >::type logging(loggingSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type summarize_yhat(summarize_yhatSEXP);
-    rcpp_result_gen = Rcpp::wrap(stappDP_mer_fit(y, Z, X, W, S, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, chain, num_posterior_samples, fix_alpha, logging, summarize_yhat));
+    rcpp_result_gen = Rcpp::wrap(stappDP_mer_fit(y, Z, X, W, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, threshold, iter_max, burn_in, thin, seed, chain, num_posterior_samples, fix_alpha, logging));
     return rcpp_result_gen;
 END_RCPP
 }
 // stappDP_merdecomp
-Rcpp::List stappDP_merdecomp(const Eigen::VectorXd& y, const Eigen::MatrixXd& Z, const Eigen::MatrixXd& X_b, const Eigen::MatrixXd& X_w, const Eigen::ArrayXXd& W, const Eigen::MatrixXd& S_b, const Eigen::MatrixXd& S_w, const Eigen::VectorXd& w, const SEXP& subj_mat_, const Eigen::ArrayXi& subj_n, const double& alpha_a, const double& alpha_b, const double& sigma_a, const double& sigma_b, const double& tau_a, const double& tau_b, const int& K, const int& num_penalties, const int& iter_max, const int& burn_in, const int& thin, const int& seed, const int& num_posterior_samples, const int& chain, const bool& fix_alpha);
-RcppExport SEXP _rstapDP_stappDP_merdecomp(SEXP ySEXP, SEXP ZSEXP, SEXP X_bSEXP, SEXP X_wSEXP, SEXP WSEXP, SEXP S_bSEXP, SEXP S_wSEXP, SEXP wSEXP, SEXP subj_mat_SEXP, SEXP subj_nSEXP, SEXP alpha_aSEXP, SEXP alpha_bSEXP, SEXP sigma_aSEXP, SEXP sigma_bSEXP, SEXP tau_aSEXP, SEXP tau_bSEXP, SEXP KSEXP, SEXP num_penaltiesSEXP, SEXP iter_maxSEXP, SEXP burn_inSEXP, SEXP thinSEXP, SEXP seedSEXP, SEXP num_posterior_samplesSEXP, SEXP chainSEXP, SEXP fix_alphaSEXP) {
+Rcpp::List stappDP_merdecomp(const Eigen::VectorXd& y, const Eigen::MatrixXd& Z, const Eigen::MatrixXd& X_b, const Eigen::MatrixXd& X_w, const Eigen::ArrayXXd& W, const Eigen::VectorXd& w, const SEXP& subj_mat_, const Eigen::ArrayXi& subj_n, const double& alpha_a, const double& alpha_b, const double& sigma_a, const double& sigma_b, const double& tau_a, const double& tau_b, const int& K, const int& threshold, const int& iter_max, const int& burn_in, const int& thin, const int& seed, const int& num_posterior_samples, const int& chain, const bool& fix_alpha, const bool& logging);
+RcppExport SEXP _rstapDP_stappDP_merdecomp(SEXP ySEXP, SEXP ZSEXP, SEXP X_bSEXP, SEXP X_wSEXP, SEXP WSEXP, SEXP wSEXP, SEXP subj_mat_SEXP, SEXP subj_nSEXP, SEXP alpha_aSEXP, SEXP alpha_bSEXP, SEXP sigma_aSEXP, SEXP sigma_bSEXP, SEXP tau_aSEXP, SEXP tau_bSEXP, SEXP KSEXP, SEXP thresholdSEXP, SEXP iter_maxSEXP, SEXP burn_inSEXP, SEXP thinSEXP, SEXP seedSEXP, SEXP num_posterior_samplesSEXP, SEXP chainSEXP, SEXP fix_alphaSEXP, SEXP loggingSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -82,8 +80,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type X_b(X_bSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type X_w(X_wSEXP);
     Rcpp::traits::input_parameter< const Eigen::ArrayXXd& >::type W(WSEXP);
-    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type S_b(S_bSEXP);
-    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type S_w(S_wSEXP);
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type w(wSEXP);
     Rcpp::traits::input_parameter< const SEXP& >::type subj_mat_(subj_mat_SEXP);
     Rcpp::traits::input_parameter< const Eigen::ArrayXi& >::type subj_n(subj_nSEXP);
@@ -94,7 +90,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double& >::type tau_a(tau_aSEXP);
     Rcpp::traits::input_parameter< const double& >::type tau_b(tau_bSEXP);
     Rcpp::traits::input_parameter< const int& >::type K(KSEXP);
-    Rcpp::traits::input_parameter< const int& >::type num_penalties(num_penaltiesSEXP);
+    Rcpp::traits::input_parameter< const int& >::type threshold(thresholdSEXP);
     Rcpp::traits::input_parameter< const int& >::type iter_max(iter_maxSEXP);
     Rcpp::traits::input_parameter< const int& >::type burn_in(burn_inSEXP);
     Rcpp::traits::input_parameter< const int& >::type thin(thinSEXP);
@@ -102,35 +98,16 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const int& >::type num_posterior_samples(num_posterior_samplesSEXP);
     Rcpp::traits::input_parameter< const int& >::type chain(chainSEXP);
     Rcpp::traits::input_parameter< const bool& >::type fix_alpha(fix_alphaSEXP);
-    rcpp_result_gen = Rcpp::wrap(stappDP_merdecomp(y, Z, X_b, X_w, W, S_b, S_w, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, num_penalties, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha));
-    return rcpp_result_gen;
-END_RCPP
-}
-// VI_lm
-Rcpp::List VI_lm(const Eigen::VectorXd& y, const Eigen::MatrixXd& X, const double& tau_a, const double& tau_b, const double& sigma_a, const double& sigma_b, const int& max_iter, const int& num_samples, const int seed);
-RcppExport SEXP _rstapDP_VI_lm(SEXP ySEXP, SEXP XSEXP, SEXP tau_aSEXP, SEXP tau_bSEXP, SEXP sigma_aSEXP, SEXP sigma_bSEXP, SEXP max_iterSEXP, SEXP num_samplesSEXP, SEXP seedSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const double& >::type tau_a(tau_aSEXP);
-    Rcpp::traits::input_parameter< const double& >::type tau_b(tau_bSEXP);
-    Rcpp::traits::input_parameter< const double& >::type sigma_a(sigma_aSEXP);
-    Rcpp::traits::input_parameter< const double& >::type sigma_b(sigma_bSEXP);
-    Rcpp::traits::input_parameter< const int& >::type max_iter(max_iterSEXP);
-    Rcpp::traits::input_parameter< const int& >::type num_samples(num_samplesSEXP);
-    Rcpp::traits::input_parameter< const int >::type seed(seedSEXP);
-    rcpp_result_gen = Rcpp::wrap(VI_lm(y, X, tau_a, tau_b, sigma_a, sigma_b, max_iter, num_samples, seed));
+    Rcpp::traits::input_parameter< const bool& >::type logging(loggingSEXP);
+    rcpp_result_gen = Rcpp::wrap(stappDP_merdecomp(y, Z, X_b, X_w, W, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, threshold, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha, logging));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_rstapDP_stappDP_fit", (DL_FUNC) &_rstapDP_stappDP_fit, 20},
-    {"_rstapDP_stappDP_mer_fit", (DL_FUNC) &_rstapDP_stappDP_mer_fit, 25},
-    {"_rstapDP_stappDP_merdecomp", (DL_FUNC) &_rstapDP_stappDP_merdecomp, 25},
-    {"_rstapDP_VI_lm", (DL_FUNC) &_rstapDP_VI_lm, 9},
+    {"_rstapDP_stappDP_mer_fit", (DL_FUNC) &_rstapDP_stappDP_mer_fit, 23},
+    {"_rstapDP_stappDP_merdecomp", (DL_FUNC) &_rstapDP_stappDP_merdecomp, 24},
     {NULL, NULL, 0}
 };
 

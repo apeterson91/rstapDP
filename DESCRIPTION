@@ -30,7 +30,8 @@ Imports:
     rstan,
     parallel,
     BH,
-    RcppParallel
+    RcppParallel,
+    LaplacesDemon
 LinkingTo: Rcpp, RcppEigen,BH, RcppProgress
 Suggests: 
     knitr,

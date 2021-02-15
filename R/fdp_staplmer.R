@@ -28,6 +28,7 @@
 #' @param seed random number generator seed will be set to default value if not by user
 #' @param scale boolean determining if fixed effects matrix is scaled for estimation
 #' @param center boolean determining if fixed effects matrix is centered for estimation
+#' @param subsample_yhat  integer value indicating how many samples to subsample of yhat samples. Useful when N is big.
 #' @param ... optional arguments to \code{\link{fdp_staplmer.fit}}
 #' @importFrom stats is.empty.model model.matrix model.response as.formula gaussian terms
 #' @export
@@ -51,10 +52,13 @@ fdp_staplmer <- function(formula,
 						 seed = NULL,
 						 scale = TRUE,
 						 center = TRUE,
+						 subsample_yhat = NULL,
 						 ...){
 
 	## Parameter check
+	num_posterior_samples <- sum((seq(from=burn_in+1,to=iter_max,by=1) %%thin)==0)
 	stopifnot(burn_in<iter_max && burn_in > 0)
+	stopifnot(num_posterior_samples>0)
 	stopifnot(all(c(alpha_a,alpha_b,sigma_a,sigma_b,tau_a,tau_b)>0))
 	stopifnot(thin>0)
 	## 
@@ -67,6 +71,10 @@ fdp_staplmer <- function(formula,
 	subj_mat <- get_subjmat(mf$glmod)
 	if(is.null(seed))
 	  seed <- 3413431L
+	if(is.null(subsample_yhat))
+		subsample_yhat <- 1:num_posterior_samples
+	else 
+		subsample_yhat <- sample(1:num_posterior_samples,size = subsample_yhat,replace=F)
 
 
 	if(vapply(list(mf$glmod$reTrms$flist),nlevels,1)>1)
@@ -97,7 +105,6 @@ fdp_staplmer <- function(formula,
 	                                                    Z = Z,
 	                                                    X = spec$X,
 	                                                    W = W,
-	                                                    S = spec$S,
 	                                                    subj_mat = Matrix::t(subj_mat),
 	                                                    subj_n = Matrix::rowSums(subj_mat),
 	                                                    weights = weights, 
@@ -123,19 +130,19 @@ fdp_staplmer <- function(formula,
 							scales = x$tau,
 							tau_b  = if(has_bw(spec)) x$tau_b,
 							tau_w = if(has_bw(spec)) x$tau_w,
-							yhat = x$yhat,
+							yhat = x$yhat[subsample_yhat,],
 							subj_b = x$subj_b,
 							subj_D = x$subj_D,
 							pmat = x$PairwiseProbabilityMat,
 							clabels = x$cluster_assignment
 							))
-	out <- list(pars=out,
+	out <- list(call=call,
+				pars=out,
 				spec = spec,
 				mf= mf,
 				formula = formula,
 				alpha_a = alpha_a,
 				alpha_b = alpha_b,
-				benvo = benvo,
 				K = K,
 				Z_scl = Z_scl,
 				Z_cnt = Z_cnt,
@@ -159,7 +166,6 @@ fdp_staplmer <- function(formula,
 #' @param Z design matrix
 #' @param X stap design matrix
 #' @param W group terms design matrix from \code{\link[lme4]{glFormula}}
-#' @param S list of penalty matrices from \code{\link[mgcv]{jagam}} 
 #' @param subj_mat matrix indexing subject-measurement locations in (Z,X,W)
 #' @param subj_n  vector of number of subject measurements
 #' @param alpha_a alpha gamma prior hyperparameter
@@ -169,6 +175,7 @@ fdp_staplmer <- function(formula,
 #' @param tau_a penalty parameters gamma prior hyperparameter
 #' @param tau_b penalty parameters gamma prior hyperparameter
 #' @param K truncation number for DP mixture components
+#' @param threshold number of members per cluster at which cluster is included in regression
 #' @param weights weights for weighted regression - default is vector of ones 
 #' @param iter_max maximum number of iterations
 #' @param burn_in number of iterations to burn-in
@@ -179,30 +186,29 @@ fdp_staplmer <- function(formula,
 #' @param seed random number generator seed will be set to default value if not by user
 #' @param chain chain label
 #' @param logging boolean parameter indicating whether or not a single iteration should be run with print messages indicating successful completion of the Sampler's sub modules
-#' @param summarize_yhat boolean value indicating whether a single mean vector of yhat values should be returned instead of a N X num samples matrix. Useful in situations where N is large.
 #' @export
 #' 
-fdp_staplmer.fit <- function(y,Z,X,W,S,
+fdp_staplmer.fit <- function(y,Z,X,W,
                              subj_mat,
-              							 subj_n,
-              							 weights = rep(1,length(y)),
-              							 alpha_a = 1,
-              							 alpha_b = 1, 
-              							 sigma_a = 1,
-              							 sigma_b = 1,
-              							 tau_a = 1,
-              							 tau_b = 1,
-              							 K = 5L,
-              							 iter_max,
-              							 burn_in,
-              							 thin = 1L,
-              							 fix_alpha = FALSE,
-              							 bw = FALSE,
-              							 seed = NULL,
-              							 chain = 1L,
-              							 logging = FALSE,
-              							 summarize_yhat = FALSE
-              							 ){
+							 subj_n,
+							 weights = rep(1,length(y)),
+							 alpha_a = 1,
+							 alpha_b = 1, 
+							 sigma_a = 1,
+							 sigma_b = 1,
+							 tau_a = 1,
+							 tau_b = 1,
+							 K = 5L,
+							 threshold = 0L,
+							 iter_max,
+							 burn_in,
+							 thin = 1L,
+							 fix_alpha = FALSE,
+							 bw = FALSE,
+							 seed = NULL,
+							 chain = 1L,
+							 logging = FALSE
+							 ){
 
 	stopifnot(c(sigma_a,sigma_b,tau_a,tau_b,alpha_a,alpha_b)>0)
 	stopifnot(length(weights) == length(y))
@@ -214,29 +220,34 @@ fdp_staplmer.fit <- function(y,Z,X,W,S,
   stopifnot(num_posterior_samples>0)
 
 	if(bw){
-	  num_penalties <- length(S[[1]])
-	  S_b <- do.call(cbind,S[[1]])
-	  S_w <- do.call(cbind,S[[2]])
 	  X_b <- X[[1]]
 	  X_w <- X[[2]]
-	  fit <- stappDP_merdecomp(y,Z,X_b,X_w,W,S_b,S_w,
-							   weights,subj_mat,
-							   subj_n,alpha_a,alpha_b,
-							   sigma_a,sigma_b,tau_a,tau_b,
-							   K,num_penalties,iter_max,burn_in,
-							   thin,seed,num_posterior_samples,chain,fix_alpha
-							  )
+	  fit <- stappDP_merdecomp(y = y ,Z = Z,
+							   X_b = X_b, X_w = X_w,
+							   W = W, w = weights,
+							   subj_mat_ = subj_mat, subj_n = subj_n,
+							   alpha_a =  alpha_a, alpha_b = alpha_b,
+							   sigma_a = sigma_a,sigma_b = sigma_b,
+							   tau_a = tau_a, tau_b = tau_b,
+							   K = K, threshold = threshold,
+							   iter_max = iter_max, burn_in = burn_in,
+							   thin = thin,seed = seed, 
+							   num_posterior_samples = num_posterior_samples,
+							   chain = chain, fix_alpha = fix_alpha,
+							   logging = logging)
 
 	}else{
-	  num_penalties <- length(S) ## default for smoothing
-	  S <- do.call(cbind,S)
-	  X <- do.call(cbind,X)
-	  fit <- stappDP_mer_fit(y,Z,X,W,S,weights,subj_mat,
-							 subj_n,alpha_a,alpha_b,
-							 sigma_a,sigma_b,tau_a,tau_b,
-							 K,num_penalties,iter_max,burn_in,
-							 thin,seed,chain,num_posterior_samples,
-							 fix_alpha,logging,summarize_yhat)
+	  fit <- stappDP_mer_fit(y = y,Z = Z, X = X, W = W,w = weights,
+							 subj_mat_ = subj_mat,subj_n = subj_n,
+							 alpha_a = alpha_a,alpha_b = alpha_b,
+							 sigma_a = sigma_a, sigma_b = sigma_b,
+							 tau_a = tau_a, tau_b = tau_b,
+							 K = K, threshold = threshold,
+							 iter_max = iter_max, burn_in = burn_in,
+							 thin = thin,seed = seed, chain = chain,
+							 num_posterior_samples = num_posterior_samples,
+							 fix_alpha = fix_alpha,
+							 logging = logging)
 	}
 
 

@@ -29,17 +29,11 @@ void FDPPSampler_mer::iteration_sample(std::mt19937 &rng){
 	adjust_beta(rng);
 	log_message("beta sampled");
 
-	/*
-	Rcpp::Rcout << "unique_taus: \n" << unique_taus.block(0,0,2,2) << std::endl;
-	Rcpp::Rcout << "beta: \n" <<  beta.head(20) << std::endl;
-	*/
-
 	// check for errors
 	if(std::isnan(beta(0)) & flag ){
-		Rcpp::Rcout << "The dynamic design matrix failed to invert successfully" << std::endl;
-		Rcpp::Rcout << " V block: \n" << V.block(0,0,10,10) << std::endl;
-		Rcpp::Rcout << "cluster count" << cluster_count.transpose() << std::endl;
-		Rcpp::Rcout << "taus: \n " << unique_taus << std::endl;
+		Rcpp::Rcout << "There was an error inverting the design matrix" << std::endl;
+		Rcpp::Rcout << "You may need to adjust the threshold parameter" << std::endl;
+		Rcpp::Rcout << "Find out more in ?fdp_staplmer.fit" << std::endl;
 		flag = false;
 	}
 
@@ -132,7 +126,7 @@ void FDPPSampler_mer::adjust_zero_clusters(std::mt19937 &rng){
 
 	for(int k = 0; k < K; k++){
 		cluster_count(k) = (iter_cluster_assignment == k).count();
-		if(cluster_count(k) == 0)
+		if(cluster_count(k) <=threshold)
 			num_nonzero --;
 	}
 
@@ -147,7 +141,7 @@ void FDPPSampler_mer::adjust_zero_clusters(std::mt19937 &rng){
 
 	int k_ = 0;
 	for(int k = 0; k < K; k++){
-		if(cluster_count(k)!=0){
+		if(cluster_count(k)>threshold){
 			X_K.block(0,k_*P_two,N,P_two) = (subj_mat * cluster_matrix.col(k)).asDiagonal() * X;
 			nonzero_ics.block(P+k*P_two,P+k_*P_two,P_two,P_two) = Eigen::MatrixXd::Identity(P_two,P_two);
 			k_ ++;
@@ -172,56 +166,33 @@ void FDPPSampler_mer::draw_var(std::mt19937 &rng){
 	residual = y - X_fit * beta_temp - Wb;
 	s = (residual.transpose() * w.asDiagonal()).dot(residual) * .5;
 	s += .5 * (beta_temp.transpose() * nonzero_ics.transpose() * PenaltyMat * nonzero_ics).dot(beta_temp) ;
-	std::gamma_distribution<double> rgamma(sigma_a + N/2 + P_two*num_nonzero, 1/( (1 / sigma_b) + s) );
-	std::normal_distribution<double> rnorm(0,1);
-	std::uniform_real_distribution<double> runif(0,1);
+	std::gamma_distribution<double> rgamma(sigma_a + N*.5 + P_two*num_nonzero*.5, 1/( (1 / sigma_b) + s) );
 	precision = rgamma(rng);
 	sigma = sqrt(1 / precision);
 	double prop = 0;
 	PenaltyMat.setZero(Q,Q);
 	for(int k = 0; k< K; k++){
-		if(cluster_count(k)!=0){
-			for(int pen_ix = 0; pen_ix < num_penalties; pen_ix ++){
-				prop = exp(rnorm(rng)*.5 + unique_taus(k,pen_ix));
-				if(calculate_penalty_ratio(prop,k,pen_ix) >= log(runif(rng))){
-					unique_taus(k,pen_ix) = prop;
-					update_penaltymat(k,pen_ix);
-					Rcpp::Rcout << pen_ix << " accepted! " << std::endl;
-				}
-			}
-		}else{
+		if(cluster_count(k)>threshold){
+				temp_scale = calculate_penalty_scale(k);
+				std::gamma_distribution<double> rgamma_tau(tau_a + P_two*.5 , 1/( (1/tau_b) + temp_scale) );
+				unique_taus(k) = rgamma_tau(rng);
+				update_penaltymat(k);
+		}
+		else{
 			std::gamma_distribution<double> rgamma_tau_prior(tau_a,1/tau_b);
-			for(int pen_ix = 0; pen_ix < num_penalties; pen_ix ++){
-				unique_taus(k,pen_ix) = rgamma_tau_prior(rng);
-				update_penaltymat(k,pen_ix);
-			}
+				unique_taus(k) = rgamma_tau_prior(rng);
+				update_penaltymat(k);
 		}
 	}
 
 }
 
-double FDPPSampler_mer::calculate_penalty_ratio(double &prop, const int &k, const int &pen_ix){
+double FDPPSampler_mer::calculate_penalty_scale(const int &k){
 
-	double ratio = 0;
-	int not_pen = pen_ix == 0 ? 1 : 0;
-	int col_ix_one = P+Q*pen_ix + k*P_two;
-	int col_ix_two = P+Q*not_pen + k*P_two;
-	int diag_ix = P+k*P_two;
-	Eigen::MatrixXd Omega = prop * S.block(diag_ix,col_ix_one,P_two,P_two) + unique_taus(k,not_pen) * S.block(diag_ix,col_ix_two,P_two,P_two);
-	//proposed  -- accounts for jacobian by  tau_a - 1 --> tau_a since (tau_a -1) * log(prop) + log(prop) = tau_a*log(prop)
-	ratio += .5 * log(Omega.determinant()) + tau_a  * log(prop) + tau_b - .5 * (beta.segment(diag_ix,P_two).transpose() * Omega).dot(
-			beta.segment(diag_ix,P_two)) ;
-	Omega = unique_taus(k,pen_ix) * S.block(diag_ix,col_ix_one,P_two,P_two) + unique_taus(k,not_pen) * S.block(diag_ix,col_ix_two,P_two,P_two);
-	if(flag)
-		Rcpp::Rcout << "ratio 1: " << ratio << std::endl;
-	//current
-	ratio -= .5 *log(Omega.determinant()) + tau_a * log(unique_taus(k,pen_ix)) + tau_b - .5 * (beta.segment(diag_ix,P_two).transpose() * Omega).dot(
-			beta.segment(diag_ix,P_two));
-	if(flag)
-		Rcpp::Rcout << "ratio 2: " << ratio << std::endl;
-
-	return(ratio);
+	double out = .5 * beta.segment(P + P_two *k,P_two).squaredNorm();
+	return(out);
 }
+
 
 void FDPPSampler_mer::store_samples(Eigen::ArrayXXd &beta_samples,
 								   Eigen::ArrayXd &sigma_samples,
@@ -244,8 +215,7 @@ void FDPPSampler_mer::store_samples(Eigen::ArrayXXd &beta_samples,
 	Eigen::MatrixXd temp = subj_D.inverse();
 	Eigen::Map<Eigen::RowVectorXd> subj_D_row(temp.data(),temp.size());
 	subj_D_samples.row(sample_ix) = subj_D_row;
-	for(int pen_ix = 0; pen_ix < num_penalties; pen_ix ++)
-		tau_samples.block(sample_ix,K*pen_ix,1,K) = unique_taus.col(pen_ix);
+	tau_samples.row(sample_ix) = unique_taus.transpose();
 	yhat_samples.row(sample_ix) = yhat;
 	sample_ix ++;
 	for(int i = 0; i< n; i ++){
@@ -265,10 +235,8 @@ void FDPPSampler_mer::initialize_beta(std::mt19937 &rng){
 		beta(p) = rnorm(rng);
 
 	for(int k = 0; k< K; k++){
-		for(int pen_ix = 0; pen_ix < num_penalties; pen_ix ++ ){
-			unique_taus(k,pen_ix) = rgamma(rng);
-			update_penaltymat(k,pen_ix);
-		}
+		unique_taus(k) = rgamma(rng);
+		update_penaltymat(k);
 	}
 
 	for(int i = 0; i < n ; i ++){
@@ -295,13 +263,10 @@ void FDPPSampler_mer::draw_zb(std::mt19937 &rng){
 		z_b(ix) = rnorm(rng);
 }
 
-void FDPPSampler_mer::update_penaltymat(const int &k,const int &pen_ix){
+void FDPPSampler_mer::update_penaltymat(const int &k){
 
-	int col_ix = P + Q*pen_ix + k*P_two;
-	int diag_ix = P+k*P_two;
-	PenaltyMat.block(diag_ix,diag_ix,P_two,P_two) = 
-				PenaltyMat.block(diag_ix,diag_ix,P_two,P_two) + 
-				unique_taus(k,pen_ix) * S.block(diag_ix,col_ix,P_two,P_two);
+	int diag_ix = P + k*P_two;
+	PenaltyMat.block(diag_ix,diag_ix,P_two,P_two) = Eigen::MatrixXd::Identity(P_two,P_two) * unique_taus(k);
 }
 
 void FDPPSampler_mer::adjust_beta(std::mt19937 &rng){
@@ -309,9 +274,9 @@ void FDPPSampler_mer::adjust_beta(std::mt19937 &rng){
 	std::normal_distribution<double> rnorm(0,1);
 
 	for(int k = 0; k < K ; k++){
-		if(cluster_count(k)==0){
+		if(cluster_count(k)<=threshold){
 			for(int p = 0; p < P_two; p++)
-				beta(P+P_two*k+p) = rnorm(rng)*sigma * sqrt(1/unique_taus(k,0));
+				beta(P+P_two*k+p) = rnorm(rng)*sigma * sqrt(1/unique_taus(k,p));
 		}
 	}
 }

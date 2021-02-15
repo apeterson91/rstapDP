@@ -36,10 +36,14 @@ FFR_effect <- function(riskcat,distance){
 
 FFR_distances <- purrr::map_dfr(1:length(ldists), 
                                 function(x) {
-                                  dplyr::tibble(ix=x,Distance=ldists[[x]])}) %>% 
-  dplyr::right_join(visit_num %>% dplyr::mutate(ix=1:dplyr::n())) %>%
-  dplyr::filter(!is.na(Distance)) %>%
-  dplyr::select(id,measurement,Distance)
+                                  dplyr::tibble(ix=x,
+                                                Distance = ldists[[x]])
+                                  }) %>% 
+  dplyr::right_join(visit_num %>% 
+                      dplyr::mutate(ix=1:dplyr::n())) %>%
+  dplyr::filter(!is.na(Distance)) %>% group_by(ix) %>% 
+  mutate(BEF_ID = 1:n()) %>% ungroup(ix) %>% select(-ix)
+  
 
 FFR_distances %>% dplyr::right_join(visit_num) %>% dplyr::left_join(sjdf) %>% 
   dplyr::group_by(id,measurement) %>% 
@@ -57,7 +61,7 @@ sjdf$BMI <- 33 +  sjdf$sex* -2.2 + .1*sjdf$year +
 
 
 
-complex_longitudinal_clusters <- benvo(subject_data = sjdf,
+complex_longitudinal_clusters <- rbenvo::benvo(subject_data = sjdf,
                                        sub_bef_data = list(FFR=FFR_distances))
 
 usethis::use_data(complex_longitudinal_clusters, overwrite = TRUE)

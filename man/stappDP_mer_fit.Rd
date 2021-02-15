@@ -9,7 +9,6 @@ stappDP_mer_fit(
   Z,
   X,
   W,
-  S,
   w,
   subj_mat_,
   subj_n,
@@ -20,7 +19,7 @@ stappDP_mer_fit(
   tau_a,
   tau_b,
   K,
-  num_penalties,
+  threshold,
   iter_max,
   burn_in,
   thin,
@@ -28,8 +27,7 @@ stappDP_mer_fit(
   chain,
   num_posterior_samples,
   fix_alpha,
-  logging,
-  summarize_yhat
+  logging
 )
 }
 \arguments{
@@ -40,8 +38,6 @@ stappDP_mer_fit(
 \item{X}{a matrix of spatial temporal aggregated predictors}
 
 \item{W}{a design matrix for group specific terms}
-
-\item{S}{penalty matrix for stap parameters}
 
 \item{w}{a vector of weights for weighted regression}
 
@@ -63,7 +59,7 @@ stappDP_mer_fit(
 
 \item{K}{truncation number}
 
-\item{num_penalties}{number of penalty matrices accounted for in S}
+\item{threshold}{number of members per cluster at which cluster is included in regression}
 
 \item{iter_max}{maximum number of iterations}
 
@@ -80,8 +76,6 @@ stappDP_mer_fit(
 \item{fix_alpha}{boolean value that determines whether or not to fix alpha in sampler}
 
 \item{logging}{boolean parameter indicating whether or not a single iteration should be run with print messages indicating successful completion of the Sampler's sub modules}
-
-\item{summarize_yhat}{boolean value indicating whether a single mean vector of yhat values should be returned instead of a N X num samples matrix. Useful in situations where N is large.}
 }
 \description{
 fits a functional dirichlet process linear mixed effects regression model

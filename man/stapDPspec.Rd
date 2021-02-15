@@ -4,12 +4,10 @@
 \alias{stapDPspec}
 \title{Create STAP-DP data structure}
 \usage{
-stapDPspec(stapless_formula, fake_formula, stap_mat, K, benvo)
+stapDPspec(stapless_formula, stap_mat, K, benvo)
 }
 \arguments{
 \item{stapless_formula}{from \code{\link{get_stapDPspec}}}
-
-\item{fake_formula}{list of ``fake'' formulas from \code{\link{get_stapDPspec}}}
 
 \item{stap_mat}{matrix of stap specification properties}
 

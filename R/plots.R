@@ -101,10 +101,80 @@ plot.stapDP <- function(x,p = 0.95,
 		  ggplot2::facet_wrap(~K) + 
 		  ggplot2::theme(strip.background=ggplot2::element_blank()) +
 		  ggplot2::geom_label(ggplot2::aes(x=x,y=y,label=Prob),data=kprob) +
-		  ggplot2::labs(y="Exposure Effect") -> pl
+		  ggplot2::labs(y = "Exposure Effect") -> pl
 	}
 
 	return(pl)
+
+}
+
+#' Cluster-Specific Spatial Temporal Effects  Plot Dataframe
+#' 
+#' Returns the plotting dataframe used for plotting the clustered spatial exposure effects
+#' @export
+#' @param x stapDP object
+#' @param p probability contained in credible interval
+#' @param  prob_filter all mixture components with median probability < prob_filter are excluded from the plot
+#' @return plot with cluster effect across space
+#' 
+plotdf <- function(x, p = 0.95, prob_filter = 0.1)
+	UseMethod("plotdf")
+
+#' @describeIn plotdf
+#' @export 
+plotdf.stapDP <- function(x,
+						  p = 0.95, 
+						  prob_filter = 0.1){
+
+	K <- Samples <- Parameter <- Lower <- Upper <- medp <- iteration_ix <- 
+		Model <- Prob <- . <- Distance <- Median <- P <- y <- RSS <- mnRSS <- NULL
+
+	stopifnot(p >= 0 && p <= 1)
+	l <-  .5 - p/2
+	u <- .5 + p/2
+	spec <- x$spec
+	term <- x$spec$term[1]
+	comp <- x$spec$component[1]
+	gd_eta <- get_stap(spec,term,comp,x$beta)
+
+	kprob <- apply(x$probs,2,median)
+	ks_to_keep <- which(kprob>prob_filter)
+	gd_eta <- get_stap(spec,term,comp,x$beta)
+
+	if(has_bw(spec)){
+		pltdf <- purrr::map_dfr(ks_to_keep,function(x)
+								  dplyr::tibble(Distance = gd_eta$grid$Distance,
+												K = x,
+												Model = "Between",
+												Lower = apply(gd_eta$eta_b[,,x],1,function(y) quantile(y,l)),
+												Median = apply(gd_eta$eta_b[,,x],1,median),
+												Upper = apply(gd_eta$eta_b[,,x],1,function(y) quantile(y,u))) %>%
+								  rbind(.,
+										dplyr::tibble(Distance = gd_eta$grid$Distance,
+													  K = x,
+													  Model = "Within",
+													  Lower = apply(gd_eta$eta_w[,,x],1,function(y) quantile(y,l)),
+													  Median = apply(gd_eta$eta_w[,,x],1,median),
+													  Upper = apply(gd_eta$eta_w[,,x],1,function(y) quantile(y,u)))
+								  )
+		)  %>% dplyr::mutate(K = factor(K))
+	}
+
+	gd <- gd_eta$grid
+
+	eta <- gd_eta$eta
+
+
+	pltdf <- purrr::map_dfr(ks_to_keep,function(x)
+							  dplyr::tibble(Distance = gd$Distance,
+							                K = x,
+							                Lower = apply(eta[,,x],1,function(y) quantile(y,l)),
+							                Median = apply(eta[,,x],1,median),
+							                Upper = apply(eta[,,x],1,function(y) quantile(y,u)))) %>%
+	dplyr::mutate(K = factor(K))
+
+
+	return(pltdf)
 
 }
 

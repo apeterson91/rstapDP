@@ -8,7 +8,6 @@ fdp_staplm.fit(
   y,
   Z,
   X,
-  S,
   weights = rep(1, length(y)),
   alpha_a = 1,
   alpha_b = 1,
@@ -22,7 +21,9 @@ fdp_staplm.fit(
   thin = 1L,
   fix_alpha = FALSE,
   seed = NULL,
-  chain = 1L
+  chain = 1L,
+  logging = FALSE,
+  threshold = 0
 )
 }
 \arguments{
@@ -31,8 +32,6 @@ fdp_staplm.fit(
 \item{Z}{design matrix}
 
 \item{X}{stap design matrix}
-
-\item{S}{list of penalty matrices from \code{\link[mgcv]{jagam}}}
 
 \item{weights}{weights for weighted regression - default is vector of ones}
 
@@ -44,9 +43,9 @@ fdp_staplm.fit(
 
 \item{sigma_b}{precision gamma prior hyperparameter}
 
-\item{tau_a}{penalty parameters gamma prior hyperparameter}
+\item{tau_a}{penalty parameter gamma prior hyperparameter}
 
-\item{tau_b}{penalty parameters gamma prior hyperparameter}
+\item{tau_b}{penalty parameter gamma prior hyperparameter}
 
 \item{K}{truncation number for DP mixture components}
 
@@ -61,6 +60,10 @@ fdp_staplm.fit(
 \item{seed}{random number generator seed will be set to default value if not by user}
 
 \item{chain}{chain label}
+
+\item{logging}{boolean parameter indicating whether or not a single iteration should be run with print messages indicating successful completion of the Sampler's sub modules}
+
+\item{threshold}{number of observations assigned to a cluster that may be considered negligble. Default is 0, but may need to be increased to 3,4, or 5 depending on how informative the data is.}
 }
 \description{
 Functional Dirichlet Process Spatial Temporal Aggregated Predictor Linear Model Fit

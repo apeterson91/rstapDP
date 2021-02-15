@@ -10,7 +10,6 @@ class FDPPSampler
 		const Eigen::VectorXd &y;
 		const Eigen::MatrixXd &Z;
 		const Eigen::MatrixXd &X;
-		const Eigen::MatrixXd &S;
 		const Eigen::VectorXd &w;
 		Eigen::VectorXd yhat;
 		Eigen::MatrixXd X_fit;
@@ -28,7 +27,7 @@ class FDPPSampler
 		Eigen::VectorXd beta_temp;
 		Eigen::VectorXd z;
 		Eigen::ArrayXXd b;
-		Eigen::ArrayXXd unique_taus;
+		Eigen::ArrayXd unique_taus;
 		const double alpha_b;
 		const double sigma_a; 
 		const double sigma_b; 
@@ -45,16 +44,17 @@ class FDPPSampler
 		const int P;
 		const int P_two;
 		const int n;
-		const int K;
 		const int Q;
-		const int num_penalties;
+		const int K;
+		const int &threshold;
 		int sample_ix = 0;
 		int num_nonzero;
 		int temp_Q;
 		Eigen::MatrixXd nonzero_ics;
 		bool initializing = true;
 		bool flag = true;
-		const bool fix_alpha;
+		const bool &fix_alpha;
+		const bool &logging;
 		const double log_factor;
 
 	public:
@@ -62,37 +62,38 @@ class FDPPSampler
 		FDPPSampler(const Eigen::VectorXd &y,
 				   const Eigen::MatrixXd &Z,
 				   const Eigen::MatrixXd &X,
-				   const Eigen::MatrixXd &S,
 				   const Eigen::VectorXd &w,
 				   const double &alpha_a,
 				   const double &alpha_b,
-				   const double &sigma_a,
-				   const double &sigma_b,
 				   const double &tau_a,
 				   const double &tau_b,
+				   const double &sigma_a,
+				   const double &sigma_b,
 				   const int &K,
-				   const int &num_penalties,
+				   const bool &logging,
+				   const int &threshold,
 				   const bool &fix_alpha,
 				   std::mt19937 &rng
 				   ): 
-			y(y), Z(Z), X(X), S(S),  w(w),
+			y(y), Z(Z), X(X),  w(w),
 			alpha_b(alpha_b),sigma_a(sigma_a),
 			sigma_b(sigma_b),
 			tau_a(tau_a), tau_b(tau_b),
 			P(Z.cols()), 
 			P_two(X.cols()),
 			n(y.rows()),
+			Q(Z.cols() + X.cols()*K),
 			K(K),
-			Q(Z.cols() + X.cols()*K), 
-			num_penalties(num_penalties),
+			threshold(threshold),
 			fix_alpha(fix_alpha),
+			logging(logging),
 			log_factor(log(pow(10,-16)) - log(n))
 	{
 		num_nonzero = K;
 		temp_Q = P + P_two * num_nonzero;
 		PenaltyMat.setZero(Q,Q); 
 		P_matrix.setZero(n,n);
-		unique_taus.setZero(K,num_penalties);
+		unique_taus.setZero(K);
 		z.setZero(temp_Q); 
 		beta.setZero(Q); 
 		nonzero_ics = Eigen::MatrixXd::Identity(temp_Q,temp_Q);
@@ -152,13 +153,18 @@ class FDPPSampler
 
 		void initialize_beta(std::mt19937 &rng);
 
-		void update_penaltymat(const int &k, const int &pen_ix);
+		void update_penaltymat(const int &k);
 
 		void adjust_zero_clusters(std::mt19937 &rng);
 
-		double calculate_penalty_scale(const int &k, const int &pen_ix);
+		double calculate_penalty_scale(const int &k);
 
 		void adjust_beta(std::mt19937 &rng);
+
+		void log_message(const std::string& input){
+			if(logging)
+				Rcpp::Rcout << "Log: " <<  input << std::endl;
+		}
 
 };
 

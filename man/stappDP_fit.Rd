@@ -8,7 +8,6 @@ stappDP_fit(
   y,
   Z,
   X,
-  S,
   w,
   alpha_a,
   alpha_b,
@@ -17,14 +16,15 @@ stappDP_fit(
   tau_a,
   tau_b,
   K,
-  num_penalties,
+  threshold,
   iter_max,
   burn_in,
   thin,
   seed,
   num_posterior_samples,
   chain,
-  fix_alpha
+  fix_alpha,
+  logging
 )
 }
 \arguments{
@@ -33,8 +33,6 @@ stappDP_fit(
 \item{Z}{a matrix of population level confounders}
 
 \item{X}{a matrix of spatial temporal aggregated predictors}
-
-\item{S}{penalty matrix for stap parameters}
 
 \item{w}{a vector of weights for weighted regression}
 
@@ -52,7 +50,7 @@ stappDP_fit(
 
 \item{K}{truncation number}
 
-\item{num_penalties}{number of penalty matrices accounted for in S}
+\item{threshold}{number of members per cluster at which cluster is included in regression}
 
 \item{iter_max}{maximum number of iterations}
 
@@ -67,6 +65,8 @@ stappDP_fit(
 \item{chain}{chain label}
 
 \item{fix_alpha}{boolean value that determines whether or not to fix alpha in sampler}
+
+\item{logging}{boolean parameter indicating whether or not a single iteration should be run with print messages indicating successful completion of the Sampler's sub modules}
 }
 \description{
 Penalized Functional Dirichlet Process Linear Regression with N observations
