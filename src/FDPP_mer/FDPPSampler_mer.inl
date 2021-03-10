@@ -169,27 +169,37 @@ void FDPPSampler_mer::draw_var(std::mt19937 &rng){
 	std::gamma_distribution<double> rgamma(sigma_a + N*.5 + P_two*num_nonzero*.5, 1/( (1 / sigma_b) + s) );
 	precision = rgamma(rng);
 	sigma = sqrt(1 / precision);
-	double prop = 0;
+	double temp_scale;
 	PenaltyMat.setZero(Q,Q);
 	for(int k = 0; k< K; k++){
 		if(cluster_count(k)>threshold){
-				temp_scale = calculate_penalty_scale(k);
-				std::gamma_distribution<double> rgamma_tau(tau_a + P_two*.5 , 1/( (1/tau_b) + temp_scale) );
+				temp_scale = calculate_penalty_scale(k,subset_one,false);
+				std::gamma_distribution<double> rgamma_tau(tau_a + subset_one*.5 , 1/( (1/tau_b) + temp_scale) );
 				unique_taus(k) = rgamma_tau(rng);
-				update_penaltymat(k);
+				update_penaltymat(k,subset_one,false);
+				temp_scale = calculate_penalty_scale(k,subset_two,true);
+				std::gamma_distribution<double> rgamma_tau2(tau_a + subset_two*.5 , 1/( (1/tau_b) + temp_scale) );
+				unique_tau2s(k) = rgamma_tau2(rng);
+				update_penaltymat(k,subset_two,true);
 		}
 		else{
 			std::gamma_distribution<double> rgamma_tau_prior(tau_a,1/tau_b);
-				unique_taus(k) = rgamma_tau_prior(rng);
-				update_penaltymat(k);
+			unique_taus(k) = rgamma_tau_prior(rng);
+			update_penaltymat(k,subset_one,false);
+			std::gamma_distribution<double> rgamma_tau2_prior(tau_a,1/tau_b);
+			unique_tau2s(k) = rgamma_tau2_prior(rng);
+			update_penaltymat(k,subset_two,true);
 		}
 	}
 
 }
 
-double FDPPSampler_mer::calculate_penalty_scale(const int &k){
+double FDPPSampler_mer::calculate_penalty_scale(const int &k, const int &subset, const bool second){
 
-	double out = .5 * beta.segment(P + P_two *k,P_two).squaredNorm();
+	double out = 0;
+	int diag_ix = P+k*P_two;
+	diag_ix += second ? P_two - subset : 0;
+	out = .5 * beta.segment(diag_ix,subset).squaredNorm();
 	return(out);
 }
 
@@ -198,6 +208,7 @@ void FDPPSampler_mer::store_samples(Eigen::ArrayXXd &beta_samples,
 								   Eigen::ArrayXd &sigma_samples,
 								   Eigen::ArrayXXd &pi_samples,
 								   Eigen::ArrayXXd &tau_samples,
+								   Eigen::ArrayXXd &tau2_samples,
 								   Eigen::ArrayXd &alpha_samples,
 								   Eigen::ArrayXXi &cluster_assignment,
 								   Eigen::ArrayXXd &yhat_samples,
@@ -216,6 +227,7 @@ void FDPPSampler_mer::store_samples(Eigen::ArrayXXd &beta_samples,
 	Eigen::Map<Eigen::RowVectorXd> subj_D_row(temp.data(),temp.size());
 	subj_D_samples.row(sample_ix) = subj_D_row;
 	tau_samples.row(sample_ix) = unique_taus.transpose();
+	tau2_samples.row(sample_ix) = unique_tau2s.transpose();
 	yhat_samples.row(sample_ix) = yhat;
 	sample_ix ++;
 	for(int i = 0; i< n; i ++){
@@ -236,7 +248,9 @@ void FDPPSampler_mer::initialize_beta(std::mt19937 &rng){
 
 	for(int k = 0; k< K; k++){
 		unique_taus(k) = rgamma(rng);
-		update_penaltymat(k);
+		update_penaltymat(k,subset_one,false);
+		unique_tau2s(k) = rgamma(rng);
+		update_penaltymat(k,subset_two,true);
 	}
 
 	for(int i = 0; i < n ; i ++){
@@ -263,20 +277,25 @@ void FDPPSampler_mer::draw_zb(std::mt19937 &rng){
 		z_b(ix) = rnorm(rng);
 }
 
-void FDPPSampler_mer::update_penaltymat(const int &k){
+void FDPPSampler_mer::update_penaltymat(const int &k,const int &subset,const bool second){
 
-	int diag_ix = P + k*P_two;
-	PenaltyMat.block(diag_ix,diag_ix,P_two,P_two) = Eigen::MatrixXd::Identity(P_two,P_two) * unique_taus(k);
+	int diag_ix = P+k*P_two;
+	diag_ix += second ? P_two - subset : 0;
+	double penalty = second ? unique_tau2s(k) : unique_taus(k);
+	PenaltyMat.block(diag_ix,diag_ix,subset,subset) = Eigen::MatrixXd::Identity(subset,subset) *  penalty;
 }
 
 void FDPPSampler_mer::adjust_beta(std::mt19937 &rng){
 
 	std::normal_distribution<double> rnorm(0,1);
+	double sd = 1;
 
 	for(int k = 0; k < K ; k++){
 		if(cluster_count(k)<=threshold){
-			for(int p = 0; p < P_two; p++)
-				beta(P+P_two*k+p) = rnorm(rng)*sigma * sqrt(1/unique_taus(k,p));
+			for(int p = 0; p < P_two; p++){
+				sd = p < subset_one ? sqrt(1/unique_taus(k)) :  sqrt(1/unique_tau2s(k));
+				beta(P+P_two*k+p) = rnorm(rng)*sigma * sd;
+			}
 		}
 	}
 }

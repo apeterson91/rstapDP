@@ -26,6 +26,8 @@
 //' @param tau_a penalty gamma prior shape hyperparameter
 //' @param tau_b penalty gamma prior scale hyperparameter
 //' @param K truncation number
+//' @param subset_one rank of first smoothing matrix
+//' @param subset_two rank of second smoothing matrix
 //' @param threshold number of members per cluster at which cluster is included in regression
 //' @param iter_max maximum number of iterations
 //' @param burn_in number of burn in iterations
@@ -47,6 +49,8 @@ Rcpp::List stappDP_fit(const Eigen::VectorXd &y,
 					   const double &tau_a,
 					   const double &tau_b,
 					   const int &K,
+					   const int &subset_one,
+					   const int &subset_two,
 					   const int &threshold,
 					   const int &iter_max,
 					   const int &burn_in,
@@ -69,6 +73,7 @@ Rcpp::List stappDP_fit(const Eigen::VectorXd &y,
 	Eigen::ArrayXXd pi_samples;
 	Eigen::ArrayXXd yhat_samples;
 	Eigen::ArrayXXd tau_samples;
+	Eigen::ArrayXXd tau2_samples;
 	Eigen::ArrayXXi cluster_assignment;
 	cluster_assignment.setZero(num_posterior_samples,y.rows());
 	alpha_samples.setZero(num_posterior_samples);
@@ -76,11 +81,18 @@ Rcpp::List stappDP_fit(const Eigen::VectorXd &y,
 	sigma_samples.setZero(num_posterior_samples);
 	pi_samples.setZero(num_posterior_samples,K);
 	tau_samples.setZero(num_posterior_samples,K);
+	tau2_samples.setZero(num_posterior_samples,K);
 	yhat_samples.setZero(num_posterior_samples,y.rows());
 
 
-	FDPPSampler sampler(y,Z,X,w, alpha_a,alpha_b,tau_a,tau_b,
-						sigma_a,sigma_b,K,logging,threshold,fix_alpha,rng);
+	Progress p(0,false);
+	FDPPSampler sampler(y,Z,X,w,
+						alpha_a,alpha_b,
+						tau_a,tau_b,
+						sigma_a,sigma_b,K,
+						subset_one,subset_two,
+						logging,threshold,
+						fix_alpha,rng);
 
 	if(logging){
 		sampler.iteration_sample(rng);
@@ -91,10 +103,15 @@ Rcpp::List stappDP_fit(const Eigen::VectorXd &y,
 
 		print_progress(iter_ix,burn_in,iter_max,chain);
 
+		if(iter_ix % 100 == 0){
+			if(Progress::check_abort())
+				return(Rcpp::List::create(Rcpp::Named("log status") = 1));
+		}
+
 		sampler.iteration_sample(rng);
 		if(iter_ix > burn_in && (iter_ix % thin == 0)){
 			sampler.store_samples(beta_samples,sigma_samples,pi_samples,
-								  tau_samples,alpha_samples,
+								  tau_samples,tau2_samples,alpha_samples,
 								  cluster_assignment,yhat_samples);
 		}
 	}
@@ -106,6 +123,7 @@ Rcpp::List stappDP_fit(const Eigen::VectorXd &y,
                               Rcpp::Named("sigma") = sigma_samples,
 							  Rcpp::Named("alpha") = alpha_samples,
 							  Rcpp::Named("tau") = tau_samples,
+							  Rcpp::Named("tau2") = tau2_samples,
 							  Rcpp::Named("yhat") = yhat_samples,
 							  Rcpp::Named("cluster_assignment") = cluster_assignment,
 							  Rcpp::Named("PairwiseProbabilityMat") = sampler.P_matrix / num_posterior_samples );
@@ -134,6 +152,8 @@ typedef Eigen::SparseMatrix<double> SpMat;
 //' @param tau_a penalty gamma prior shape hyperparameter
 //' @param tau_b penalty gamma prior scale hyperparameter
 //' @param K truncation number
+//' @param subset_one rank of first smoothing matrix
+//' @param subset_two rank of second smoothing matrix
 //' @param threshold number of members per cluster at which cluster is included in regression
 //' @param iter_max maximum number of iterations
 //' @param burn_in number of burn in iterations
@@ -158,6 +178,8 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 						   const double &tau_a,
 						   const double &tau_b,
 						   const int &K,
+						   const int &subset_one,
+						   const int &subset_two,
 						   const int &threshold,
 						   const int &iter_max,
 						   const int &burn_in,
@@ -184,6 +206,7 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 	Eigen::ArrayXXd pi_samples;
 	Eigen::ArrayXXd yhat_samples;
 	Eigen::ArrayXXd tau_samples;
+	Eigen::ArrayXXd tau2_samples;
 	Eigen::ArrayXXi cluster_assignment;
 	Eigen::ArrayXXd b_samples;
 	Eigen::ArrayXXd D_samples;
@@ -193,6 +216,7 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 	sigma_samples.setZero(num_posterior_samples);
 	pi_samples.setZero(num_posterior_samples,K);
 	tau_samples.setZero(num_posterior_samples,K);
+	tau2_samples.setZero(num_posterior_samples,K);
 	yhat_samples.setZero(num_posterior_samples,y.rows());
 	b_samples.setZero(num_posterior_samples,W.cols()*subj_mat.cols());
 	D_samples.setZero(num_posterior_samples,W.cols()*W.cols());
@@ -200,11 +224,10 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 	Progress p(0,false);
 	FDPPSampler_mer sampler(y,Z,X,W,w,
 							subj_mat,subj_n,
-							alpha_a,
-							alpha_b,
-							sigma_a, sigma_b,
+							alpha_a,alpha_b, sigma_a, sigma_b,
 							tau_a,tau_b,
-							K,threshold,
+							K,subset_one,
+							subset_two,threshold,
 							fix_alpha,logging,rng);
 	if(logging){
 		sampler.iteration_sample(rng);
@@ -223,9 +246,9 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 
 		if(iter_ix > burn_in && (iter_ix % thin == 0)){
 			sampler.store_samples(beta_samples,sigma_samples,pi_samples,
-								  tau_samples,alpha_samples,
-								  cluster_assignment,yhat_samples,
-								  b_samples,D_samples);
+                         tau_samples,tau2_samples,
+                         alpha_samples,cluster_assignment,
+                         yhat_samples,b_samples,D_samples);
 		}
 	}
 
@@ -237,6 +260,7 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
                               Rcpp::Named("sigma") = sigma_samples,
 							  Rcpp::Named("alpha") = alpha_samples,
 							  Rcpp::Named("tau") = tau_samples,
+							  Rcpp::Named("tau2") = tau2_samples,
 							  Rcpp::Named("yhat") = yhat_samples,
 							  Rcpp::Named("subj_b") = b_samples,
 							  Rcpp::Named("subj_D") = D_samples,
@@ -266,6 +290,8 @@ Rcpp::List stappDP_mer_fit(const Eigen::VectorXd &y,
 //' @param tau_a penalty gamma prior shape hyperparameter
 //' @param tau_b penalty gamma prior scale hyperparameter
 //' @param K truncation number
+//' @param subset_one rank of first smoothing matrix
+//' @param subset_two rank of second smoothing matrix
 //' @param threshold number of members per cluster at which cluster is included in regression
 //' @param iter_max maximum number of iterations
 //' @param burn_in number of burn in iterations
@@ -291,6 +317,8 @@ Rcpp::List stappDP_merdecomp(const Eigen::VectorXd &y,
 						   const double &tau_a,
 						   const double &tau_b,
 						   const int &K,
+						   const int &subset_one,
+						   const int &subset_two,
 						   const int &threshold,
 						   const int &iter_max,
 						   const int &burn_in,
@@ -317,7 +345,9 @@ Rcpp::List stappDP_merdecomp(const Eigen::VectorXd &y,
 	Eigen::ArrayXXd pi_samples;
 	Eigen::ArrayXXd yhat_samples;
 	Eigen::ArrayXXd tau_samples_b;
+	Eigen::ArrayXXd tau2_samples_b;
 	Eigen::ArrayXXd tau_samples_w;
+	Eigen::ArrayXXd tau2_samples_w;
 	Eigen::ArrayXXi cluster_assignment;
 	Eigen::ArrayXXd b_samples;
 	Eigen::ArrayXXd D_samples;
@@ -328,6 +358,8 @@ Rcpp::List stappDP_merdecomp(const Eigen::VectorXd &y,
 	pi_samples.setZero(num_posterior_samples,K);
 	tau_samples_b.setZero(num_posterior_samples,K);
 	tau_samples_w.setZero(num_posterior_samples,K);
+	tau2_samples_b.setZero(num_posterior_samples,K);
+	tau2_samples_w.setZero(num_posterior_samples,K);
 	yhat_samples.setZero(num_posterior_samples,y.rows());
 	b_samples.setZero(num_posterior_samples,W.cols()*subj_mat.cols());
 	D_samples.setZero(num_posterior_samples,W.cols()*W.cols());
@@ -337,7 +369,8 @@ Rcpp::List stappDP_merdecomp(const Eigen::VectorXd &y,
                            alpha_a,alpha_b,
                            sigma_a,sigma_b,
 						   tau_a,tau_b,
-						   K,threshold,
+						   K,subset_one,
+						   subset_two,threshold,
                            fix_alpha,logging,rng,
                            X_w);
 
@@ -349,6 +382,7 @@ Rcpp::List stappDP_merdecomp(const Eigen::VectorXd &y,
 		if(iter_ix > burn_in && (iter_ix % thin == 0)){
 			sampler.store_samples(beta_samples,sigma_samples,pi_samples,
 								  tau_samples_b,tau_samples_w,
+								  tau2_samples_b,tau2_samples_w,
 								  alpha_samples,cluster_assignment,
 								  yhat_samples,b_samples,D_samples);
 		}
@@ -360,7 +394,9 @@ Rcpp::List stappDP_merdecomp(const Eigen::VectorXd &y,
                               Rcpp::Named("sigma") = sigma_samples,
 							  Rcpp::Named("alpha") = alpha_samples,
 							  Rcpp::Named("tau_b") = tau_samples_b,
+							  Rcpp::Named("tau2_b") = tau2_samples_b,
 							  Rcpp::Named("tau_w") = tau_samples_w,
+							  Rcpp::Named("tau2_w") = tau2_samples_w,
 							  Rcpp::Named("yhat") = yhat_samples,
 							  Rcpp::Named("subj_b") = b_samples,
 							  Rcpp::Named("subj_D") = D_samples,

@@ -14,6 +14,8 @@
 #' @param tau_a penalty gamma prior shape hyperparameter
 #' @param tau_b penalty gamma prior scale hyperparameter
 #' @param K truncation number
+#' @param subset_one rank of first smoothing matrix
+#' @param subset_two rank of second smoothing matrix
 #' @param threshold number of members per cluster at which cluster is included in regression
 #' @param iter_max maximum number of iterations
 #' @param burn_in number of burn in iterations
@@ -23,8 +25,8 @@
 #' @param chain chain label
 #' @param fix_alpha  boolean value that determines whether or not to fix alpha in sampler
 #' @param logging boolean parameter indicating whether or not a single iteration should be run with print messages indicating successful completion of the Sampler's sub modules
-stappDP_fit <- function(y, Z, X, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, threshold, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha, logging) {
-    .Call(`_rstapDP_stappDP_fit`, y, Z, X, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, threshold, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha, logging)
+stappDP_fit <- function(y, Z, X, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, subset_one, subset_two, threshold, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha, logging) {
+    .Call(`_rstapDP_stappDP_fit`, y, Z, X, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, subset_one, subset_two, threshold, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha, logging)
 }
 
 #' Penalized Functional Dirichlet Process Linear Mixed Effects Regression
@@ -46,6 +48,8 @@ stappDP_fit <- function(y, Z, X, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, t
 #' @param tau_a penalty gamma prior shape hyperparameter
 #' @param tau_b penalty gamma prior scale hyperparameter
 #' @param K truncation number
+#' @param subset_one rank of first smoothing matrix
+#' @param subset_two rank of second smoothing matrix
 #' @param threshold number of members per cluster at which cluster is included in regression
 #' @param iter_max maximum number of iterations
 #' @param burn_in number of burn in iterations
@@ -55,8 +59,8 @@ stappDP_fit <- function(y, Z, X, w, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, t
 #' @param num_posterior_samples total number of posterior samples
 #' @param fix_alpha  boolean value that determines whether or not to fix alpha in sampler
 #' @param logging boolean parameter indicating whether or not a single iteration should be run with print messages indicating successful completion of the Sampler's sub modules
-stappDP_mer_fit <- function(y, Z, X, W, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, threshold, iter_max, burn_in, thin, seed, chain, num_posterior_samples, fix_alpha, logging) {
-    .Call(`_rstapDP_stappDP_mer_fit`, y, Z, X, W, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, threshold, iter_max, burn_in, thin, seed, chain, num_posterior_samples, fix_alpha, logging)
+stappDP_mer_fit <- function(y, Z, X, W, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, subset_one, subset_two, threshold, iter_max, burn_in, thin, seed, chain, num_posterior_samples, fix_alpha, logging) {
+    .Call(`_rstapDP_stappDP_mer_fit`, y, Z, X, W, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, subset_one, subset_two, threshold, iter_max, burn_in, thin, seed, chain, num_posterior_samples, fix_alpha, logging)
 }
 
 #' Penalized Functional Dirichlet Process Linear Mixed Effects Regression with Between-Within Decomposition
@@ -79,6 +83,8 @@ stappDP_mer_fit <- function(y, Z, X, W, w, subj_mat_, subj_n, alpha_a, alpha_b, 
 #' @param tau_a penalty gamma prior shape hyperparameter
 #' @param tau_b penalty gamma prior scale hyperparameter
 #' @param K truncation number
+#' @param subset_one rank of first smoothing matrix
+#' @param subset_two rank of second smoothing matrix
 #' @param threshold number of members per cluster at which cluster is included in regression
 #' @param iter_max maximum number of iterations
 #' @param burn_in number of burn in iterations
@@ -88,7 +94,7 @@ stappDP_mer_fit <- function(y, Z, X, W, w, subj_mat_, subj_n, alpha_a, alpha_b, 
 #' @param chain chain label
 #' @param fix_alpha  boolean value that determines whether or not to fix alpha in sampler
 #' @param logging boolean parameter indicating whether or not a single iteration should be run with print messages indicating successful completion of the Sampler's sub modules
-stappDP_merdecomp <- function(y, Z, X_b, X_w, W, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, threshold, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha, logging) {
-    .Call(`_rstapDP_stappDP_merdecomp`, y, Z, X_b, X_w, W, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, threshold, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha, logging)
+stappDP_merdecomp <- function(y, Z, X_b, X_w, W, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, subset_one, subset_two, threshold, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha, logging) {
+    .Call(`_rstapDP_stappDP_merdecomp`, y, Z, X_b, X_w, W, w, subj_mat_, subj_n, alpha_a, alpha_b, sigma_a, sigma_b, tau_a, tau_b, K, subset_one, subset_two, threshold, iter_max, burn_in, thin, seed, num_posterior_samples, chain, fix_alpha, logging)
 }
 

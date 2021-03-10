@@ -42,6 +42,8 @@ class FDPPSamplerdecomp
 		const Eigen::ArrayXi subj_n;
 		Eigen::ArrayXd unique_taus_b;
 		Eigen::ArrayXd unique_taus_w;
+		Eigen::ArrayXd unique_tau2s_b;
+		Eigen::ArrayXd unique_tau2s_w;
 		const double alpha_b;
 		const double sigma_a; 
 		const double sigma_b; 
@@ -62,6 +64,8 @@ class FDPPSamplerdecomp
 		const int N;
 		const int n;
 		const int K;
+		const int subset_one;
+		const int subset_two;
 		const int threshold;
 		const int Q;
 		int sample_ix = 0;
@@ -90,6 +94,8 @@ class FDPPSamplerdecomp
 				const double &tau_a,
 				const double &tau_b,
 				const int &K,
+				const int &subset_one,
+				const int &subset_two,
 				const int &threshold,
 				const bool &fix_alpha,
 				const bool &logging,
@@ -108,7 +114,10 @@ class FDPPSamplerdecomp
 			P_b(X_b.cols()),
 			P_w(X_w.cols()),
 			N(y.rows()), n(subj_mat.cols()),
-			K(K), threshold(threshold),
+			K(K),
+			subset_one(subset_one),
+			subset_two(subset_two),
+			threshold(threshold),
 			Q(Z.cols() + (X_w.cols() +  X_b.cols())*K), 
 			fix_alpha(fix_alpha),
 			logging(logging),
@@ -137,6 +146,8 @@ class FDPPSamplerdecomp
 						   Eigen::ArrayXXd &pi_samples,
 						   Eigen::ArrayXXd &tau_samples_b,
 						   Eigen::ArrayXXd &tau_samples_w,
+						   Eigen::ArrayXXd &tau2_samples_b,
+						   Eigen::ArrayXXd &tau2_samples_w,
 						   Eigen::ArrayXd &alpha_samples,
 						   Eigen::ArrayXXi &cluster_assignment,
 						   Eigen::ArrayXXd &yhat_samples,
@@ -162,11 +173,11 @@ class FDPPSamplerdecomp
 
 		void initialize_beta(std::mt19937 &rng);
 
-		void update_penaltymat(const int &k);
+		void update_penaltymat(const int &k,const int &subset, const bool second);
 
 		void adjust_zero_clusters(std::mt19937 &rng);
 
-		double calculate_penalty_scale(const int &k, const bool &between);
+		double calculate_penalty_scale(const int &k, const int &subset, const bool second, const bool &between);
 
 		void adjust_beta(std::mt19937 &rng);
 

@@ -182,45 +182,59 @@ void FDPPSamplerdecomp::draw_var(std::mt19937 &rng){
 	PenaltyMat.setZero(Q,Q);
 	for(int k = 0; k< K; k++){
 		if(cluster_count(k)>threshold){
-			temp_scale = calculate_penalty_scale(k,true);
-			std::gamma_distribution<double> rgamma_tau_b(tau_a + P_two / 2, 1/( (1/tau_b) + temp_scale) );
+			temp_scale = calculate_penalty_scale(k,subset_one,false,true);
+			std::gamma_distribution<double> rgamma_tau_b(tau_a + subset_one / 2, 1/( (1/tau_b) + temp_scale) );
 			unique_taus_b(k) = rgamma_tau_b(rng);
 				// repeat for unique_taus_w
-			temp_scale = calculate_penalty_scale(k,false);
-			std::gamma_distribution<double> rgamma_tau_w(tau_a + P_two / 2, 1/( (1/tau_b) + temp_scale) );
+			temp_scale = calculate_penalty_scale(k,subset_one,false,false);
+			std::gamma_distribution<double> rgamma_tau_w(tau_a + subset_one / 2, 1/( (1/tau_b) + temp_scale) );
 			unique_taus_w(k) = rgamma_tau_w(rng);
-			update_penaltymat(k);
+			update_penaltymat(k,subset_one,false);
+			temp_scale = calculate_penalty_scale(k,subset_two,true,true);
+			std::gamma_distribution<double> rgamma_tau2_b(tau_a + subset_two / 2, 1/( (1/tau_b) + temp_scale) );
+			unique_tau2s_b(k) = rgamma_tau2_b(rng);
+			temp_scale = calculate_penalty_scale(k,subset_two,true,false);
+			std::gamma_distribution<double> rgamma_tau2_w(tau_a + subset_two / 2, 1/( (1/tau_b) + temp_scale) );
+			unique_tau2s_w(k) = rgamma_tau2_w(rng);
+			update_penaltymat(k,subset_two,true);
 		}
 		else{
 			std::gamma_distribution<double> rgamma_tau_prior(tau_a,1/tau_b);
 			unique_taus_b(k) = rgamma_tau_prior(rng);
 			unique_taus_w(k) = rgamma_tau_prior(rng);
-			update_penaltymat(k);
+			update_penaltymat(k,subset_one,false);
+			unique_tau2s_b(k) = rgamma_tau_prior(rng);
+			unique_tau2s_w(k) = rgamma_tau_prior(rng);
+			update_penaltymat(k,subset_two,true);
 		}
 	}
 
 }
 
-double FDPPSamplerdecomp::calculate_penalty_scale(const int &k, const bool &between){
+double FDPPSamplerdecomp::calculate_penalty_scale(const int &k, const int &subset, const bool second, const bool &between){
 
 	double out = 0;
 	int beta_ix = P;
 	if(between){
 		beta_ix += P_two *k;
-		out = beta.segment(beta_ix,P_b).squaredNorm();
+		beta_ix += second ? P_b - subset : 0;
+		out = beta.segment(beta_ix,subset).squaredNorm();
 	}else{
-		beta_ix += P_b + P_two*k;
-		out = beta.segment(beta_ix,P_w).squaredNorm();
+		beta_ix += P_b + P_two*k ;
+		beta_ix += second ? P_b - subset : 0;
+		out = beta.segment(beta_ix,subset).squaredNorm();
 	}
 	out *= .5;
 	return(out);
 }
 
-void FDPPSamplerdecomp::store_samples(Eigen::ArrayXXd &beta_samples,
-								   Eigen::ArrayXd &sigma_samples,
+void FDPPSamplerdecomp::store_samples(Eigen::ArrayXXd &beta_samples, 
+									  Eigen::ArrayXd &sigma_samples,
 								   Eigen::ArrayXXd &pi_samples,
 								   Eigen::ArrayXXd &tau_samples_b,
 								   Eigen::ArrayXXd &tau_samples_w,
+								   Eigen::ArrayXXd &tau2_samples_b,
+								   Eigen::ArrayXXd &tau2_samples_w,
 								   Eigen::ArrayXd &alpha_samples,
 								   Eigen::ArrayXXi &cluster_assignment,
 								   Eigen::ArrayXXd &yhat_samples,
@@ -240,6 +254,8 @@ void FDPPSamplerdecomp::store_samples(Eigen::ArrayXXd &beta_samples,
 	subj_D_samples.row(sample_ix) = subj_D_row;
 	tau_samples_b.row(sample_ix) = unique_taus_b;
 	tau_samples_w.row(sample_ix) = unique_taus_w;
+	tau2_samples_b.row(sample_ix) = unique_tau2s_b;
+	tau2_samples_w.row(sample_ix) = unique_tau2s_w;
 	yhat_samples.row(sample_ix) = yhat;
 	sample_ix ++;
 	for(int i = 0; i< n; i ++){
@@ -261,7 +277,10 @@ void FDPPSamplerdecomp::initialize_beta(std::mt19937 &rng){
 	for(int k = 0; k< K; k++){
 		unique_taus_b(k) = rgamma(rng);
 		unique_taus_w(k) = rgamma(rng);
-		update_penaltymat(k);
+		update_penaltymat(k,subset_one,false);
+		unique_tau2s_b(k) = rgamma(rng);
+		unique_tau2s_w(k) = rgamma(rng);
+		update_penaltymat(k,subset_two,true);
 	}
 
 	for(int i = 0; i < n ; i ++){
@@ -288,26 +307,35 @@ void FDPPSamplerdecomp::draw_zb(std::mt19937 &rng){
 		z_b(ix) = rnorm(rng);
 }
 
-void FDPPSamplerdecomp::update_penaltymat(const int &k){
+void FDPPSamplerdecomp::update_penaltymat(const int &k,const int &subset, const bool second){
 
 	int row_ix = P + P_two*k;
+	row_ix += second ? P_b - subset : 0;
+	double penalty_b = second ? unique_tau2s_b(k) : unique_taus_b(k);
+	double penalty_w = second ? unique_tau2s_w(k) : unique_taus_w(k);
 	// between
-	PenaltyMat.block(row_ix,row_ix,P_b,P_b) = Eigen::MatrixXd::Identity(P_b,P_b) * unique_taus_b(k) ;
+	PenaltyMat.block(row_ix,row_ix,subset,subset) = Eigen::MatrixXd::Identity(subset,subset) * penalty_b ;
 	// within
 	row_ix = P + P_two*k + P_b;
-	PenaltyMat.block(row_ix,row_ix,P_w,P_w) = Eigen::MatrixXd::Identity(P_w,P_w) * unique_taus_w(k);
+	row_ix += second ? P_b - subset : 0;
+	PenaltyMat.block(row_ix,row_ix,subset,subset) = Eigen::MatrixXd::Identity(subset,subset) * penalty_w; 
 }
 
 void FDPPSamplerdecomp::adjust_beta(std::mt19937 &rng){
 
 	std::normal_distribution<double> rnorm(0,1);
+	double sd = 1;
 
 	for(int k = 0; k < K ; k++){
 		if(cluster_count(k)<=threshold){
-			for(int p = 0; p < P_b; p++)
-				beta(P+P_two*k+p) = rnorm(rng)*sigma * sqrt(1/unique_taus_b(k));
-			for(int p = 0; p < P_w; p++)
-				beta(P+P_two*k+P_b+p) = rnorm(rng)*sigma * sqrt(1/unique_taus_w(k));
+			for(int p = 0; p < P_b; p++){
+				sd =  p < subset_one ? sqrt(1/unique_taus_b(k)) : sqrt(1/unique_tau2s_b(k));
+				beta(P+P_two*k+p) = rnorm(rng)*sigma * sd;
+			}
+			for(int p = 0; p < P_w; p++){
+				sd =  p < subset_one ? sqrt(1/unique_taus_w(k)) : sqrt(1/unique_tau2s_w(k));
+				beta(P+P_two*k+P_b+p) = rnorm(rng)*sigma * sd;
+			}
 		}
 	}
 }
@@ -349,6 +377,8 @@ void FDPPSamplerdecomp::initialization(std::mt19937 &rng){
 	P_matrix.setZero(n,n);
 	unique_taus_b.setZero(K);
 	unique_taus_w.setZero(K);
+	unique_tau2s_b.setZero(K);
+	unique_tau2s_w.setZero(K);
 	b.setZero(n,K);
 	z.setZero(temp_Q); 
 	z_b.setZero(W.cols()); 
@@ -371,6 +401,9 @@ void FDPPSamplerdecomp::initialization(std::mt19937 &rng){
 	cluster_matrix.setZero(n,K);
 	initialize_beta(rng);
 	initializing = false;
+	if(subset_one + subset_two != P_b)
+		throw std::range_error("subset_one + subset_two != P_two");
+
 	if(y.rows() != N)
 		throw std::range_error("length(y) != N");
 

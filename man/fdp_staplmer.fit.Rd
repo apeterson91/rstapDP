@@ -19,6 +19,8 @@ fdp_staplmer.fit(
   tau_a = 1,
   tau_b = 1,
   K = 5L,
+  rank_one,
+  rank_two,
   threshold = 0L,
   iter_max,
   burn_in,
@@ -58,6 +60,10 @@ fdp_staplmer.fit(
 \item{tau_b}{penalty parameters gamma prior hyperparameter}
 
 \item{K}{truncation number for DP mixture components}
+
+\item{rank_one}{rank of first smoothing matrix}
+
+\item{rank_two}{rank of second smoothing matrix}
 
 \item{threshold}{number of members per cluster at which cluster is included in regression}
 

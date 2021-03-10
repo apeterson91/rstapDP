@@ -16,6 +16,8 @@ stappDP_fit(
   tau_a,
   tau_b,
   K,
+  subset_one,
+  subset_two,
   threshold,
   iter_max,
   burn_in,
@@ -49,6 +51,10 @@ stappDP_fit(
 \item{tau_b}{penalty gamma prior scale hyperparameter}
 
 \item{K}{truncation number}
+
+\item{subset_one}{rank of first smoothing matrix}
+
+\item{subset_two}{rank of second smoothing matrix}
 
 \item{threshold}{number of members per cluster at which cluster is included in regression}
 

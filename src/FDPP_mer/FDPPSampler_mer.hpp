@@ -41,6 +41,7 @@ class FDPPSampler_mer
 		const int subj_D_df;
 		const Eigen::ArrayXi subj_n;
 		Eigen::ArrayXd unique_taus;
+		Eigen::ArrayXd unique_tau2s;
 		const double alpha_b;
 		const double sigma_a; 
 		const double sigma_b; 
@@ -59,6 +60,8 @@ class FDPPSampler_mer
 		const int N;
 		const int n;
 		const int K;
+		const int subset_one;
+		const int subset_two;
 		const int threshold;
 		const int Q;
 		int sample_ix = 0;
@@ -88,6 +91,8 @@ class FDPPSampler_mer
 				const double &tau_a,
 				const double &tau_b,
 				const int &K,
+				const int &subset_one,
+				const int &subset_two,
 				const int &threshold,
 				const bool &fix_alpha,
 				const bool &logging,
@@ -105,7 +110,9 @@ class FDPPSampler_mer
 			P(Z.cols()), 
 			P_two(X.cols()),
 			N(y.rows()), n(subj_mat.cols()),
-			K(K),threshold(threshold),
+			K(K),subset_one(subset_one),
+			subset_two(subset_two),
+			threshold(threshold),
 			Q(Z.cols() + X.cols()*K), 
 			fix_alpha(fix_alpha),
 			log_factor(log(pow(10,-16)) - log(N)),
@@ -116,6 +123,7 @@ class FDPPSampler_mer
 		PenaltyMat.setZero(Q,Q); 
 		P_matrix.setZero(n,n);
 		unique_taus.setZero(K);
+		unique_tau2s.setZero(K);
 		b.setZero(n,K);
 		z.setZero(temp_Q); 
 		z_b.setZero(W.cols()); 
@@ -162,6 +170,7 @@ class FDPPSampler_mer
 						   Eigen::ArrayXd &sigma_samples,
 						   Eigen::ArrayXXd &pi_samples,
 						   Eigen::ArrayXXd &tau_samples,
+						   Eigen::ArrayXXd &tau2_samples,
 						   Eigen::ArrayXd &alpha_samples,
 						   Eigen::ArrayXXi &cluster_assignment,
 						   Eigen::ArrayXXd &yhat_samples,
@@ -181,7 +190,7 @@ class FDPPSampler_mer
 
 		void calculate_b();
 
-		double calculate_penalty_scale(const int &k);
+		double calculate_penalty_scale(const int &k,const int &subset, const bool second);
 
 		void sample_cluster_labels(std::mt19937 &rng);
 
@@ -189,11 +198,9 @@ class FDPPSampler_mer
 
 		void initialize_beta(std::mt19937 &rng);
 
-		void update_penaltymat(const int &k);
+		void update_penaltymat(const int &k,const int &subset, const bool second);
 
 		void adjust_zero_clusters(std::mt19937 &rng);
-
-		double calculate_penalty_ratio(double &prop, const int &k, const int &pen_ix);
 
 		void adjust_beta(std::mt19937 &rng);
 

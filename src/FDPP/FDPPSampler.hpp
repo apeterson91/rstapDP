@@ -28,6 +28,7 @@ class FDPPSampler
 		Eigen::VectorXd z;
 		Eigen::ArrayXXd b;
 		Eigen::ArrayXd unique_taus;
+		Eigen::ArrayXd unique_tau2s;
 		const double alpha_b;
 		const double sigma_a; 
 		const double sigma_b; 
@@ -46,6 +47,8 @@ class FDPPSampler
 		const int n;
 		const int Q;
 		const int K;
+		const int subset_one;
+		const int subset_two;
 		const int &threshold;
 		int sample_ix = 0;
 		int num_nonzero;
@@ -70,6 +73,8 @@ class FDPPSampler
 				   const double &sigma_a,
 				   const double &sigma_b,
 				   const int &K,
+				   const int &subset_one,
+				   const int &subset_two,
 				   const bool &logging,
 				   const int &threshold,
 				   const bool &fix_alpha,
@@ -84,6 +89,8 @@ class FDPPSampler
 			n(y.rows()),
 			Q(Z.cols() + X.cols()*K),
 			K(K),
+			subset_one(subset_one),
+			subset_two(subset_two),
 			threshold(threshold),
 			fix_alpha(fix_alpha),
 			logging(logging),
@@ -94,6 +101,7 @@ class FDPPSampler
 		PenaltyMat.setZero(Q,Q); 
 		P_matrix.setZero(n,n);
 		unique_taus.setZero(K);
+		unique_tau2s.setZero(K);
 		z.setZero(temp_Q); 
 		beta.setZero(Q); 
 		nonzero_ics = Eigen::MatrixXd::Identity(temp_Q,temp_Q);
@@ -131,6 +139,7 @@ class FDPPSampler
 						   Eigen::ArrayXd &sigma_samples,
 						   Eigen::ArrayXXd &pi_samples,
 						   Eigen::ArrayXXd &tau_samples,
+						   Eigen::ArrayXXd &tau2_samples,
 						   Eigen::ArrayXd &alpha_samples,
 						   Eigen::ArrayXXi &cluster_assignment,
 						   Eigen::ArrayXXd &yhat_samples);
@@ -153,11 +162,11 @@ class FDPPSampler
 
 		void initialize_beta(std::mt19937 &rng);
 
-		void update_penaltymat(const int &k);
+		void update_penaltymat(const int &k, const int &subset, const bool second);
 
 		void adjust_zero_clusters(std::mt19937 &rng);
 
-		double calculate_penalty_scale(const int &k);
+		double calculate_penalty_scale(const int &k,const int &subset, const bool second);
 
 		void adjust_beta(std::mt19937 &rng);
 

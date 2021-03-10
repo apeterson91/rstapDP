@@ -5,7 +5,7 @@
 #' in the formula argument and a Dirichlet process prior with normal-gamma base measure 
 #' assigned to the stap basis function expansion using penalized splines via \code{\link[mgcv]{jagam}}.
 #' normal priors are placed on the latent group variables and an improper prior is placed on the 
-#' correlation matrix leading to a Wishart posterior.
+#' group covariance matrix leading to a Wishart posterior.
 #'
 #' The concentration parameter is assigned a gamma prior with  hyperparameters shape alpha_a and scale alpha_b.
 #'  Precision parameters sigma_a,sigma_b, tau_a,tau_b are similar for the residual and penalties' precision, respectively.
@@ -57,7 +57,7 @@ fdp_staplmer <- function(formula,
 
 	## Parameter check
 	num_posterior_samples <- sum((seq(from=burn_in+1,to=iter_max,by=1) %%thin)==0)
-	stopifnot(burn_in<iter_max && burn_in > 0)
+	stopifnot(burn_in<iter_max && burn_in >= 0)
 	stopifnot(num_posterior_samples>0)
 	stopifnot(all(c(alpha_a,alpha_b,sigma_a,sigma_b,tau_a,tau_b)>0))
 	stopifnot(thin>0)
@@ -71,11 +71,18 @@ fdp_staplmer <- function(formula,
 	subj_mat <- get_subjmat(mf$glmod)
 	if(is.null(seed))
 	  seed <- 3413431L
-	if(is.null(subsample_yhat))
+	if(is.null(subsample_yhat)){
 		subsample_yhat <- 1:num_posterior_samples
-	else 
-		subsample_yhat <- sample(1:num_posterior_samples,size = subsample_yhat,replace=F)
-
+		obs_ix <- 1:length(mf$y)
+	}
+	else {
+	  if(length(subsample_yhat)>1){
+	    obs_ix <- sample(1:length(mf$y),size = subsample_yhat[1],replace = F)
+	    subsample_yhat <- subsample_yhat[2]
+	  }
+	  subsample_yhat <- sample(1:num_posterior_samples,size = subsample_yhat,replace=F)
+	}
+		
 
 	if(vapply(list(mf$glmod$reTrms$flist),nlevels,1)>1)
 		stop("Estimation of only 1 group term currently implimented")
@@ -99,6 +106,8 @@ fdp_staplmer <- function(formula,
 	  Z_cnt <- rep(0,ncol(Z))
 	if(has_intercept)
 	  Z <- cbind(1,Z)
+
+	rank <- spec$smooth_objs[[1]]$rank
 	
 	
 	fit <- lapply(1L:chains,function(x) fdp_staplmer.fit(y = mf$y,
@@ -115,6 +124,8 @@ fdp_staplmer <- function(formula,
 	                                                    tau_a = tau_a,
 	                                                    tau_b = tau_b,
 	                                                    K = K,
+														rank_one = rank[1],
+														rank_two = rank[2],
 	                                                    iter_max = iter_max,
 	                                                    burn_in = burn_in,
 	                                                    thin = thin,
@@ -127,10 +138,13 @@ fdp_staplmer <- function(formula,
 							pi = x$pi,
 							sigma = x$sigma,
 							alpha = x$alpha,
-							scales = x$tau,
+						   scales_one = x$tau,
+						   scales_two = x$tau2,
 							tau_b  = if(has_bw(spec)) x$tau_b,
 							tau_w = if(has_bw(spec)) x$tau_w,
-							yhat = x$yhat[subsample_yhat,],
+							tau2_b = if(has_bw(spec)) x$tau2_b,
+							tau2_w = if(has_bw(spec)) x$tau2_w,
+							yhat = x$yhat[subsample_yhat,obs_ix,drop=F],
 							subj_b = x$subj_b,
 							subj_D = x$subj_D,
 							pmat = x$PairwiseProbabilityMat,
@@ -175,6 +189,8 @@ fdp_staplmer <- function(formula,
 #' @param tau_a penalty parameters gamma prior hyperparameter
 #' @param tau_b penalty parameters gamma prior hyperparameter
 #' @param K truncation number for DP mixture components
+#' @param rank_one rank of first smoothing matrix
+#' @param rank_two rank of second smoothing matrix
 #' @param threshold number of members per cluster at which cluster is included in regression
 #' @param weights weights for weighted regression - default is vector of ones 
 #' @param iter_max maximum number of iterations
@@ -199,6 +215,8 @@ fdp_staplmer.fit <- function(y,Z,X,W,
 							 tau_a = 1,
 							 tau_b = 1,
 							 K = 5L,
+							 rank_one,
+							 rank_two,
 							 threshold = 0L,
 							 iter_max,
 							 burn_in,
@@ -229,7 +247,10 @@ fdp_staplmer.fit <- function(y,Z,X,W,
 							   alpha_a =  alpha_a, alpha_b = alpha_b,
 							   sigma_a = sigma_a,sigma_b = sigma_b,
 							   tau_a = tau_a, tau_b = tau_b,
-							   K = K, threshold = threshold,
+							   K = K, 
+							   subset_one = rank_one, 
+							   subset_two = rank_two,
+							   threshold = threshold,
 							   iter_max = iter_max, burn_in = burn_in,
 							   thin = thin,seed = seed, 
 							   num_posterior_samples = num_posterior_samples,
@@ -242,7 +263,8 @@ fdp_staplmer.fit <- function(y,Z,X,W,
 							 alpha_a = alpha_a,alpha_b = alpha_b,
 							 sigma_a = sigma_a, sigma_b = sigma_b,
 							 tau_a = tau_a, tau_b = tau_b,
-							 K = K, threshold = threshold,
+							 K = K, subset_one = rank_one, 
+							 subset_two = rank_two,threshold = threshold,
 							 iter_max = iter_max, burn_in = burn_in,
 							 thin = thin,seed = seed, chain = chain,
 							 num_posterior_samples = num_posterior_samples,

@@ -44,14 +44,21 @@ stapDP <- function(object){
 		nms <- Reduce(c,lapply(spec$X,colnames))
 		tau_b <- collapse_pars("tau_b",K,1,ix)
 		tau_w <- collapse_pars("tau_w",K,1,ix)
+		tau2_b <- collapse_pars("tau2_b",K,1,ix)
+		tau2_w <- collapse_pars("tau2_w",K,1,ix)
 		colnames(tau_b) <- paste0("tau_b_",1:K)
 		colnames(tau_w) <- paste0("tau_w_",1:K)
+		colnames(tau2_b) <- paste0("tau2_b_",1:K)
+		colnames(tau2_w) <- paste0("tau2_w_",1:K)
 		scales <- cbind(tau_b,tau_w)
+		scales2 <- cbind(tau2_b,tau2_w)
 	}else{
 		P_two <- ncol(spec$X)
 		nms <- colnames(spec$X)
-		scales <- collapse_pars("scales",K,1,ix)
+		scales <- collapse_pars("scales_one",K,1,ix)
 		colnames(scales) <- paste0("tau_",1:(K))
+		scales2 <- collapse_pars("scales_two",K,1,ix)
+		colnames(scales2) <- paste0("tau2_",1:K)
 	}
 
 
@@ -78,7 +85,7 @@ stapDP <- function(object){
 	colnames(sigma) <- "sigma"
 
 
-	parmat <- cbind(delta,betamat,alpha,sigma,probs,scales)
+	parmat <- cbind(delta,betamat,alpha,sigma,probs,scales,scales2)
 	if(mer){
 		parmat <- cbind(parmat,b,D)
 	}
@@ -115,6 +122,7 @@ stapDP <- function(object){
 				probs = probs,
 				yhat = yhat,
 				scales = scales,
+				scales2 = scales2,
 				pmat = Reduce(`+`,lapply(pars,function(x) x$pmat))/length(pars),
 				cmat = Reduce(rbind,lapply(pars,function(x) x$clabels)),
 				model = list(formula = object$formula,

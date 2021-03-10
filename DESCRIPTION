@@ -1,7 +1,7 @@
 Package: rstapDP
 Type: Package
 Title: Functional Dirichlet Process Spatial Temporal Aggregated Predictors in R
-Version: 0.1.4.9000
+Version: 0.1.5.9000
 Date: 2020-08-27
 Authors@R: person("Adam", "Peterson", , "atpvyc@umich.edu", c("aut", "cre"))
 BugReports: https://github.com/apeterson91/rstapDP/issues

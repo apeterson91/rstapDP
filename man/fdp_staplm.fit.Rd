@@ -16,6 +16,8 @@ fdp_staplm.fit(
   tau_a = 1,
   tau_b = 1,
   K = 5L,
+  rank_one,
+  rank_two,
   iter_max,
   burn_in,
   thin = 1L,
@@ -48,6 +50,10 @@ fdp_staplm.fit(
 \item{tau_b}{penalty parameter gamma prior hyperparameter}
 
 \item{K}{truncation number for DP mixture components}
+
+\item{rank_one}{rank of first smoothing matrix}
+
+\item{rank_two}{rank of second smoothing matrix}
 
 \item{iter_max}{maximum number of iterations}
 

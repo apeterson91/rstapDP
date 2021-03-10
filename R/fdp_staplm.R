@@ -57,20 +57,28 @@ fdp_staplm <- function(formula,
 
 	## Parameter check
 	num_posterior_samples <- sum((seq(from=burn_in+1,to=iter_max,by=1) %%thin)==0)
-	stopifnot(burn_in<iter_max && burn_in > 0)
+	stopifnot(burn_in<iter_max && burn_in >= 0)
 	stopifnot(all(c(alpha_a,alpha_b,sigma_a,sigma_b,tau_a,tau_b)>0))
 	stopifnot(thin>0)
 	## 
 	if(is.null(seed))
 		seed <- 2341341
-	if(is.null(subsample_yhat))
-		subsample_yhat <- 1:num_posterior_samples
-	else 
-		subsample_yhat <- sample(1:num_posterior_samples,size = subsample_yhat,replace=F)
+	
 	
 	spec <- get_stapDPspec(formula,K,benvo)
 	foo <- spec$stapless_formula
 
+	if(is.null(subsample_yhat)){
+	  subsample_yhat <- 1:num_posterior_samples
+	  obs_ix <- 1:length(spec$mf$y)
+	}
+	else{
+	  if(length(subsample_yhat)>1){
+	    obs_ix <- sample(1:length(spec$mf$y),size = subsample_yhat[1],replace = F)
+	    subsample_yhat <- subsample_yhat[2]
+	  }
+	  subsample_yhat <- sample(1:num_posterior_samples,size = subsample_yhat,replace=F)
+	}
 	if(is.null(weights))
 	  weights <- rep(1,length(spec$mf$y))
 
@@ -93,6 +101,8 @@ fdp_staplm <- function(formula,
 	if(has_intercept)
 	  Z <- cbind(1,Z)
 
+	rank <- spec$smooth_objs[[1]]$rank
+
 	
 	fit <- lapply(1:chains,function(x) fdp_staplm.fit(y = mf$y,
 													  Z = Z,
@@ -104,7 +114,10 @@ fdp_staplm <- function(formula,
 													  sigma_b = sigma_b,
 													  tau_a = tau_a,
 													  tau_b = tau_b,
-													  K = K,iter_max = iter_max,
+													  K = K,
+													  rank_one = rank[1],
+													  rank_two = rank[2],
+													  iter_max = iter_max,
 													  burn_in = burn_in,
 													  thin = thin,
 													  fix_alpha = fix_alpha,
@@ -116,8 +129,9 @@ fdp_staplm <- function(formula,
                                        pi = x$pi,
                                        sigma = x$sigma,
                                        alpha = x$alpha,
-                                       yhat = x$yhat[subsample_yhat,],
-                                       scales = x$tau,
+                                       yhat = x$yhat[subsample_yhat,obs_ix,drop=F],
+                                       scales_one = x$tau,
+									   scales_two = x$tau2,
                                        cluster_mat = x$cluster_mat,
                                        pmat = x$PairwiseProbabilityMat,
                                        clabels = x$cluster_assignment
@@ -150,6 +164,8 @@ fdp_staplm <- function(formula,
 #' @param tau_a penalty parameter gamma prior hyperparameter
 #' @param tau_b penalty parameter gamma prior hyperparameter
 #' @param K truncation number for DP mixture components
+#' @param rank_one rank of first smoothing matrix
+#' @param rank_two rank of second smoothing matrix
 #' @param weights weights for weighted regression - default is vector of ones 
 #' @param iter_max maximum number of iterations
 #' @param burn_in number of iterations to burn-in
@@ -170,6 +186,8 @@ fdp_staplm.fit <- function(y,Z,X,
                            tau_a = 1,
                            tau_b = 1,
                            K = 5L,
+						   rank_one,
+						   rank_two,
                            iter_max,
 						   burn_in,
                            thin = 1L,
@@ -181,6 +199,7 @@ fdp_staplm.fit <- function(y,Z,X,
 
 	stopifnot(all(c(sigma_a,sigma_b,tau_a,tau_b,alpha_a,alpha_b)>0))
 	stopifnot(length(weights) == length(y))
+	stopifnot(rank_one + rank_two == ncol(X))
   if(is.null(seed)){
     seed <- 3413
   }
@@ -193,7 +212,10 @@ fdp_staplm.fit <- function(y,Z,X,
 					 alpha_a = alpha_a, alpha_b = alpha_b,
 					 sigma_a = sigma_a, sigma_b = sigma_b,
 					 tau_a = tau_a,tau_b = tau_b,
-					 K = K,threshold = threshold,
+					 K = K,
+					 subset_one = rank_one,
+					 subset_two = rank_two,
+					 threshold = threshold,
 					 iter_max = iter_max ,burn_in = burn_in, 
 					 thin = thin,
 					 seed = seed,
